@@ -8,7 +8,7 @@
 // #include <Sensor.h>
 
 #include <RTC.h>
-#include <LiquidCrystal_I2C.h>
+// #include <LiquidCrystal_I2C.h>
 #include <SPI.h>
 #include <SD.h>
 
@@ -25,18 +25,21 @@ class Logger
         static void set_log_level(LogLevel log_level);
 
         static void set_rtc();
-        static void set_lcd(LiquidCrystal_I2C *lcd);
+        // static void set_lcd(LiquidCrystal_I2C *lcd);
         static void set_sd(int pin);
 
         template <typename T>
-        static void log(const T *msg, LogLevel log_level = APPLICATION);
+        static void log(const T *msg);
+
+        template <typename T>
+        static void log(const T *msg, LogLevel log_level);
 
     private:
         Logger() {};
         Logger(const Logger&) {};
 
-        LiquidCrystal_I2C *_lcd;
-        RTC& _rtc;
+        // LiquidCrystal_I2C *_lcd;
+        RTC* _rtc;
 
         template <typename T>
         void _print_serial(const T *msg, LogLevel log_level);
@@ -44,8 +47,8 @@ class Logger
         template <typename T>
         void _print_sd(const T *msg, LogLevel log_level);
 
-        template <typename T>
-        void _print_lcd(const T *msg);
+        // template <typename T>
+        // void _print_lcd(const T *msg);
 
         int _sd_pin;
         char _log_file_name[20];
@@ -58,15 +61,20 @@ class Logger
 };
 
 template <typename T>
-static void Logger::log(const T *msg, LogLevel log_level = APPLICATION)
+void Logger::log(const T *msg)
+{
+    log(msg, APPLICATION);
+}
+
+template <typename T>
+void Logger::log(const T *msg, LogLevel log_level)
 {
     Logger& logger = getInstance(); // get logger instance
     clear(logger._timestamp);
 
-    logger._rtc.get_timestamp(logger._timestamp); // get current timestamp
+    logger._rtc->get_timestamp(logger._timestamp); // get current timestamp
     logger._print_serial(msg, log_level);
     logger._print_sd(msg, log_level);
-    logger._print_lcd(msg);
 }
 
 template <typename T>
@@ -116,25 +124,25 @@ void Logger::_print_sd(const T *msg, LogLevel log_level)
     
 }
 
-template <typename T>
-void Logger::_print_lcd(const T *msg)
-{
-    static char logs[4][50];
+// template <typename T>
+// void Logger::_print_lcd(const T *msg)
+// {
+//     static char logs[4][50];
 
-    Logger& logger = Logger::getInstance(); // get logger instance
-    logger._lcd->clear();
+//     Logger& logger = Logger::getInstance(); // get logger instance
+//     logger._lcd->clear();
 
-    for (int i = 1; i < 4; i++)
-    {
-        logger._lcd->setCursor(0, i-1); 
-        logger._lcd->print(logs[i]);
+//     for (int i = 1; i < 4; i++)
+//     {
+//         logger._lcd->setCursor(0, i-1); 
+//         logger._lcd->print(logs[i]);
 
-        memset(logs[i-1], 0, sizeof(logs[i-1]));   // clear data before offseting   
-        strcpy(logs[i-1], logs[i]);  // offset logs by one    
-    }
+//         memset(logs[i-1], 0, sizeof(logs[i-1]));   // clear data before offseting   
+//         strcpy(logs[i-1], logs[i]);  // offset logs by one    
+//     }
     
-    memset(logs[3], 0, sizeof(logs[3]));   // clear data before offseting     
-    _rtc.get_timestamp(logs[3]);
-    logger._lcd->print(logs[3]);
-}
+//     memset(logs[3], 0, sizeof(logs[3]));   // clear data before offseting     
+//     _rtc.get_timestamp(logs[3]);
+//     logger._lcd->print(logs[3]);
+// }
 #endif

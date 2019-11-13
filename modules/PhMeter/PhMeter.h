@@ -1,15 +1,15 @@
 #ifndef PhMeter_h
 #define  PhMeter_h
 
-#define SAMPLING_INTERVAL 1000
+#define PH_SAMPLING_INTERVAL 1000
 
 #include "Arduino.h"
 #include "Sensor.h"
 #include "Utils.h"
 #include "RTC.h"
 
-#define UPPER_LEVEL 6.7
-#define LOWER_LEVEL 6.5
+#define PH_UPPER_LEVEL 6.9
+#define PH_LOWER_LEVEL 6.5
 
 class PhMeter: public Sensor
 {

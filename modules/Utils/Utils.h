@@ -4,7 +4,7 @@
 #define MEMORY 8192
 
 #include <SoftwareSerial.h>
-#include <Log.h>
+// #include <Log.h>
 
 // TODO: Add namespace
 void clear(char *arr);

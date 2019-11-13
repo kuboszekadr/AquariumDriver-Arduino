@@ -25,16 +25,16 @@ void read_serial(char *arr, int arr_size, SoftwareSerial *serial)
         arr[i++] = serial->read(); // read incoming data   
     arr[i] = 0; // add null termination string
 
-    if(serial->available() & i >= (arr_size-1))
-    {
-        Logger::log(F("Serial response longer then array size."), LogLevel::WARNING);
-        Logger::log(F("Leftover below:"), LogLevel::WARNING);
+    // if(serial->available() & i >= (arr_size-1))
+    // {
+    //     // Logger::log(F("Serial response longer then array size."), LogLevel::WARNING);
+    //     // Logger::log(F("Leftover below:"), LogLevel::WARNING);
         
-        // TODO: add array to hold the response
-        while((serial->available()))
-            Serial.print(serial->read());
-        Serial.println();
-    }       
+    //     // TODO: add array to hold the response
+    //     // while((serial->available()))
+    //     //     Serial.print(serial->read());
+    //     // Serial.println();
+    // }       
 }
 
 void print_serial(const char *arr, SoftwareSerial *serial)
@@ -68,12 +68,12 @@ void substring(char *target, const char *str, int start, int length)
     target[c] = '\0';
 }
 
-int available_memory()
-{
-    int size = MEMORY;
-    byte *buf;
-    while ((buf = (byte *) malloc(--size)) == NULL);
-    free(buf);
+// int available_memory()
+// {
+//     int size = MEMORY;
+//     byte *buf;
+//     while ((buf = (byte *) malloc(--size)) == NULL);
+//     free(buf);
 
-    return size; 
-}
+//     return size; 
+// }

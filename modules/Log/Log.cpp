@@ -1,6 +1,6 @@
 #include <Log.h>
 
-static Logger& Logger::getInstance()
+Logger& Logger::getInstance()
 {
     static Logger instance;
     return instance;
@@ -11,13 +11,13 @@ void Logger::set_rtc()
     RTC& _rtc = RTC::get_instance();
 }
 
-void Logger::set_lcd(LiquidCrystal_I2C *lcd)
-{
-    Logger& logger = Logger::getInstance(); // get logger instance
-    logger._lcd = lcd;
-    logger._lcd->init();
-    logger._lcd->backlight();
-}
+// void Logger::set_lcd(LiquidCrystal_I2C *lcd)
+// {
+//     Logger& logger = Logger::getInstance(); // get logger instance
+//     logger._lcd = lcd;
+//     logger._lcd->init();
+//     logger._lcd->backlight();
+// }
 
 void Logger::set_sd(int pin)
 {

@@ -3,7 +3,6 @@
 #include <ThreeWire.h>
 #include <Wire.h> 
 #include <ESP_8266.h>
-#include <Adafruit_NeoPixel.h>
 #include <SPI.h>
 #include <SD.h>
 
@@ -54,17 +53,18 @@ PhMeter ph_meter(PH_PIN, PH_SENSOR_ID);
 WaterLevel water_level_sump(HC_ECHO, HC_TRIG, HC_SENSOR_ID);
 
 // DS18B20 - Thermometer
-char address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+uint8_t address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
 Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, address);
 
 /* OTHER */
 ReadingsQueue readings;  // to hold all readings to be sent
 char msg[30];  // to create log messages
 
-// Pixels
-// Adafruit_NeoPixel lamp_rigth = Adafruit_NeoPixel(200, 40, NEO_GRB + NEO_KHZ800);
-// Adafruit_NeoPixel lamp_middle = Adafruit_NeoPixel(200, 40, NEO_GRB + NEO_KHZ800);
-// Adafruit_NeoPixel lamp_left = Adafruit_NeoPixel(200, 40, NEO_GRB + NEO_KHZ800);
+// LCD display
+LiquidCrystal_I2C lcd = LiquidCrystal_I2C(0x27, 20, 4);
+char temp[6];
+char ph[6];
+char water_level[6];
 
 void setup()
 {
@@ -76,28 +76,27 @@ void setup()
 
     water_level_sump.attach_relay(8);  // attach relay
  
-    LiquidCrystal_I2C *lcd = new LiquidCrystal_I2C(0x27, 20, 4);
-    lcd->init();
-    lcd->backlight();
+    lcd.init();
+    lcd.backlight();
+    lcd.print(F("Booting..."));
 
-    Logger::set_lcd(lcd);
     Logger::set_sd(SD_PIN);
 
     Logger::log(F("ESP - ready"));
-    // Logger::log(esp.connected() ? "1" : "0");
-    Serial.println(esp.connected() ? "1": "0");
+    Logger::log(esp.connected() ? "1" : "0");
 
     Logger::log(F("ESP - restarting"));
-    (void) esp.restart();
-    // Logger::log(esp.restart() ? "1" : "0");
+    Logger::log(esp.restart() ? "1" : "0");
 
     Logger::log(F("ESP - WiFi connection"));
-    // Logger::log(esp.connect_wifi(SSID, PWD) ? "1" : "0");
-    Serial.println(esp.connect_wifi(SSID, PWD) ? "1" : "0");
-
+    Logger::log(esp.connect_wifi(SSID, PWD) ? "1" : "0");
 
     Logger::log(F("Setup complete"));
-}
+    lcd.print(F("Setup complete..."));
+    delay(500);
+    lcd.clear();
+
+}  // setup
 
 void loop()
 {
@@ -111,8 +110,9 @@ void loop()
         (void) esp.connect_wifi(SSID, PWD);
     }
 
+    print_lcd();
     delay(500);
-}
+} // loop
 
 void check_water_level()
 {
@@ -131,7 +131,6 @@ void check_water_level()
         readings.add(&r);
 
         // show water level
-        char water_level[6];
         dtostrf(r.value, 2, 2, water_level);
 
         clear(msg); // clear previous message
@@ -167,7 +166,7 @@ void read_temperature()
     {
         Logger::log(F("Getting temp"), LogLevel::VERBOSE);
         thermometer.make_reading();  // make reading
-    }
+    }  // if ready
 
     if (thermometer.available())
     {
@@ -176,16 +175,14 @@ void read_temperature()
         readings.add(&r);
 
         // show water level
-        char temp[6];
         dtostrf(r.value, 2, 2, temp);
 
         clear(msg); // clear previous message
         strcpy(msg, "T: ");
         strcat(msg, temp);
         Logger::log(msg, LogLevel::APPLICATION);  // log water level       
-        // Logger::log(r);
-    }
-}
+    }  // if available
+}  // read temperature
 
 void send_data()
 {
@@ -202,10 +199,45 @@ void send_data()
         else
             Logger::log(F("Failure."), LogLevel::ERROR);
     }
-    // else if (is_queue_empty)
-    //     Logger::log(F("Queue empty"));
-    // else if (is_esp_connected)
-    // {
-    //     Logger::log(F("Disconected from AP"));
-    // }
+}
+
+void print_lcd()
+{
+ /*
+    2019-11-11 21:12
+    Temp: 26.6 'C
+    Ph: 6.5
+    WL: 15.65 cm
+ */   
+    char timestamp[20];
+    RTC::get_timestamp(timestamp);
+
+    timestamp[20] = '\0';  // truncate timestamp
+
+    // Date time
+    int row = 0;
+    lcd.setCursor(0, row);
+    lcd.print(timestamp);
+    
+    // Temperature
+    row++;
+    lcd.setCursor(0, row);
+    lcd.print(F("Temp: "));
+    lcd.setCursor(9, row);
+    lcd.print(temp);
+
+    // Ph
+    row++;
+    lcd.setCursor(0, row);
+    lcd.print(F("Ph: "));
+    lcd.setCursor(9, row);
+    lcd.print(ph);
+
+    // Water level
+    row++;
+    lcd.setCursor(0, row);
+    lcd.print(F("WL: "));
+    lcd.setCursor(9, row);
+    lcd.print(water_level);
+
 }

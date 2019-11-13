@@ -1,6 +1,6 @@
 #include "Thermometer.h"
 
-Thermometer::Thermometer(int pin, int id_sensor, char *address)
+Thermometer::Thermometer(int pin, int id_sensor, uint8_t *address)
 {
     _pin = pin;
     _id_sensor = id_sensor;
