@@ -60,10 +60,9 @@ void clear_buffer(SoftwareSerial *serial)
 
 void substring(char *target, const char *str, int start, int length)
 {
-    int c = -1;
-
+    int c = 0;
     while (c < length)
-        target[++c] = str[start + c];    
+        target[c++] = str[start + c];    
 
     target[c] = '\0';
 }

@@ -12,8 +12,10 @@ bool PhMeter::make_reading()
 	if (!ready() || available()) 
 		return false;
 
+	// source: https://wiki.dfrobot.com/Analog_pH_Meter_Pro_SKU_SEN0169
     float voltage = analogRead(_pin);  // read voltage from the analog pin
     float ph = voltage*5.0/1024;  // translate voltage into Ph
+	ph = 3.5*ph;
 
 	// count how many readings are available in the array
 	_readings_count = (_readings_count + 1) % SAMPLING_AMOUNT;  // for safety reasons

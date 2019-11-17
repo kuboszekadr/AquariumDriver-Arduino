@@ -19,7 +19,6 @@ class PhMeter: public Sensor
 
     private:
         int _pin;
-        int _id_sensor;
 };
 
 #endif  

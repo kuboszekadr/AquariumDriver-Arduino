@@ -52,7 +52,7 @@ class Logger
 
         int _sd_pin;
         char _log_file_name[20];
-        File _log_file;
+        // File _log_file;
         
         char _timestamp[17];
         LogLevel _log_level = ERROR;
@@ -92,13 +92,14 @@ void Logger::_print_serial(const T *msg, LogLevel log_level)
 template <typename T>
 void Logger::_print_sd(const T *msg, LogLevel log_level)
 {
+    // char _log_file_name[20];
     memset(_log_file_name, 0, 20);  // erase file name from previous logging
 
     // create file name in format YYYYMMDD.txt
     substring(_log_file_name, _timestamp, 0, 8);  // take only YYYYMMDD info from the timestamp
     strcat(_log_file_name, ".txt");  // appent file extension
 
-    _log_file = SD.open(_log_file_name, FILE_WRITE);  // open file for writing
+    File _log_file = SD.open(_log_file_name, FILE_WRITE);  // open file for writing if not exists it will create new
 
     if(_log_file)  // check if open is successfull
     {
@@ -113,7 +114,8 @@ void Logger::_print_sd(const T *msg, LogLevel log_level)
     }
     else
     {
-        Serial.println("Can not open the file");
+        Serial.print("Can not open the file: ");
+        Serial.println(_log_file_name);
         if (SD.begin(_sd_pin))
         {
             Serial.println("SD reinitalization successfull");

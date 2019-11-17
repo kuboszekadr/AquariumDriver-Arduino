@@ -46,7 +46,7 @@ char HOST[14] = "192.168.0.179";
 char SSID[20] = "Zdrajcy metalu";
 char PWD[20] = "Dz3nt31m3n_m3ta1u";
 
-ESP esp(ESP_RX, ESP_TX); // rx, tx
+ESP esp(ESP_RX, ESP_TX);  // rx, tx
 
 /* SENSORS */
 PhMeter ph_meter(PH_PIN, PH_SENSOR_ID);
@@ -102,6 +102,7 @@ void loop()
 {
     check_water_level();
     read_temperature();
+    read_ph();
     send_data();
 
     if (esp.get_connection_status() == DISCONECTED)
@@ -133,7 +134,7 @@ void check_water_level()
         // show water level
         dtostrf(r.value, 2, 2, water_level);
 
-        clear(msg); // clear previous message
+        clear(msg);  // clear previous message
         strcpy(msg, "Water level: ");
         strcat(msg, water_level);
         Logger::log(msg, LogLevel::APPLICATION);  // log water level
@@ -183,6 +184,29 @@ void read_temperature()
         Logger::log(msg, LogLevel::APPLICATION);  // log water level       
     }  // if available
 }  // read temperature
+
+void read_ph()
+{
+    if (ph_meter.ready())
+    {
+        Logger::log(F("Getting ph"), LogLevel::VERBOSE);
+        ph_meter.make_reading();
+    }
+
+    if (ph_meter.available())
+    {
+        struct Reading r = ph_meter.get_reading();
+        readings.add(&r);
+
+        //show ph value
+        dtostrf(r.value, 2, 2, ph);
+
+        clear(msg);  // clear previous message
+        strcpy(msg, "Ph: ");
+        strcat(msg, ph);
+        Logger::log(msg, LogLevel::APPLICATION);  // log water level       
+    }
+}
 
 void send_data()
 {
@@ -239,5 +263,4 @@ void print_lcd()
     lcd.print(F("WL: "));
     lcd.setCursor(9, row);
     lcd.print(water_level);
-
 }
