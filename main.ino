@@ -12,11 +12,11 @@ void loop()
 {
     if (i2c::transmissionStep == i2c::TransmissionStep::FINISHED)
     {
-        // execute order
+        executeOrder();
     }
     else if (i2c::transmissionStep == i2c::TransmissionStep::EMPTY)
     {
-        // get data from the sensors
+        scanSensors();
     }
 }
 
@@ -27,5 +27,22 @@ void scanSensors()
 
 void executeOrder()
 {
-    
+    switch (i2c::order)
+    {
+    case i2c::Order::UPDATE_RTC:
+        // UPDATE RTC
+        break;
+    case i2c::Order::UPDATE_WIFI_STATUS:
+        // UPDATE WIFI STATUS
+        break;
+    case i2c::Order::WATER_CHANGE:
+        // START WATER CHANGE
+        break;
+    default:
+        break;
+    }
+
+    // clear order
+    i2c::order = i2c::Order::UNKNOWN;
+    return;
 }
