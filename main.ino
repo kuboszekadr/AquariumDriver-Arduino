@@ -1,4 +1,4 @@
-#include "I2CSlave.h"
+#include "src/I2CSlave.h"
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
@@ -10,11 +10,11 @@ void setup()
 
 void loop() 
 {
-    if (i2c::transmissionStep == i2c::TransmissionStep::FINISHED)
+    if (i2c::transmissionStep == i2c::FINISHED)
     {
         executeOrder();
     }
-    else if (i2c::transmissionStep == i2c::TransmissionStep::EMPTY)
+    else if (i2c::transmissionStep == i2c::EMPTY)
     {
         scanSensors();
     }
@@ -22,20 +22,20 @@ void loop()
 
 void scanSensors()
 {
-
+    // scan sensors
 }
 
 void executeOrder()
 {
     switch (i2c::order)
     {
-    case i2c::Order::UPDATE_RTC:
+    case i2c::UPDATE_RTC:
         // UPDATE RTC
         break;
-    case i2c::Order::UPDATE_WIFI_STATUS:
+    case i2c::UPDATE_WIFI_STATUS:
         // UPDATE WIFI STATUS
         break;
-    case i2c::Order::WATER_CHANGE:
+    case i2c::WATER_CHANGE:
         // START WATER CHANGE
         break;
     default:
@@ -43,6 +43,6 @@ void executeOrder()
     }
 
     // clear order
-    i2c::order = i2c::Order::UNKNOWN;
+    i2c::order = i2c::UNKNOWN;
     return;
 }
