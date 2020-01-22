@@ -52,8 +52,8 @@ void i2c::requestEvent()
     if (step == 0)
     {
         // get length of the data
-        length = strlen(response);  
         char post_data_length[4];
+        length = strlen(response);  
         sprintf(post_data_length, "%03d", length);
 
         Wire.write(post_data_length);  //notify master about data length
@@ -97,4 +97,9 @@ i2c::Order i2c::parseOrder()
     default:
         return Order::UNKNOWN;
     }
+}
+
+void i2c::clearBuffer()
+{
+    memset(command, 0, 128);
 }

@@ -34,6 +34,8 @@ namespace i2c
     void receiveEvent(int count);
     void requestEvent();
 
+    void clearBuffer();
+
     Order parseOrder();
 }
 
