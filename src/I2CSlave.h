@@ -1,11 +1,10 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define I2C_ADDRESS 8
+#include "Utils.h"
 
 #include <Arduino.h>
 #include <Wire.h>
-#include "Utils.h"
 
 namespace i2c
 {
@@ -24,13 +23,14 @@ namespace i2c
         FINISHED  // all data received from the master
     };
 
-    extern char command[128];  // for storing commands from the master
-    extern char response[512];  // for storing response message
+    extern char dataBuffer[512];  // for storing data from sensors
+    extern char commandBuffer[128];  // for storing commands from the master
+    // extern char responseBuffer[128];  // for storing response message
     
     extern TransmissionStep transmissionStep;  // current transmission step
     extern Order order;  // task to be perfomed
 
-    void setup();  // initalize I2C
+    void begin(int address);  // initalize I2C
     void receiveEvent(int count);
     void requestEvent();
 
