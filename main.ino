@@ -19,5 +19,15 @@ void setup()
 
 void loop()
 {
-    Sensor::collectData();
+    for (int i = 0; i < Sensor::sensors_amount; i++)
+    {
+        Sensor *sensor = Sensor::sensors[i];
+        if (sensor->isReady()) sensor->makeReading();
+        if (sensor->isAvailable()) 
+        {
+            Reading r = sensor->getReading();
+            Serial.println(r.value);
+            // TODO: add reading to the buffer
+        }
+    }
 }
