@@ -1,3 +1,4 @@
+#include "src/I2CSlave.h"
 #include "src/Reading.h"
 #include "src/Sensor.h"
 #include "src/Thermometer.h"
@@ -7,27 +8,88 @@
 #include <SoftwareSerial.h>
 
 // DS18B20 - Thermometer
-uint8_t address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-Thermometer thermometer(2, 1, address);
+#define THERMOMETER_PIN 2
+#define THERMOMETER_SENSOR_ID 1
+uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
 
-void setup() 
+// I2C
+#define I2C_ADDRESS 8
+
+void setup()
 {
     Serial.begin(9600);
     Serial.println("Starting");
+
+    // i2c::begin(I2C_ADDRESS); // join I2C bus
+
     Serial.println("Setup finished");
 }
 
 void loop()
 {
+    if (i2c::transmissionStep == i2c::FINISHED)
+    {
+        // executeOrder();
+        i2c::clearBuffer();
+        i2c::transmissionStep = i2c::EMPTY;
+    }
+    // do not scan sensors when I2C transmission is in progress
+    else if (i2c::transmissionStep == i2c::EMPTY)
+    {
+        scanSensors();
+    }
+}
+
+void scanSensors()
+{
     for (int i = 0; i < Sensor::sensors_amount; i++)
     {
         Sensor *sensor = Sensor::sensors[i];
-        if (sensor->isReady()) sensor->makeReading();
-        if (sensor->isAvailable()) 
+        // check if sensor is reading for data collection
+        if (sensor->isReady())
         {
+            sensor->makeReading();
+        }
+
+        // check if sensor has collected enough data to share
+        if (sensor->isAvailable())
+        {
+            Serial.println("Agg...");
+            // request data from the sensor
             Reading r = sensor->getReading();
-            Serial.println(r.value);
-            // TODO: add reading to the buffer
+            addReadingToBuffer(&r); // add to I2C data buffer
         }
     }
+}
+
+void addReadingToBuffer(Reading *reading)
+{
+    char readingJSON[30];
+    reading->toJSON(readingJSON); // get JSON string
+
+    // if buffer is empty initalize JSON objects array
+    unsigned int buffer_length = strlen(i2c::dataBuffer);
+
+    if (buffer_length == 0)
+    {
+        strcat(i2c::dataBuffer, "[");
+    }
+    else if (buffer_length >= 511)
+    {
+        Serial.println("I2C buffer full, can not send more data...");
+        return; // avoid buffer overwride
+    }
+    else if (buffer_length + strlen(readingJSON) >= 511)
+    {
+        Serial.println("Not enough space to fit data into the buffer");
+        return;
+    }
+    else
+    {
+        strcat(i2c::dataBuffer, ","); // add object separator
+    }
+
+    strcat(i2c::dataBuffer, readingJSON);
+    Serial.println(i2c::dataBuffer);
 }
