@@ -1,12 +1,12 @@
 #include "Sensor.h"
 
 unsigned int Sensor::sensors_amount = 0;
-Sensor* Sensor::sensors[SENSOR_AMOUNT];
+Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
 Sensor::Sensor()
 {
-    sensors[sensors_amount] = this;  // add sensor to the list of sensors
-    sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1;  // increase amount of sensors
+    sensors[sensors_amount] = this;                            // add sensor to the list of sensors
+    sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1; // increase amount of sensors
 }
 
 Reading Sensor::getReading()
