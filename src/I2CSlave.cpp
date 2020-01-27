@@ -104,4 +104,5 @@ i2c::Order i2c::parseOrder()
 void i2c::clearBuffer()
 {
     memset(commandBuffer, 0, 128);
+    memset(dataBuffer, 0, 512);
 }
