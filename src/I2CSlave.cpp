@@ -1,24 +1,26 @@
 #include "I2CSlave.h"
 
-char i2c::command[128];
-char i2c::response[512];
+char i2c::dataBuffer[512];
+char i2c::commandBuffer[128];
+// char i2c::responseBuffer[128];
+
 i2c::TransmissionStep i2c::transmissionStep = EMPTY;
 i2c::Order i2c::order = UNKNOWN;
 
-void i2c::setup()
+void i2c::begin(int address)
 {
-    Wire.begin(I2C_ADDRESS);
+    Wire.begin(address);
     Wire.onReceive(receiveEvent);
     Wire.onRequest(requestEvent);
 }
 
 void i2c::receiveEvent(int count)
 {
-    static int size = 0;  // amount of currently readed bytes
+    static int size = 0; // amount of currently readed bytes
     if (transmissionStep != ONGOING)
     {
-        memset(command, 0, 128);  // clear buffer
-        transmissionStep = ONGOING;  // change current transmission status
+        memset(commandBuffer, 0, 128); // clear buffer
+        transmissionStep = ONGOING;    // change current transmission status
     }
 
     // read incoming data
@@ -26,15 +28,15 @@ void i2c::receiveEvent(int count)
     while (Wire.available())
     {
         c = Wire.read();
-        command[size] = c;
+        commandBuffer[size] = c;
         size++;
     }
-    
+
     // check if last char is transmission terminator
     if (c == '#')
     {
-        size = 0;  // restore buffer
-        transmissionStep = FINISHED;  // end transmission
+        size = 0;                    // restore buffer
+        transmissionStep = FINISHED; // end transmission
         order = parseOrder();
     }
     return;
@@ -43,32 +45,32 @@ void i2c::receiveEvent(int count)
 void i2c::requestEvent()
 {
     static int step = 0;
-    static int package_start = 0;  // from which point start data transfer
-    static int length;  // length of data to be send
+    static int package_start = 0; // from which point start data transfer
+    static int length;            // length of data to be send
 
-    int package_size = 32;  // maximum package size (derived from Wire.h)
-    char package[33];  // empty char array for package data
+    int package_size = 32; // maximum package size (derived from Wire.h)
+    char package[33];      // empty char array for package data
 
     if (step == 0)
     {
         // get length of the data
         char post_data_length[4];
-        length = strlen(response);  
+        length = strlen(dataBuffer);
         sprintf(post_data_length, "%03d", length);
 
-        Wire.write(post_data_length);  //notify master about data length
-        step++;  // end first step of data sending
+        Wire.write(post_data_length); //notify master about data length
+        step++;                       // end first step of data sending
     }
     else if (step == 1)
     {
         // send package to the master
-        package_size = package_size < length ? package_size : length;  // determine amount of data to be send
-        substring(package, response, package_start, package_size);  // copy part of the data
+        package_size = package_size < length ? package_size : length;    // determine amount of data to be send
+        substring(package, dataBuffer, package_start, package_size); // copy part of the data
 
-        Wire.write(package);  // send package to the master
+        Wire.write(package); // send package to the master
 
-        package_start += package_size;  // increment package start
-        length -= package_size;  // shorten remaining data to be send
+        package_start += package_size; // increment package start
+        length -= package_size;        // shorten remaining data to be send
 
         // check if data was send
         if (length <= 0)
@@ -78,13 +80,13 @@ void i2c::requestEvent()
             package_start = 0;
         }
     }
-    return;    
+    return;
 }
 
 i2c::Order i2c::parseOrder()
 {
-    char order_id = command[0];  // first char stands for order to be executed
-    
+    char order_id = commandBuffer[0]; // first char stands for order to be executed
+
     // maps command char to order type
     switch (order_id)
     {
@@ -101,5 +103,6 @@ i2c::Order i2c::parseOrder()
 
 void i2c::clearBuffer()
 {
-    memset(command, 0, 128);
+    memset(commandBuffer, 0, 128);
+    memset(dataBuffer, 0, 512);
 }
