@@ -2,10 +2,14 @@
 #include "src/Reading.h"
 #include "src/Sensor.h"
 #include "src/Thermometer.h"
+#include "src/WaterLevel.h"
 #include "src/Utils.h"
 
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+
+// I2C
+#define I2C_ADDRESS 8
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
@@ -13,8 +17,11 @@
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
 Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
 
-// I2C
-#define I2C_ADDRESS 8
+// WATER LEVEL SENSOR - HC-SR04
+#define WATER_LEVEL_SENSOR_ECHO_PIN 3
+#define WATER_LEVEL_SENSOR_TRIG_PIN 4
+#define WATER_LEVEL_SENSOR_ID 2
+WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID);
 
 void setup()
 {
@@ -71,11 +78,7 @@ void addReadingToBuffer(Reading *reading)
     // if buffer is empty initalize JSON objects array
     unsigned int buffer_length = strlen(i2c::dataBuffer);
 
-    if (buffer_length == 0)
-    {
-        strcat(i2c::dataBuffer, "[");
-    }
-    else if (buffer_length >= 511)
+    if (buffer_length >= 511)
     {
         Serial.println("I2C buffer full, can not send more data...");
         return; // avoid buffer overwride
