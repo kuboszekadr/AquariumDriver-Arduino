@@ -62,7 +62,6 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            Serial.println("Agg...");
             // request data from the sensor
             Reading r = sensor->getReading();
             addReadingToBuffer(&r); // add to I2C data buffer
@@ -78,21 +77,20 @@ void addReadingToBuffer(Reading *reading)
     // if buffer is empty initalize JSON objects array
     unsigned int buffer_length = strlen(i2c::dataBuffer);
 
-    if (buffer_length >= 511)
+    if (buffer_length > 510)
     {
         Serial.println("I2C buffer full, can not send more data...");
         return; // avoid buffer overwride
     }
-    else if (buffer_length + strlen(readingJSON) >= 511)
+    else if (buffer_length + strlen(readingJSON) > 510)
     {
         Serial.println("Not enough space to fit data into the buffer");
         return;
     }
-    else
+    else if (buffer_length > 0)
     {
         strcat(i2c::dataBuffer, ","); // add object separator
     }
 
     strcat(i2c::dataBuffer, readingJSON);
-    Serial.println(i2c::dataBuffer);
 }

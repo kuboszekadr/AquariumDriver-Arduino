@@ -10,15 +10,17 @@ WaterLevel::WaterLevel(int echo, int trig, int id_sensor)
 	pinMode(_echo, INPUT);
 }
 
-WaterStatus WaterLevel::getWaterStatus()
-{
-	if (_last_reading_value < WATER_LEVEL_UPPER_LEVEL) // too much water
-		return OVERFILLED;
-	else if (_last_reading_value > WATER_LEVEL_LOWER_LEVEL) // water is lacking
-		return LACKING;
-	else
-		return OK;
-}
+// WaterStatus WaterLevel::getWaterStatus()
+// {
+// 	// push(WATER_LOW);
+// 	// push(WATER_HIGH);
+// 	if (_last_reading_value < WATER_LEVEL_UPPER_LEVEL) // too much water
+// 		return OVERFILLED;
+// 	else if (_last_reading_value > WATER_LEVEL_LOWER_LEVEL) // water is lacking
+// 		return LACKING;
+// 	else
+// 		return OK;
+// }
 
 bool WaterLevel::makeReading()
 {
@@ -40,8 +42,26 @@ bool WaterLevel::makeReading()
 
 	// count how many readings are available in the array
 	_readings_count = (_readings_count + 1) % SENSOR_SAMPLING_AMOUNT; // for safety reasons
-	_readings[_readings_count] = pulseIn(_echo, HIGH) / 58.0;  // insert new reading data
+	_readings[_readings_count] = pulseIn(_echo, HIGH) / 58.0;		  // insert new reading data
 
 	_last_reading = millis();
 	return true;
+}
+
+Event WaterLevel::checkState()
+{
+	Event event = Events::NONE;
+	if (_readings[_readings_count] >= WATER_LEVEL_UPPER_LEVEL)
+	{
+		event = Events::WATER_HIGH;
+	}
+	else if (_readings[_readings_count <= WATER_LEVEL_LOWER_LEVEL])
+	{
+		event = Events::WATER_HIGH;
+	}
+
+	if (event != Events::NONE)
+	{
+		Events::pushEvent(event);
+	}
 }

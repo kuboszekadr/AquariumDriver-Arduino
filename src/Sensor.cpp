@@ -22,11 +22,6 @@ Reading Sensor::getReading()
     return reading;
 }
 
-void Sensor::attachRelay(int pin)
-{
-    relay = new Relay(pin);
-}
-
 bool Sensor::isAvailable()
 {
     // check if array is full
