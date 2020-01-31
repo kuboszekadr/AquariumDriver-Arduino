@@ -1,4 +1,5 @@
 #include "src/I2CSlave.h"
+#include "src/Events.h"
 #include "src/Reading.h"
 #include "src/Sensor.h"
 #include "src/Thermometer.h"

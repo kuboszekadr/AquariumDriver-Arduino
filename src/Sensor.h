@@ -21,7 +21,6 @@ public:
 
   static void collectData();      // collects data from all sensors
   virtual bool makeReading() = 0; // to be overwriten by the subclasses
-  virtual Event checkState();     // check if any event should be raised
 
   Sensor();
   Reading getReading(); // returns averaged value over sampling

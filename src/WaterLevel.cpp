@@ -48,20 +48,20 @@ bool WaterLevel::makeReading()
 	return true;
 }
 
-Event WaterLevel::checkState()
-{
-	Event event = Events::NONE;
-	if (_readings[_readings_count] >= WATER_LEVEL_UPPER_LEVEL)
-	{
-		event = Events::WATER_HIGH;
-	}
-	else if (_readings[_readings_count <= WATER_LEVEL_LOWER_LEVEL])
-	{
-		event = Events::WATER_HIGH;
-	}
+// Event WaterLevel::checkState()
+// {
+// 	Event event = Events::NONE;
+// 	if (_readings[_readings_count] >= WATER_LEVEL_UPPER_LEVEL)
+// 	{
+// 		event = Events::WATER_HIGH;
+// 	}
+// 	else if (_readings[_readings_count <= WATER_LEVEL_LOWER_LEVEL])
+// 	{
+// 		event = Events::WATER_HIGH;
+// 	}
 
-	if (event != Events::NONE)
-	{
-		Events::pushEvent(event);
-	}
-}
+// 	if (event != Events::NONE)
+// 	{
+// 		Events::pushEvent(event);
+// 	}
+// }

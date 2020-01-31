@@ -17,24 +17,35 @@ enum EventType
     TEMP_HIGH
 };
 
+class EventSubscriber
+{
+public:
+    void subscribe(EventType event);
+    virtual void execute();
+};
+
 class Event
 {
 public:
     Event(EventType event);
 
-    static void subscribe(EventType event);
-
 private:
     static Event *_events[5];
+    static void _new_subscriber(EventType event, EventSubscriber *subscriber);
 
     EventType _type;
 
-    EventSubscriber _subscribers[EVENT_MAX_SUBSCRIBERS];
-    static void _new_subscriber(EventType event);
+    EventSubscriber *_subscribers[EVENT_MAX_SUBSCRIBERS];
     int _subscribers_amount;
+
+    friend EventSubscriber;
 };
 
 void pushEvent(EventType event);
+void notifySubscribers();
+
+extern EventType EventsQueue[EVENT_QUEUE_LENGTH];
+extern int queueLength;
 
 } // namespace Events
 
