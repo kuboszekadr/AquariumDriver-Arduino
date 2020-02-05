@@ -13,13 +13,13 @@
 #define SENSOR_SAMPLING_AMOUNT 5      // readings array size
 #define SENSOR_AMOUNT 5               // maximum amount of sensors
 
-class Sensor
+class Sensor : public Events::EventSubscriber
 {
 public:
   static Sensor *sensors[SENSOR_AMOUNT]; // array of generated sensors
   static unsigned int sensors_amount;    // how many sensors are initalized
+  static void collectData();             // collects data from all sensors
 
-  static void collectData();      // collects data from all sensors
   virtual bool makeReading() = 0; // to be overwriten by the subclasses
 
   Sensor();
