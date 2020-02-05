@@ -21,7 +21,7 @@ class WaterLevel: public Sensor
 	public:
 		WaterLevel(int echo, int trig, int id_sensor);
 		bool makeReading();
-		
+		void reactForEvent();
 		// WaterStatus getWaterStatus();
 
 	private:

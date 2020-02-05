@@ -13,6 +13,7 @@ public:
     Thermometer(int pin, int id_sensor, uint8_t address[]);
     bool makeReading();  // overwrite Sensor method
     bool isReady();
+    void reactForEvent();
 
 private:
     int _pin;
