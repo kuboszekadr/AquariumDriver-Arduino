@@ -4,6 +4,8 @@
 #define EVENT_QUEUE_LENGTH 10
 #define EVENT_MAX_SUBSCRIBERS 3
 
+#include <Arduino.h>
+
 namespace Events
 {
 enum EventType
@@ -21,13 +23,16 @@ class EventSubscriber
 {
 public:
     void subscribe(EventType event);
-    virtual void execute();
+    virtual void reactForEvent();
 };
 
 class Event
 {
 public:
-    Event(EventType event);
+    Event(EventType event_type);
+    void notifySubscribers();
+
+    static Event *getEvent(EventType event);
 
 private:
     static Event *_events[5];
