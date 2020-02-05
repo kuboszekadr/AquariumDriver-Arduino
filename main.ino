@@ -13,10 +13,10 @@
 #define I2C_ADDRESS 8
 
 // DS18B20 - Thermometer
-#define THERMOMETER_PIN 2
-#define THERMOMETER_SENSOR_ID 1
-uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
+// #define THERMOMETER_PIN 2
+// #define THERMOMETER_SENSOR_ID 1
+// uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+// Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
 
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
@@ -32,6 +32,8 @@ void setup()
     // i2c::begin(I2C_ADDRESS); // join I2C bus
 
     Serial.println("Setup finished");
+
+    // Events::Event event = Events::Event(Events::WATER_LOW);
 }
 
 void loop()
