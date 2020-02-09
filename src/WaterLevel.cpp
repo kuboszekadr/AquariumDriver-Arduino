@@ -8,9 +8,6 @@ WaterLevel::WaterLevel(int echo, int trig, int id_sensor)
 
 	pinMode(_trig, OUTPUT);
 	pinMode(_echo, INPUT);
-
-	subscribe(Events::WATER_LOW);
-
 }
 
 bool WaterLevel::makeReading()
@@ -35,15 +32,6 @@ bool WaterLevel::makeReading()
 	_readings_count = (_readings_count + 1) % SENSOR_SAMPLING_AMOUNT; // for safety reasons
 	_readings[_readings_count] = pulseIn(_echo, HIGH) / 58.0;		  // insert new reading data
 
-	Events::pushEvent(Events::WATER_LOW);
-
 	_last_reading = millis();
-
 	return true;
-}
-
-void WaterLevel::reactForEvent()
-{
-	Serial.println("Water LOW!");
-	// TODO
 }

@@ -30,10 +30,10 @@ void Events::Event::_new_subscriber(EventType event, EventSubscriber *subscriber
 
 void Events::Event::notifySubscribers()
 {
-    // loop through all event subsribes
+    // loop through all event subscribes
     for (int i = 0; i < _subscribers_amount; i++)
     {
-        _subscribers[i]->reactForEvent();
+        _subscribers[i]->reactForEvent(_type);
     }
 }
 
@@ -42,7 +42,7 @@ Events::Event *Events::Event::getEvent(EventType event)
     return _events[event];
 }
 
-void Events::pushEvent(EventType event)
+void Events::raise(EventType event)
 {
     Serial.print("New event: \t");
     Serial.println(event);
@@ -57,7 +57,6 @@ void Events::pushEvent(EventType event)
 
 void Events::notifySubscribers()
 {
-    Serial.println("Notifying...");
     int i = 0;
 
     for (int i = 0; i < Events::queueLength; i++)

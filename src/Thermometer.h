@@ -11,7 +11,7 @@ class Thermometer : public Sensor
 {
 public:
     Thermometer(int pin, int id_sensor, uint8_t address[]);
-    bool makeReading();  // overwrite Sensor method
+    bool makeReading(); // overwrite Sensor method
     bool isReady();
     void reactForEvent();
 

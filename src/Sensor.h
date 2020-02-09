@@ -3,7 +3,7 @@
 
 #include "Events.h"
 #include "Utils.h"
-#include "Relay.h"
+// #include "Relay.h"
 #include "Reading.h"
 
 #include <Arduino.h>
@@ -13,7 +13,7 @@
 #define SENSOR_SAMPLING_AMOUNT 5      // readings array size
 #define SENSOR_AMOUNT 5               // maximum amount of sensors
 
-class Sensor : public Events::EventSubscriber
+class Sensor
 {
 public:
   static Sensor *sensors[SENSOR_AMOUNT]; // array of generated sensors

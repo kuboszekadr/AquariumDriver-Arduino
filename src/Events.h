@@ -22,8 +22,9 @@ enum EventType
 class EventSubscriber
 {
 public:
+    EventSubscriber() {};
     void subscribe(EventType event);
-    virtual void reactForEvent();
+    virtual void reactForEvent(EventType event)=0;
 };
 
 class Event
@@ -46,12 +47,12 @@ private:
     friend EventSubscriber;
 };
 
-void pushEvent(EventType event);
+void raise(EventType event);
 void notifySubscribers();
 
 extern EventType EventsQueue[EVENT_QUEUE_LENGTH];
 extern int queueLength;
 
-} // namespace Events
+}; // namespace Events
 
 #endif

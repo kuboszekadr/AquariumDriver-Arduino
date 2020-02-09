@@ -1,8 +1,10 @@
 #include "src/I2CSlave.h"
 #include "src/Events.h"
+#include "src/Programs.h"
 #include "src/Reading.h"
 #include "src/Sensor.h"
 #include "src/Thermometer.h"
+#include "src/WaterChange.h"
 #include "src/WaterLevel.h"
 #include "src/Utils.h"
 
@@ -32,8 +34,6 @@ void setup()
     // i2c::begin(I2C_ADDRESS); // join I2C bus
 
     Serial.println("Setup finished");
-
-    // Events::Event event = Events::Event(Events::WATER_LOW);
 }
 
 void loop()
@@ -48,6 +48,10 @@ void loop()
     else if (i2c::transmissionStep == i2c::EMPTY)
     {
         scanSensors();
+        if (Events::queueLength > 0)
+        {
+            Events::notifySubscribers();
+        }
     }
 }
 
