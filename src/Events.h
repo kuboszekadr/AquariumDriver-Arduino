@@ -10,6 +10,7 @@ namespace Events
 {
 enum EventType
 {
+    EMPTY,
     RELAY_STATE_CHANGE,
 
     WATER_LOW,
@@ -17,14 +18,18 @@ enum EventType
 
     TEMP_LOW,
     TEMP_HIGH
+
+    // TODO:
+    // CO2_LOW,
+    // CO2_HIGH
 };
 
 class EventSubscriber
 {
 public:
-    EventSubscriber() {};
+    EventSubscriber(){};
     void subscribe(EventType event);
-    virtual void reactForEvent(EventType event)=0;
+    virtual void reactForEvent(EventType event) = 0;
 };
 
 class Event

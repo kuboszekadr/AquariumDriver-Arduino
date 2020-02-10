@@ -3,10 +3,14 @@
 unsigned int Sensor::sensors_amount = 0;
 Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
-Sensor::Sensor()
+Sensor::Sensor(int id_sensor, float trigger_low, float trigger_high)
 {
     sensors[sensors_amount] = this;                            // add sensor to the list of sensors
     sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1; // increase amount of sensors
+
+    _id_sensor = id_sensor;
+    _trigger_low = trigger_low;
+    _trigger_high = trigger_high;
 }
 
 Reading Sensor::getReading()

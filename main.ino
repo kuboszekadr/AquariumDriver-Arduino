@@ -15,16 +15,22 @@
 #define I2C_ADDRESS 8
 
 // DS18B20 - Thermometer
-// #define THERMOMETER_PIN 2
-// #define THERMOMETER_SENSOR_ID 1
-// uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-// Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
+#define THERMOMETER_PIN 2
+#define THERMOMETER_SENSOR_ID 1
+#define THERMOMETER_TEMP_LOW 24.8
+#define THERMOMETER_TEMP_HIGH 25.2
+uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address,
+                        (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH);
 
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
 #define WATER_LEVEL_SENSOR_ID 2
-WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID);
+#define WATER_LEVEL_LOW 15.0
+#define WATER_LEVEL_HIGH 10.0
+WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN,
+                              WATER_LEVEL_SENSOR_ID, (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH);
 
 void setup()
 {

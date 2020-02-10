@@ -13,13 +13,13 @@
 class WaterLevel : public Sensor
 {
 public:
-	WaterLevel(int echo, int trig, int id_sensor);
+	WaterLevel(int echo, int trig, int id_sensor, float avg_value, float hysteresis);
 	bool makeReading();
+	Events::EventType WaterLevel::checkTriggers();
 
 private:
 	int _echo;
 	int _trig;
-	int _i;
 };
 
 #endif

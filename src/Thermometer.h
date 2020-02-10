@@ -10,10 +10,11 @@
 class Thermometer : public Sensor
 {
 public:
-    Thermometer(int pin, int id_sensor, uint8_t address[]);
-    bool makeReading(); // overwrite Sensor method
-    bool isReady();
+    Thermometer(int pin, uint8_t address[], int id_sensor, float trigger_low, float trigger_high);
+    bool makeReading();
+    bool isReady(); // overwrite Sensor method
     void reactForEvent();
+    Events::EventType Thermometer::checkTriggers();
 
 private:
     int _pin;

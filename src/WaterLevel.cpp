@@ -1,18 +1,18 @@
 #include "WaterLevel.h"
 
-WaterLevel::WaterLevel(int echo, int trig, int id_sensor)
+WaterLevel::WaterLevel(int echo, int trig, int id_sensor, float trigger_low, float trigger_high)
+	: Sensor(id_sensor, trigger_low, trigger_high)
 {
 	_echo = echo; // echo pin
 	_trig = trig; // trig pin
-	_id_sensor = id_sensor;
-
+	
 	pinMode(_trig, OUTPUT);
 	pinMode(_echo, INPUT);
 }
 
 bool WaterLevel::makeReading()
 {
-	//  check if sensor is ready or if data is full
+	//  check if sensor is ready or if data array is full
 	if (!isReady() || isAvailable())
 	{
 		return false;
@@ -34,4 +34,27 @@ bool WaterLevel::makeReading()
 
 	_last_reading = millis();
 	return true;
+}
+
+Events::EventType WaterLevel::checkTriggers()
+{
+	Events::EventType event = Events::EventType::EMPTY;
+
+	// check current level of water
+	if (_last_reading_value < _trigger_low)
+	{
+		event = Events::EventType::WATER_LOW;
+	}
+	else if (_last_reading_value > _trigger_high)
+	{
+		event = Events::EventType::WATER_HIGH;
+	}
+	
+	// push to the queue if event is not empty
+	if (event != Events::EventType::EMPTY)
+	{
+		Events::raise(event);
+	}
+	
+	return event;
 }

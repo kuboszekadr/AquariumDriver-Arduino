@@ -1,6 +1,7 @@
 #include "Thermometer.h"
 
-Thermometer::Thermometer(int pin, int id_sensor, uint8_t *address)
+Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor, float trigger_low, float trigger_high)
+    : Sensor(id_sensor, trigger_low, trigger_high)
 {
     _pin = pin;
     _id_sensor = id_sensor;
@@ -35,4 +36,25 @@ bool Thermometer::makeReading()
 
     _last_reading = millis();
     return true;
+}
+
+Events::EventType Thermometer::checkTriggers()
+{
+	Events::EventType event = Events::EventType::EMPTY;
+
+	// check current level of water
+	if (_last_reading_value < _trigger_low)
+	{
+		event = Events::EventType::TEMP_LOW;
+	}
+	else if (_last_reading_value > _trigger_high)
+	{
+		event = Events::EventType::TEMP_HIGH;
+	}
+	// push to the queue if event is not empty
+	if (event != Events::EventType::EMPTY)
+	{
+		Events::raise(event);
+	}   
+	return event;
 }
