@@ -3,13 +3,19 @@
 unsigned int Sensor::sensors_amount = 0;
 Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
-Sensor::Sensor(int id_sensor, float trigger_low, float trigger_high)
+Sensor::Sensor(int id_sensor,
+               float trigger_value_low, float trigger_value_high,
+               Events::EventType trigger_low, Events::EventType trigger_high)
 {
     sensors[sensors_amount] = this;                            // add sensor to the list of sensors
     sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1; // increase amount of sensors
 
     _id_sensor = id_sensor;
+
+    _trigger_value_low = trigger_value_low;
     _trigger_low = trigger_low;
+
+    _trigger_value_high = trigger_value_high;
     _trigger_high = trigger_high;
 }
 
@@ -45,4 +51,27 @@ float Sensor::_avg()
 
     _readings_count = -1; // restart counter after data sending
     return _avg;          // return average of readings
+}
+
+Events::EventType Sensor::checkTriggers()
+{
+    Events::EventType event = Events::EventType::EMPTY;
+
+    // check current level of water
+    if (_last_reading_value < _trigger_value_low)
+    {
+        event = _trigger_low;
+    }
+    else if (_last_reading_value > _trigger_value_high)
+    {
+        event = _trigger_high;
+    }
+
+    // push to the queue if event is not empty
+    if (event != Events::EventType::EMPTY & event != _last_trigger)
+    {
+        Events::raise(event);
+    }
+
+    return event;
 }

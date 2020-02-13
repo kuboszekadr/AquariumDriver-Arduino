@@ -9,7 +9,7 @@
 
 // send new data in approx every 30s
 #define SENSOR_SAMPLING_INTERVAL 500L // sample every 1/2 second
-#define SENSOR_SAMPLING_AMOUNT 5     // readings array size
+#define SENSOR_SAMPLING_AMOUNT 5      // readings array size
 #define SENSOR_AMOUNT 5               // maximum amount of sensors
 
 class Sensor
@@ -19,21 +19,29 @@ public:
   static unsigned int sensors_amount;    // how many sensors are initalized
   static void collectData();             // collects data from all sensors
 
-  virtual bool makeReading() = 0;                // to be overwriten by the subclasses
-  virtual Events::EventType checkTriggers() = 0; // check if current level of sensor value is between low and high trigger
+  Sensor(int id_sensor,
+         float trigger_value_low, float trigger_value_high,
+         Events::EventType trigger_low, Events::EventType trigger_high);
 
-  Sensor(int id_sensor, float trigger_low, float trigger_high);
+  virtual bool makeReading() = 0;    // to be overwriten by the subclasses
+  Events::EventType checkTriggers(); // check if current level of sensor value is between low and high trigger
+
   Reading getReading(); // returns averaged value over sampling
 
   bool isAvailable(); // check if sensor gathered enough data
   bool isReady();     // check if sensor can gather data
 
 protected:
-  float _trigger_low;  // average sensor value
-  float _trigger_high; // +/- level when specify event should be published
+  float _trigger_value_low = -1.0; // average sensor value
+  Events::EventType _trigger_low;  // event to be rised when sensor value is below low value
 
-  float _avg();              // aggrage all readings within SENSOR_SAMPLING_AMOUNT
-  float _last_reading_value; // last readed value by the sensor
+  float _trigger_value_high = -1.0; // +/- level when specify event should be published
+  Events::EventType _trigger_high;  // event to be rised when sensor value is above value
+
+  Events::EventType _last_trigger = Events::EventType::EMPTY;
+
+  float _avg();                     // aggrage all readings within SENSOR_SAMPLING_AMOUNT
+  float _last_reading_value = -1.0; // last readed value by the sensor
 
   float _readings[SENSOR_SAMPLING_AMOUNT]; // array to hold all readings done before publishing
   unsigned long _last_reading = 0;         // when last reading was done (as millis)
