@@ -10,7 +10,7 @@ namespace Events
 {
 enum EventType
 {
-    EMPTY,
+    EMPTY = 0,
     RELAY_STATE_CHANGE,
 
     WATER_LOW,
@@ -27,7 +27,7 @@ enum EventType
 class EventSubscriber
 {
 public:
-    EventSubscriber(){};
+    // EventSubscriber(){};
     void subscribe(EventType event);
     virtual void reactForEvent(EventType event) = 0;
 };
@@ -41,13 +41,13 @@ public:
     static Event *getEvent(EventType event);
 
 private:
-    static Event *_events[5];
+    static Event *_events[6];
     static void _new_subscriber(EventType event, EventSubscriber *subscriber);
 
     EventType _type;
 
     EventSubscriber *_subscribers[EVENT_MAX_SUBSCRIBERS];
-    int _subscribers_amount;
+    int _subscribers_amount = 0;
 
     friend EventSubscriber;
 };

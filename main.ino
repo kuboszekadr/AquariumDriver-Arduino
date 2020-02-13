@@ -32,6 +32,9 @@ Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_addr
 WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN,
                               WATER_LEVEL_SENSOR_ID, (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH);
 
+Programs::WaterChange water_change = Programs::WaterChange(1, 2);
+// Programs::Heater heater = 
+
 void setup()
 {
     Serial.begin(9600);
@@ -75,8 +78,12 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
+            Serial.print("Sensor ready: ");
+            Serial.println(i);
+
             // request data from the sensor
             Reading r = sensor->getReading();
+            sensor->checkTriggers();
             addReadingToBuffer(&r); // add to I2C data buffer
         }
     }

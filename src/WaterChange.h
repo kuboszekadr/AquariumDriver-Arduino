@@ -15,7 +15,6 @@ public:
     void reactForEvent(Events::EventType event);
 
 private:
-    bool _is_active = false;
     Relay *_pomp;
     Relay *_water;
 };

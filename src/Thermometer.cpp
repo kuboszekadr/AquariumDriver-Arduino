@@ -56,5 +56,6 @@ Events::EventType Thermometer::checkTriggers()
 	{
 		Events::raise(event);
 	}   
+
 	return event;
 }

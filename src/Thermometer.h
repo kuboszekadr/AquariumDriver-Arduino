@@ -13,7 +13,6 @@ public:
     Thermometer(int pin, uint8_t address[], int id_sensor, float trigger_low, float trigger_high);
     bool makeReading();
     bool isReady(); // overwrite Sensor method
-    void reactForEvent();
     Events::EventType Thermometer::checkTriggers();
 
 private:

@@ -11,6 +11,7 @@ namespace Programs
 class Program : public Events::EventSubscriber
 {
 protected:
+    bool _is_active = false;
     Events::EventType _state;
 };
 } // namespace Programs

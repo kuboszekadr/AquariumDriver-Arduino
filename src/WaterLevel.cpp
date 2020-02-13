@@ -55,6 +55,6 @@ Events::EventType WaterLevel::checkTriggers()
 	{
 		Events::raise(event);
 	}
-	
+
 	return event;
 }

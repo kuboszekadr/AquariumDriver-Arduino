@@ -44,6 +44,12 @@ void Programs::WaterChange::pour()
 
 void Programs::WaterChange::reactForEvent(Events::EventType event)
 {
+    //ignore the same state
+    if (_state == event)
+    {
+        return;
+    }
+
     // Check if program can be closed
     if (_state == Events::WATER_LOW && event == Events::WATER_HIGH)
     {
@@ -59,9 +65,5 @@ void Programs::WaterChange::reactForEvent(Events::EventType event)
         Serial.println(F("Pouring water..."));
         _state = event;
         pour();
-    }
-    else if (_state == event)
-    {
-        // Do nothing...
     }
 }
