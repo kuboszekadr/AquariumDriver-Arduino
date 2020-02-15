@@ -37,26 +37,3 @@ bool WaterLevel::makeReading()
 	_last_reading = millis();
 	return true;
 }
-
-// Events::EventType WaterLevel::checkTriggers()
-// {
-// 	Events::EventType event = Events::EventType::EMPTY;
-
-// 	// check current level of water
-// 	if (_last_reading_value < _trigger_low)
-// 	{
-// 		event = Events::EventType::WATER_LOW;
-// 	}
-// 	else if (_last_reading_value > _trigger_high)
-// 	{
-// 		event = Events::EventType::WATER_HIGH;
-// 	}
-
-// 	// push to the queue if event is not empty
-// 	if (event != Events::EventType::EMPTY)
-// 	{
-// 		Events::raise(event);
-// 	}
-
-// 	return event;
-// }

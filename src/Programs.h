@@ -10,6 +10,19 @@ namespace Programs
 {
 class Program : public Events::EventSubscriber
 {
+public:
+    Program() {};
+    Program(int relay_pin);
+    
+    void start();
+    void end();
+    void reactForEvent(Events::EventType event);
+    
+    bool isActive();
+
+private:
+    Relay *_relay;
+
 protected:
     bool _is_active = false;
     Events::EventType _state;

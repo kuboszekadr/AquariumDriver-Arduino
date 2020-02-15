@@ -6,10 +6,11 @@ Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor,
     : Sensor(id_sensor, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
     _pin = pin;
-    _id_sensor = id_sensor;
+    // _id_sensor = id_sensor;
 
     // copy thermometer address
-    memcpy(_address, address, 8);
+    // TODO: copy address properly
+    // memcpy(_address, address, 8);
 
     // initalize relevant variables
     _onewire = OneWire(_pin);

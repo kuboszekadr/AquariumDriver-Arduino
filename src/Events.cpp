@@ -20,15 +20,16 @@ Events::Event::Event(EventType event_type)
 {
     // TODO: check if event has been init
     _events[event_type] = this; // place event pointer in the array of events
-    
+
     _type = event_type; // assing event type
 }
 
 void Events::Event::_new_subscriber(EventType event, EventSubscriber *subscriber)
 {
-    Event *_event = _events[event];       // get event instance
-    int subscribers = _event->_subscribers_amount;
+    Event *_event = _events[event];                // get event instance
+    int subscribers = _event->_subscribers_amount; // get current subscribers _subscribers_amount
 
+    // add new subscriber
     _event->_subscribers[subscribers] = subscriber; // add subscriber to the list of subscribers
     _event->_subscribers_amount = ++subscribers;
 }
@@ -38,7 +39,6 @@ void Events::Event::notifySubscribers()
     // loop through all event subscribes
     for (int i = 0; i < _subscribers_amount; i++)
     {
-        Serial.println("Notifying...");
         _subscribers[i]->reactForEvent(_type);
     }
 }
@@ -58,7 +58,6 @@ void Events::raise(EventType event)
     }
 
     EventsQueue[queueLength++] = event; // insert event into queue
-    // queueLength++;
 }
 
 void Events::notifySubscribers()
@@ -67,9 +66,17 @@ void Events::notifySubscribers()
     for (int i = 0; i < queueLength; i++)
     {
         EventType event_type = EventsQueue[i];
-        //TODO: check if event has subscribers
         Event *event = Event::getEvent(event_type);
-        event->notifySubscribers();
+
+        if (event)
+        {
+            event->notifySubscribers();
+        }
+        else
+        {
+            Serial.println("Event has no subscribers");
+        }
+        
 
         EventsQueue[i] = EventType::EMPTY;
     }

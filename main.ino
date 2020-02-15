@@ -85,7 +85,9 @@ void scanSensors()
 
             // request data from the sensor
             Reading r = sensor->getReading();
-            sensor->checkTriggers();
+            Serial.println(r.value);
+
+            (void)sensor->checkTriggers();
             addReadingToBuffer(&r); // add to I2C data buffer
         }
     }
