@@ -17,6 +17,7 @@ public:
 			   float trigger_value_low, float trigger_value_high,
 			   Events::EventType trigger_low, Events::EventType trigger_high);
 	bool makeReading();
+	Events::EventType checkTriggers();
 
 private:
 	int _echo;
