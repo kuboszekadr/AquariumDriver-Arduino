@@ -10,13 +10,15 @@
 class Thermometer : public Sensor
 {
 public:
-    Thermometer(int pin, int id_sensor, uint8_t address[]);
-    bool makeReading();  // overwrite Sensor method
-    bool isReady();
+    Thermometer(int pin, uint8_t address[], int id_sensor,
+                float trigger_value_low, float trigger_value_high,
+                Events::EventType trigger_low, Events::EventType trigger_high);
+    bool makeReading();
+    bool isReady(); // overwrite Sensor method
 
 private:
     int _pin;
-    uint8_t _address[8]; // = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+    uint8_t _address[8] = {};
     OneWire _onewire;
     DS18B20 *_sensor;
 };

@@ -5,16 +5,16 @@
 
 class Relay
 {
-  public:
-    Relay(int pin);
+public:
+  Relay(int pin);
 
-    void turn_on();
-    void turn_off();
+  void turnOn();
+  void turnOff();
 
-    int pin();
-  
-  private:
-    int _pin;
+  int pin();
+
+private:
+  int _pin;
 };
 
 #endif

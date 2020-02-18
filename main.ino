@@ -1,7 +1,10 @@
 #include "src/I2CSlave.h"
+#include "src/Events.h"
+#include "src/Programs.h"
 #include "src/Reading.h"
 #include "src/Sensor.h"
 #include "src/Thermometer.h"
+#include "src/WaterChange.h"
 #include "src/WaterLevel.h"
 #include "src/Utils.h"
 
@@ -14,14 +17,29 @@
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
 #define THERMOMETER_SENSOR_ID 1
+#define THERMOMETER_TEMP_LOW 24.8
+#define THERMOMETER_TEMP_HIGH 25.2
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address);
+Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID,
+                        (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
+                        Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
 #define WATER_LEVEL_SENSOR_ID 2
-WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID);
+#define WATER_LEVEL_LOW 15.0
+#define WATER_LEVEL_HIGH 10.0
+WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID,
+                              (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
+                              Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
+
+// Water change
+Programs::WaterChange water_change = Programs::WaterChange(1, 2);
+
+// Heater
+Events::EventType heater_programs[3] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH, NULL};
+Programs::Program heater = Programs::Program(10, heater_programs, 2);
 
 void setup()
 {
@@ -45,6 +63,10 @@ void loop()
     else if (i2c::transmissionStep == i2c::EMPTY)
     {
         scanSensors();
+        if (Events::queueLength > 0)
+        {
+            Events::notifySubscribers();
+        }
     }
 }
 
@@ -62,10 +84,15 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            Serial.println("Agg...");
+            Serial.print("Sensor ready: ");
+            Serial.println(i);
+
             // request data from the sensor
             Reading r = sensor->getReading();
+            Serial.println(r.value);
             addReadingToBuffer(&r); // add to I2C data buffer
+
+            (void)sensor->checkTriggers();
         }
     }
 }
@@ -78,21 +105,20 @@ void addReadingToBuffer(Reading *reading)
     // if buffer is empty initalize JSON objects array
     unsigned int buffer_length = strlen(i2c::dataBuffer);
 
-    if (buffer_length >= 511)
+    if (buffer_length > 510)
     {
         Serial.println("I2C buffer full, can not send more data...");
         return; // avoid buffer overwride
     }
-    else if (buffer_length + strlen(readingJSON) >= 511)
+    else if (buffer_length + strlen(readingJSON) > 510)
     {
         Serial.println("Not enough space to fit data into the buffer");
         return;
     }
-    else
+    else if (buffer_length > 0)
     {
         strcat(i2c::dataBuffer, ","); // add object separator
     }
 
     strcat(i2c::dataBuffer, readingJSON);
-    Serial.println(i2c::dataBuffer);
 }

@@ -7,12 +7,12 @@ Relay::Relay(int pin)
     pinMode(_pin, LOW);
 }
 
-void Relay::turn_on()
+void Relay::turnOn()
 {
     pinMode(_pin, HIGH);
 }
 
-void Relay::turn_off()
+void Relay::turnOff()
 {
     pinMode(_pin, LOW);
 }

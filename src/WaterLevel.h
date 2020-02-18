@@ -5,28 +5,22 @@
 */
 
 #ifndef WaterLevel_h
-#define  WaterLevel_h
+#define WaterLevel_h
 
 #include "Sensor.h"
-
 #include <Arduino.h>
 
-#define WATER_LEVEL_UPPER_LEVEL 5.0
-#define WATER_LEVEL_LOWER_LEVEL 15.0
-
-enum WaterStatus {LACKING, OK, OVERFILLED, FILLING, PUMPING_OUT};
-
-class WaterLevel: public Sensor
+class WaterLevel : public Sensor
 {
-	public:
-		WaterLevel(int echo, int trig, int id_sensor);
-		bool makeReading();
+public:
+	WaterLevel(int echo, int trig, int id_sensor,
+			   float trigger_value_low, float trigger_value_high,
+			   Events::EventType trigger_low, Events::EventType trigger_high);
+	bool makeReading();
 
-		WaterStatus getWaterStatus();
-
-	private:
-		int _echo;
-		int _trig;
+private:
+	int _echo;
+	int _trig;
 };
 
 #endif
