@@ -46,7 +46,6 @@ void setup()
     Serial.begin(9600);
     Serial.println("Starting");
 
-    // new Programs::Program(10, heater_programs, 2);
     // i2c::begin(I2C_ADDRESS); // join I2C bus
 
     Serial.println("Setup finished");

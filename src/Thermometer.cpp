@@ -6,12 +6,13 @@ Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor,
     : Sensor(id_sensor, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
     _pin = pin;
-    // _id_sensor = id_sensor;
 
-    // copy thermometer address
-    // TODO: copy address properly
-    // memcpy(_address, address, 8);
-
+    // Copy thermometer address
+    for (int i = 0; i < 8; i++)
+    {
+        _address[i] = *(address+i);
+    }
+    
     // initalize relevant variables
     _onewire = OneWire(_pin);
     _sensor = new DS18B20(&_onewire);
