@@ -2,7 +2,7 @@
 
 int Events::queueLength = 0;
 Events::EventType Events::EventsQueue[EVENT_QUEUE_LENGTH];
-Events::Event *Events::Event::_events[6];
+Events::Event *Events::Event::_events[7];
 
 void Events::EventSubscriber::subscribe(EventType event)
 {

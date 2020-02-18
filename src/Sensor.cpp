@@ -56,7 +56,6 @@ float Sensor::_avg()
 Events::EventType Sensor::checkTriggers()
 {
     Events::EventType event = Events::EventType::EMPTY;
-
     // check current level of water
     if (_last_reading_value < _trigger_value_low)
     {

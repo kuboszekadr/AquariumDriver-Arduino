@@ -20,7 +20,7 @@
 #define THERMOMETER_TEMP_LOW 24.8
 #define THERMOMETER_TEMP_HIGH 25.2
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-Thermometer thermometer(THERMOMETER_PIN, THERMOMETER_SENSOR_ID, thermometer_address,
+Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID,
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
@@ -34,14 +34,19 @@ WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TR
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
+// Water change
 Programs::WaterChange water_change = Programs::WaterChange(1, 2);
-// Programs::Heater heater =
+
+// Heater
+Events::EventType heater_programs[3] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH, NULL};
+Programs::Program heater = Programs::Program(10, heater_programs, 2);
 
 void setup()
 {
     Serial.begin(9600);
     Serial.println("Starting");
 
+    // new Programs::Program(10, heater_programs, 2);
     // i2c::begin(I2C_ADDRESS); // join I2C bus
 
     Serial.println("Setup finished");
@@ -86,9 +91,9 @@ void scanSensors()
             // request data from the sensor
             Reading r = sensor->getReading();
             Serial.println(r.value);
+            addReadingToBuffer(&r); // add to I2C data buffer
 
             (void)sensor->checkTriggers();
-            addReadingToBuffer(&r); // add to I2C data buffer
         }
     }
 }

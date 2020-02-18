@@ -41,7 +41,7 @@ public:
     static Event *getEvent(EventType event);
 
 private:
-    static Event *_events[6] = {};
+    static Event *_events[7] = {};
     static void _new_subscriber(EventType event, EventSubscriber *subscriber);
 
     EventType _type;

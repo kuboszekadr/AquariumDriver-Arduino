@@ -12,7 +12,7 @@ class Program : public Events::EventSubscriber
 {
 public:
     Program() {};
-    Program(int relay_pin);
+    Program(int relay_pin, const Events::EventType *events_subscription, int events);
     
     void start();
     void end();
