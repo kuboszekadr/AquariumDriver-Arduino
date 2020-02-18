@@ -24,7 +24,7 @@ public:
          Events::EventType trigger_low, Events::EventType trigger_high);
 
   virtual bool makeReading() = 0;    // to be overwriten by the subclasses
-  Events::EventType checkTriggers(); // check if current level of sensor value is between low and high trigger
+  virtual Events::EventType checkTriggers(); // check if current level of sensor value is between low and high trigger
 
   Reading getReading(); // returns averaged value over sampling
 
