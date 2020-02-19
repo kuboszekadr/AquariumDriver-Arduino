@@ -16,8 +16,6 @@ public:
     static void getTimestamp(char *timestamp);
 
 private:
-    static RTC _instance;
-
     RTC() {}
     RTC(const RTC &){};
 
