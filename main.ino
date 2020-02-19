@@ -16,9 +16,9 @@
 #define I2C_ADDRESS 8
 
 // RTC
-#define RTC_RTS 1
-#define RTC_CLK 2
-#define RTC_DAT 3
+#define RTC_RTS 6
+#define RTC_CLK 8
+#define RTC_DAT 7
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
@@ -49,6 +49,8 @@ Programs::WaterChange water_change = Programs::WaterChange(1, 2);
 Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
 Programs::Program heater = Programs::Program(10, heater_programs, 2);
 
+char ts[30];
+
 void setup()
 {
     Serial.begin(9600);
@@ -56,14 +58,17 @@ void setup()
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
 
-    RTC& rtc = RTC::getInstance(); 
-    rtc.set(RTC_RTS, RTC_CLK, RTC_DAT);  // init RTC
+    RTC &rtc = RTC::getInstance();
+    rtc.set(RTC_RTS, RTC_CLK, RTC_DAT); // init RTC
+    rtc.setTimestamp(2020, 2, 19, 22, 0, 0);
 
     Serial.println("Setup finished");
 }
 
 void loop()
 {
+    memset(ts, 0, 30);
+
     if (i2c::transmissionStep == i2c::FINISHED)
     {
         // executeOrder();
@@ -104,6 +109,8 @@ void scanSensors()
             addReadingToBuffer(&r); // add to I2C data buffer
 
             (void)sensor->checkTriggers();
+            RTC::getTimestamp(ts);
+            Serial.println(ts);
         }
     }
 }
