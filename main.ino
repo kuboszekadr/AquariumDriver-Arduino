@@ -46,7 +46,7 @@ void setup()
     Serial.begin(9600);
     Serial.println("Starting");
 
-    // i2c::begin(I2C_ADDRESS); // join I2C bus
+    i2c::begin(I2C_ADDRESS); // join I2C bus
 
     Serial.println("Setup finished");
 }
