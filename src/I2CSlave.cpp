@@ -58,6 +58,8 @@ void i2c::requestEvent()
         length = strlen(dataBuffer);
         sprintf(post_data_length, "%03d", length);
 
+        transmissionStep = ONGOING;
+
         Wire.write(post_data_length); //notify master about data length
         step++;                       // end first step of data sending
     }
@@ -78,6 +80,7 @@ void i2c::requestEvent()
             // restore defaults
             step = 0;
             package_start = 0;
+            transmissionStep = FINISHED;
         }
     }
     return;
