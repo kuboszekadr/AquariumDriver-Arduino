@@ -1,6 +1,8 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
+#define BUFFER_LENGTH 512
+
 #include "Utils.h"
 
 #include <Arduino.h>
@@ -23,7 +25,7 @@ enum TransmissionStep
     FINISHED // all data received from the master
 };
 
-extern char dataBuffer[512];    // for storing data from sensors
+extern char dataBuffer[BUFFER_LENGTH];    // for storing data from sensors
 extern char commandBuffer[128]; // for storing commands from the master
 // extern char responseBuffer[128];  // for storing response message
 
@@ -35,6 +37,7 @@ void receiveEvent(int count);
 void requestEvent();
 
 void clearBuffer();
+bool addToBuffer(const char *data);
 
 Order parseOrder();
 } // namespace i2c

@@ -1,6 +1,6 @@
 #include "I2CSlave.h"
 
-char i2c::dataBuffer[512];
+char i2c::dataBuffer[BUFFER_LENGTH];
 char i2c::commandBuffer[128];
 // char i2c::responseBuffer[128];
 
@@ -66,8 +66,8 @@ void i2c::requestEvent()
     else if (step == 1)
     {
         // send package to the master
-        package_size = package_size < length ? package_size : length;    // determine amount of data to be send
-        substring(package, dataBuffer, package_start, package_size); // copy part of the data
+        package_size = package_size < length ? package_size : length; // determine amount of data to be send
+        substring(package, dataBuffer, package_start, package_size);  // copy part of the data
 
         Wire.write(package); // send package to the master
 
@@ -84,6 +84,26 @@ void i2c::requestEvent()
         }
     }
     return;
+}
+
+bool i2c::addToBuffer(const char *data)
+{
+    // check bytes available in the buffer
+    unsigned int buffer_length = strlen(dataBuffer);
+
+    // check if buffer has enough space
+    if ((buffer_length > BUFFER_LENGTH - 1) ||
+        (buffer_length + strlen(data) > BUFFER_LENGTH - 1))
+    {
+        return false; // avoid buffer overwride
+    }
+    else if (buffer_length > 0)
+    {
+        strcat(dataBuffer, ","); // add data object separator
+    }
+
+    strcat(dataBuffer, data);
+    return true;
 }
 
 i2c::Order i2c::parseOrder()
@@ -107,5 +127,5 @@ i2c::Order i2c::parseOrder()
 void i2c::clearBuffer()
 {
     memset(commandBuffer, 0, 128);
-    memset(dataBuffer, 0, 512);
+    memset(dataBuffer, 0, BUFFER_LENGTH);
 }
