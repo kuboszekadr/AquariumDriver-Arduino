@@ -4,6 +4,8 @@
 #include "src/Reading.h"
 #include "src/RTC.h"
 #include "src/Sensor.h"
+#include "src/Task.h"
+#include "src/TaskScheduler.h"
 #include "src/Thermometer.h"
 #include "src/WaterChange.h"
 #include "src/WaterLevel.h"
