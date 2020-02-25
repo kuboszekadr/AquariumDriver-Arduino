@@ -31,10 +31,36 @@ void RTC::setTimestamp(int year, int month, int day, int hour, int minute, int s
     rtc._rtc->SetIsWriteProtected(true);
 }
 
-void RTC::getTimestamp(char *timestamp)
+void RTC::getTimestamp(char *target)
 {
     RTC &rtc = getInstance();
 
     RtcDateTime now = rtc._rtc->GetDateTime();
-    sprintf(timestamp, "%d%02d%02d %02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
+    sprintf(target, "%d%02d%02d %02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
+}
+
+timestamp RTC::now(bool full = true)
+{
+    RTC &rtc = getInstance();
+
+    timestamp result = 0;
+    RtcDateTime now = rtc._rtc->GetDateTime();
+    if (full)
+    {
+        result += now.Year() * 1000000000L; // 10^8
+        result += now.Month() * 10000000L;  // 10^6
+        result += now.Day() * 100000L;      // 10^4
+    }
+
+    result += now.Hour() * 100L; // 10^2
+    result += now.Minute() * 1L; // 10^0
+
+    return result;
+}
+
+DayOfWeek RTC::dayOfWeek()
+{
+    RTC &rtc = getInstance();
+    RtcDateTime dt = rtc._rtc->GetDateTime();
+    return dt.DayOfWeek();
 }
