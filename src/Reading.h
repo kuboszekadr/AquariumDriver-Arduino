@@ -7,7 +7,7 @@ struct Reading
 {
     int id_sensor;
     float value;
-    // char timestamp[17];
+    char timestamp[17];
 
     void toJSON(char *target);
 };
