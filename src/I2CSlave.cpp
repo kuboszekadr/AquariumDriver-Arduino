@@ -1,8 +1,7 @@
 #include "I2CSlave.h"
 
-char i2c::dataBuffer[512];
-char i2c::commandBuffer[128];
-// char i2c::responseBuffer[128];
+char i2c::dataBuffer[DATA_BUFFER_SIZE];
+char i2c::commandBuffer[RESPONSE_BUFFER_SIZE];
 
 i2c::TransmissionStep i2c::transmissionStep = EMPTY;
 i2c::Order i2c::order = UNKNOWN;
@@ -19,7 +18,7 @@ void i2c::receiveEvent(int count)
     static int size = 0; // amount of currently readed bytes
     if (transmissionStep != ONGOING)
     {
-        memset(commandBuffer, 0, 128); // clear buffer
+        memset(commandBuffer, 0, RESPONSE_BUFFER_SIZE); // clear buffer
         transmissionStep = ONGOING;    // change current transmission status
     }
 
@@ -66,8 +65,8 @@ void i2c::requestEvent()
     else if (step == 1)
     {
         // send package to the master
-        package_size = package_size < length ? package_size : length;    // determine amount of data to be send
-        substring(package, dataBuffer, package_start, package_size); // copy part of the data
+        package_size = package_size < length ? package_size : length; // determine amount of data to be send
+        substring(package, dataBuffer, package_start, package_size);  // copy part of the data
 
         Wire.write(package); // send package to the master
 
@@ -84,6 +83,26 @@ void i2c::requestEvent()
         }
     }
     return;
+}
+
+bool i2c::addToBuffer(const char *data)
+{
+    // check bytes available in the buffer
+    unsigned int buffer_length = strlen(dataBuffer);
+
+    // check if buffer has enough space
+    if ((buffer_length > DATA_BUFFER_SIZE - 1) ||
+        (buffer_length + strlen(data) > DATA_BUFFER_SIZE - 1))
+    {
+        return false; // avoid buffer overwride
+    }
+    else if (buffer_length > 0)
+    {
+        strcat(dataBuffer, ","); // add data object separator
+    }
+
+    strcat(dataBuffer, data);
+    return true;
 }
 
 i2c::Order i2c::parseOrder()
@@ -106,6 +125,6 @@ i2c::Order i2c::parseOrder()
 
 void i2c::clearBuffer()
 {
-    memset(commandBuffer, 0, 128);
-    memset(dataBuffer, 0, 512);
+    memset(commandBuffer, 0, RESPONSE_BUFFER_SIZE);
+    memset(dataBuffer, 0, DATA_BUFFER_SIZE);
 }
