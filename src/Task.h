@@ -13,6 +13,8 @@ class Task
 public:
     Task(const char *name, void (*fnc)());
 
+    char *getName();
+
     bool isExecutable(); // check if task can be executed
 
     void forceExecute();  // forces task execution regardless of it status
