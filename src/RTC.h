@@ -12,7 +12,7 @@ class RTC
 public:
     static RTC &getInstance();
 
-    void set(int rts, int clk, int dat);
+    static RTC &init(int rts, int clk, int dat);
 
     static void setTimestamp(int year, int month, int day, int hour, int minute, int second);
     static void getTimestamp(char *timestamp);

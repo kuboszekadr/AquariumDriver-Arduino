@@ -6,7 +6,7 @@ RTC &RTC::getInstance()
     return instance;
 }
 
-void RTC::set(int rts, int clk, int dat)
+RTC &RTC::init(int rts, int clk, int dat)
 {
     RTC &rtc = getInstance();
 
@@ -20,6 +20,8 @@ void RTC::set(int rts, int clk, int dat)
 
     rtc._rtc->Begin();                   //init RTC clock
     rtc._rtc->SetIsWriteProtected(true); //make sure that clock is protected
+
+    return rtc;
 }
 
 void RTC::setTimestamp(int year, int month, int day, int hour, int minute, int second)
