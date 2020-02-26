@@ -6,6 +6,11 @@ TaskScheduler::Task::Task(const char *name, void (*fnc)())
     _fnc = fnc;
 }
 
+char *TaskScheduler::Task::getName()
+{
+    return _name;
+}
+
 bool TaskScheduler::Task::isExecutable()
 {
     // return false always when task is deactivated
