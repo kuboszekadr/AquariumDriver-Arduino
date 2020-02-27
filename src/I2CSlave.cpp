@@ -1,8 +1,7 @@
 #include "I2CSlave.h"
 
-char i2c::dataBuffer[BUFFER_LENGTH];
-char i2c::commandBuffer[128];
-// char i2c::responseBuffer[128];
+char i2c::dataBuffer[DATA_BUFFER_SIZE];
+char i2c::commandBuffer[RESPONSE_BUFFER_SIZE];
 
 i2c::TransmissionStep i2c::transmissionStep = EMPTY;
 i2c::Order i2c::order = UNKNOWN;
@@ -19,7 +18,7 @@ void i2c::receiveEvent(int count)
     static int size = 0; // amount of currently readed bytes
     if (transmissionStep != ONGOING)
     {
-        memset(commandBuffer, 0, 128); // clear buffer
+        memset(commandBuffer, 0, RESPONSE_BUFFER_SIZE); // clear buffer
         transmissionStep = ONGOING;    // change current transmission status
     }
 
@@ -92,8 +91,8 @@ bool i2c::addToBuffer(const char *data)
     unsigned int buffer_length = strlen(dataBuffer);
 
     // check if buffer has enough space
-    if ((buffer_length > BUFFER_LENGTH - 1) ||
-        (buffer_length + strlen(data) > BUFFER_LENGTH - 1))
+    if ((buffer_length > DATA_BUFFER_SIZE - 1) ||
+        (buffer_length + strlen(data) > DATA_BUFFER_SIZE - 1))
     {
         return false; // avoid buffer overwride
     }
@@ -126,6 +125,6 @@ i2c::Order i2c::parseOrder()
 
 void i2c::clearBuffer()
 {
-    memset(commandBuffer, 0, 128);
-    memset(dataBuffer, 0, BUFFER_LENGTH);
+    memset(commandBuffer, 0, RESPONSE_BUFFER_SIZE);
+    memset(dataBuffer, 0, DATA_BUFFER_SIZE);
 }

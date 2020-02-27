@@ -1,7 +1,8 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define BUFFER_LENGTH 512
+#define DATA_BUFFER_SIZE 1024
+#define RESPONSE_BUFFER_SIZE 512
 
 #include "Utils.h"
 
@@ -25,9 +26,8 @@ enum TransmissionStep
     FINISHED // all data received from the master
 };
 
-extern char dataBuffer[BUFFER_LENGTH];    // for storing data from sensors
-extern char commandBuffer[128]; // for storing commands from the master
-// extern char responseBuffer[128];  // for storing response message
+extern char dataBuffer[DATA_BUFFER_SIZE];           // for storing data from sensors
+extern char commandBuffer[RESPONSE_BUFFER_SIZE]; // for storing commands from the master
 
 extern TransmissionStep transmissionStep; // current transmission step
 extern Order order;                       // task to be perfomed

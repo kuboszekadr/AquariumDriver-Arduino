@@ -4,6 +4,8 @@
 #include "src/Reading.h"
 #include "src/RTC.h"
 #include "src/Sensor.h"
+#include "src/Task.h"
+#include "src/TaskScheduler.h"
 #include "src/Thermometer.h"
 #include "src/WaterChange.h"
 #include "src/WaterLevel.h"
@@ -12,6 +14,10 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
+// Prototypes
+void changeWater();
+void turnOnHeater();
+
 // I2C
 #define I2C_ADDRESS 8
 
@@ -19,6 +25,7 @@
 #define RTC_RTS 6
 #define RTC_CLK 8
 #define RTC_DAT 7
+RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
@@ -31,10 +38,17 @@ Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
+// Heater
+#define HEATER_PIN 3
+Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
+Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
+
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
 #define WATER_LEVEL_SENSOR_ID 2
+#define WATER_LEVEL_POMP_PIN 1
+#define WATER_LEVEL_WATER_PIN 2
 #define WATER_LEVEL_LOW 15.0
 #define WATER_LEVEL_HIGH 10.0
 
@@ -43,13 +57,16 @@ WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TR
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
 // Water change
-Programs::WaterChange water_change = Programs::WaterChange(1, 2);
+Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_POMP_PIN, WATER_LEVEL_WATER_PIN);
 
-// Heater
-Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(10, heater_programs, 2);
+// Scheduler & Tasks
+TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
+TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
 
-char ts[30];
+// Ph sensor
+// TODO
+
+char current_timestamp[30];
 
 void setup()
 {
@@ -58,16 +75,12 @@ void setup()
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
 
-    RTC &rtc = RTC::getInstance();
-    rtc.set(RTC_RTS, RTC_CLK, RTC_DAT); // init RTC
-    rtc.setTimestamp(2020, 2, 19, 22, 0, 0);
-
     Serial.println("Setup finished");
 }
 
 void loop()
 {
-    memset(ts, 0, 30);
+    memset(current_timestamp, 0, 30);
 
     if (i2c::transmissionStep == i2c::FINISHED)
     {
@@ -79,18 +92,19 @@ void loop()
     else if (i2c::transmissionStep == i2c::EMPTY)
     {
         scanSensors();
-        if (Events::queueLength > 0)
-        {
-            Events::notifySubscribers();
-        }
+        Events::notifySubscribers();
+        scheduler.loop();
     }
 }
 
 void scanSensors()
 {
+    char reading_json[50]; // array to store reading of a sensor
+
+    // loop through sensors
     for (int i = 0; i < Sensor::sensors_amount; i++)
     {
-        Sensor *sensor = Sensor::sensors[i];
+        Sensor *sensor = Sensor::sensors[i]; // take sensor
         // check if sensor is reading for data collection
         if (sensor->isReady())
         {
@@ -100,43 +114,28 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            Serial.print("Sensor ready: ");
-            Serial.println(i);
-
             // request data from the sensor
-            Reading r = sensor->getReading();
-            Serial.println(r.value);
-            addReadingToBuffer(&r); // add to I2C data buffer
+            RTC::getTimestamp(current_timestamp);
+            Reading reading = sensor->getReading();       // average over available data
+            strcpy(reading.timestamp, current_timestamp); // add timestamp to the reading
 
-            (void)sensor->checkTriggers();
-            RTC::getTimestamp(ts);
-            Serial.println(ts);
+            // generate JSON and add to data buffer to be send to the database
+            reading.toJSON(reading_json);
+            i2c::addToBuffer(reading_json);
+
+            sensor->checkTriggers();
+            memset(current_timestamp, 0, 30);
         }
     }
 }
 
-void addReadingToBuffer(Reading *reading)
+// Schedule programs
+void changeWater()
 {
-    char readingJSON[30];
-    reading->toJSON(readingJSON); // get JSON string
+    water_change.changeWater();
+}
 
-    // if buffer is empty initalize JSON objects array
-    unsigned int buffer_length = strlen(i2c::dataBuffer);
-
-    if (buffer_length > 510)
-    {
-        Serial.println("I2C buffer full, can not send more data...");
-        return; // avoid buffer overwride
-    }
-    else if (buffer_length + strlen(readingJSON) > 510)
-    {
-        Serial.println("Not enough space to fit data into the buffer");
-        return;
-    }
-    else if (buffer_length > 0)
-    {
-        strcat(i2c::dataBuffer, ","); // add object separator
-    }
-
-    strcat(i2c::dataBuffer, readingJSON);
+void turnOnHeater()
+{
+    heater.start();
 }

@@ -2,7 +2,6 @@
 
 Programs::Program::Program(int relay_pin, const Events::EventType *events_subscription, int events)
 {
-    // TODO: Add event subscribers
     _relay = new Relay(relay_pin);
 
     Events::EventType *event = events_subscription;
