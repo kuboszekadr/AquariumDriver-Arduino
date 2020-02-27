@@ -14,6 +14,10 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 
+// Prototypes
+void changeWater();
+void turnOnHeater();
+
 // I2C
 #define I2C_ADDRESS 8
 
@@ -34,10 +38,17 @@ Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
+// Heater
+#define HEATER_PIN 3
+Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
+Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
+
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
 #define WATER_LEVEL_SENSOR_ID 2
+#define WATER_LEVEL_POMP_PIN 1
+#define WATER_LEVEL_WATER_PIN 2
 #define WATER_LEVEL_LOW 15.0
 #define WATER_LEVEL_HIGH 10.0
 
@@ -46,22 +57,16 @@ WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TR
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
 // Water change
-Programs::WaterChange water_change = Programs::WaterChange(1, 2);
+Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_POMP_PIN, WATER_LEVEL_WATER_PIN);
 
-// Heater
-Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(10, heater_programs, 2);
-
+// Scheduler & Tasks
 TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
-
-void changeWater()
-{
-    water_change.changeWater();
-}
-
 TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
 
-char ts[30];
+// Ph sensor
+// TODO
+
+char current_timestamp[30];
 
 void setup()
 {
@@ -75,7 +80,7 @@ void setup()
 
 void loop()
 {
-    memset(ts, 0, 30);
+    memset(current_timestamp, 0, 30);
 
     if (i2c::transmissionStep == i2c::FINISHED)
     {
@@ -110,16 +115,27 @@ void scanSensors()
         if (sensor->isAvailable())
         {
             // request data from the sensor
-            RTC::getTimestamp(ts);
-            Reading reading = sensor->getReading(); // average over available data
-            strcpy(reading.timestamp, ts);          // add timestamp to the reading
+            RTC::getTimestamp(current_timestamp);
+            Reading reading = sensor->getReading();       // average over available data
+            strcpy(reading.timestamp, current_timestamp); // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
             i2c::addToBuffer(reading_json);
 
             sensor->checkTriggers();
-            memset(ts, 0, 30);
+            memset(current_timestamp, 0, 30);
         }
     }
+}
+
+// Schedule programs
+void changeWater()
+{
+    water_change.changeWater();
+}
+
+void turnOnHeater()
+{
+    heater.start();
 }
