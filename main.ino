@@ -1,31 +1,47 @@
+/*---------------------*/
 #include "src/I2CSlave.h"
 #include "src/Events.h"
 #include "src/Programs.h"
+
 #include "src/Reading.h"
 #include "src/RTC.h"
+
 #include "src/Sensor.h"
+
 #include "src/Task.h"
 #include "src/TaskScheduler.h"
 #include "src/Thermometer.h"
+
 #include "src/WaterChange.h"
 #include "src/WaterLevel.h"
+
 #include "src/Utils.h"
 
+/*---------------------*/
 #include <Arduino.h>
 #include <SoftwareSerial.h>
+
+/*---------------------*/
 
 // Prototypes
 void changeWater();
 void turnOnHeater();
 
+/*---------------------*/
+
 // I2C
 #define I2C_ADDRESS 8
 
+/*---------------------*/
 // RTC
 #define RTC_RTS 6
 #define RTC_CLK 8
 #define RTC_DAT 7
 RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
+
+/*---------------------*/
+//SD
+#define SD_PIN 53
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
