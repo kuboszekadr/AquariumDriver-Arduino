@@ -2,6 +2,7 @@
 #define TaskScheduler_h
 
 #include "Task.h"
+#include "Log.h"
 
 #include <Arduino.h>
 

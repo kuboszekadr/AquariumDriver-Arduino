@@ -13,7 +13,7 @@ void Programs::WaterChange::changeWater()
 {
     if (_is_active)
     {
-        Serial.println(F("Program is already running!"));
+        Logger::log(F("Water change is already running."), LogLevel::VERBOSE);
         return;
     }
 
@@ -32,19 +32,21 @@ void Programs::WaterChange::changeWater()
 
 void Programs::WaterChange::pumpOut()
 {
+    Logger::log(F("Pomping water our.."), LogLevel::APPLICATION);
     _water->turnOff();
     _pomp->turnOn();
 }
 
 void Programs::WaterChange::pour()
 {
+    Logger::log(F("Pouring water..."), LogLevel::APPLICATION);
     _water->turnOn();
     _pomp->turnOff();
 }
 
 void Programs::WaterChange::reactForEvent(Events::EventType event)
 {
-    //ignore the same state
+    // ignore the same state
     if (_state == event)
     {
         return;
@@ -53,16 +55,16 @@ void Programs::WaterChange::reactForEvent(Events::EventType event)
     // Check if program can be closed
     if (_state == Events::WATER_LOW && event == Events::WATER_HIGH)
     {
-        _is_active = false;  // finish water change
-        Serial.println(F("Closing water flow..."));
+        Logger::log(F("Closing water flow..."), LogLevel::APPLICATION);
+
+        _is_active = false; // finish water change
         _water->turnOff();
         _pomp->turnOff();
         _state = event;
     }
-    //check if water has to be poured
+    // check if water has to be poured
     else if (event == Events::WATER_LOW)
     {
-        Serial.println(F("Pouring water..."));
         _state = event;
         pour();
     }

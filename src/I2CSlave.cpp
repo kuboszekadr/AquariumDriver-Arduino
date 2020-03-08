@@ -19,7 +19,7 @@ void i2c::receiveEvent(int count)
     if (transmissionStep != ONGOING)
     {
         memset(commandBuffer, 0, RESPONSE_BUFFER_SIZE); // clear buffer
-        transmissionStep = ONGOING;    // change current transmission status
+        transmissionStep = ONGOING;                     // change current transmission status
     }
 
     // read incoming data
@@ -56,11 +56,10 @@ void i2c::requestEvent()
         char post_data_length[4];
         length = strlen(dataBuffer);
         sprintf(post_data_length, "%03d", length);
-
-        transmissionStep = ONGOING;
-
         Wire.write(post_data_length); //notify master about data length
-        step++;                       // end first step of data sending
+
+        transmissionStep = length > 0 ? ONGOING : FINISHED;
+        step += length > 0 ? 1 : 0; // end first step of data sending
     }
     else if (step == 1)
     {
@@ -76,7 +75,7 @@ void i2c::requestEvent()
         // check if data was send
         if (length <= 0)
         {
-            // restore defaults
+            // restore initials
             step = 0;
             package_start = 0;
             transmissionStep = FINISHED;
@@ -85,7 +84,7 @@ void i2c::requestEvent()
     return;
 }
 
-bool i2c::addToBuffer(const char *data)
+void i2c::addToBuffer(const char *data)
 {
     // check bytes available in the buffer
     unsigned int buffer_length = strlen(dataBuffer);
@@ -94,7 +93,8 @@ bool i2c::addToBuffer(const char *data)
     if ((buffer_length > DATA_BUFFER_SIZE - 1) ||
         (buffer_length + strlen(data) > DATA_BUFFER_SIZE - 1))
     {
-        return false; // avoid buffer overwride
+        Logger::log(F("Not enough space in buffer"), LogLevel::WARNING);
+        return; // avoid buffer overwride
     }
     else if (buffer_length > 0)
     {
@@ -102,7 +102,6 @@ bool i2c::addToBuffer(const char *data)
     }
 
     strcat(dataBuffer, data);
-    return true;
 }
 
 i2c::Order i2c::parseOrder()

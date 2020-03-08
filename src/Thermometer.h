@@ -11,6 +11,7 @@ class Thermometer : public Sensor
 {
 public:
     Thermometer(int pin, uint8_t address[], int id_sensor,
+                const char *name,
                 float trigger_value_low, float trigger_value_high,
                 Events::EventType trigger_low, Events::EventType trigger_high);
     bool makeReading();

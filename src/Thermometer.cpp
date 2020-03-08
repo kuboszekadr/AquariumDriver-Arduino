@@ -1,18 +1,19 @@
 #include "Thermometer.h"
 
 Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor,
+                         const char *name,
                          float trigger_value_low, float trigger_value_high,
                          Events::EventType trigger_low, Events::EventType trigger_high)
-    : Sensor(id_sensor, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+    : Sensor(id_sensor, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
     _pin = pin;
 
     // Copy thermometer address
     for (int i = 0; i < 8; i++)
     {
-        _address[i] = *(address+i);
+        _address[i] = *(address + i);
     }
-    
+
     // initalize relevant variables
     _onewire = OneWire(_pin);
     _sensor = new DS18B20(&_onewire);

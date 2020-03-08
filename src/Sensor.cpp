@@ -4,11 +4,14 @@ unsigned int Sensor::sensors_amount = 0;
 Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
 Sensor::Sensor(int id_sensor,
+               const char *name,
                float trigger_value_low, float trigger_value_high,
                Events::EventType trigger_low, Events::EventType trigger_high)
 {
     sensors[sensors_amount] = this;                            // add sensor to the list of sensors
     sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1; // increase amount of sensors
+
+    strcpy(_name, name);
 
     _id_sensor = id_sensor;
 
@@ -42,6 +45,11 @@ bool Sensor::isReady()
 {
     // check if proper time amount passed since last reading
     return (abs(millis() - _last_reading) >= SENSOR_SAMPLING_INTERVAL);
+}
+
+char *Sensor::getName()
+{
+    return _name;
 }
 
 float Sensor::_avg()

@@ -9,7 +9,7 @@
 
 // send new data in approx every 30s
 #define SENSOR_SAMPLING_INTERVAL 500L // sample every 1/2 second
-#define SENSOR_SAMPLING_AMOUNT 60     // readings array size
+#define SENSOR_SAMPLING_AMOUNT 5     // readings array size
 #define SENSOR_AMOUNT 5               // maximum amount of sensors
 
 class Sensor
@@ -20,6 +20,7 @@ public:
   static void collectData();             // collects data from all sensors
 
   Sensor(int id_sensor,
+         const char *name,
          float trigger_value_low, float trigger_value_high,
          Events::EventType trigger_low, Events::EventType trigger_high);
 
@@ -30,6 +31,8 @@ public:
 
   bool isAvailable(); // check if sensor gathered enough data
   bool isReady();     // check if sensor can gather data
+
+  char *getName();
 
 protected:
   float _trigger_value_low = -1.0; // average sensor value
@@ -48,6 +51,8 @@ protected:
 
   int _readings_count = -1; // amount of readings done in the sesion
   int _id_sensor;           // sensor id when exposing data by the Reading struct
+
+  char _name[20]; // sensor name / label
 
 }; // namespace Sensor
 #endif

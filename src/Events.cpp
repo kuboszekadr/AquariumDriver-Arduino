@@ -10,7 +10,7 @@ void Events::EventSubscriber::subscribe(EventType event)
     // note that each event has it's own place in the array
     if (!Event::_events[event])
     {
-        new Event(event);
+        new Event(event); //create new event object on the heap
     }
 
     Event::_new_subscriber(event, this); // add event subscriber
@@ -51,9 +51,13 @@ Events::Event *Events::Event::getEvent(EventType event)
 void Events::raise(EventType event)
 {
     // if queue is full or event is empty ommit
-    if (queueLength >= EVENT_QUEUE_LENGTH || event == EMPTY)
+    if (queueLength >= EVENT_QUEUE_LENGTH)
     {
-        Serial.println("Queue full or empty event");
+        Logger::log(F("Events queue is full"), LogLevel::WARNING);
+        return;
+    }
+    else if (event == EMPTY)
+    {
         return;
     }
 
@@ -65,8 +69,8 @@ void Events::notifySubscribers()
     // loop through subscribers and notify about event
     for (int i = 0; i < queueLength; i++)
     {
-        EventType event_type = EventsQueue[i];
-        Event *event = Event::getEvent(event_type);
+        EventType event_type = EventsQueue[i];      // take event type from the queue
+        Event *event = Event::getEvent(event_type); // get event object based on event type
 
         if (event)
         {
@@ -74,12 +78,9 @@ void Events::notifySubscribers()
         }
         else
         {
-            Serial.println("Event has no subscribers");
+            Logger::log(F("Event has no subscribers"), LogLevel::WARNING);
         }
-        
-
         EventsQueue[i] = EventType::EMPTY;
     }
-
     queueLength = 0; // restart queue
 }
