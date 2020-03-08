@@ -1,9 +1,10 @@
 #include "WaterLevel.h"
 
 WaterLevel::WaterLevel(int echo, int trig, int id_sensor,
+					   const char *name,
 					   float trigger_value_low, float trigger_value_high,
 					   Events::EventType trigger_low, Events::EventType trigger_high)
-	: Sensor(id_sensor, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+	: Sensor(id_sensor, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
 	_echo = echo; // echo pin
 	_trig = trig; // trig pin
@@ -40,22 +41,22 @@ bool WaterLevel::makeReading()
 
 Events::EventType WaterLevel::checkTriggers()
 {
-    Events::EventType event = Events::EventType::EMPTY;
-    // check current level of water
-    if (_last_reading_value > _trigger_value_low)
-    {
-        event = _trigger_low;
-    }
-    else if (_last_reading_value < _trigger_value_high)
-    {
-        event = _trigger_high;
-    }
+	Events::EventType event = Events::EventType::EMPTY;
+	// check current level of water
+	if (_last_reading_value > _trigger_value_low)
+	{
+		event = _trigger_low;
+	}
+	else if (_last_reading_value < _trigger_value_high)
+	{
+		event = _trigger_high;
+	}
 
-    // push to the queue if event is not empty
-    if (event != Events::EventType::EMPTY & event != _last_trigger)
-    {
-        Events::raise(event);
-    }
+	// push to the queue if event is not empty
+	if (event != Events::EventType::EMPTY & event != _last_trigger)
+	{
+		Events::raise(event);
+	}
 
-    return event;
+	return event;
 }

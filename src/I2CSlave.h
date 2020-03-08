@@ -1,9 +1,10 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define DATA_BUFFER_SIZE 1024
-#define RESPONSE_BUFFER_SIZE 512
+#define DATA_BUFFER_SIZE 512
+#define RESPONSE_BUFFER_SIZE 256
 
+#include "Log.h"
 #include "Utils.h"
 
 #include <Arduino.h>
@@ -37,7 +38,7 @@ void receiveEvent(int count);
 void requestEvent();
 
 void clearBuffer();
-bool addToBuffer(const char *data);
+void addToBuffer(const char *data);
 
 Order parseOrder();
 } // namespace i2c

@@ -4,6 +4,8 @@
 #define EVENT_QUEUE_LENGTH 10
 #define EVENT_MAX_SUBSCRIBERS 3
 
+#include "Log.h"
+
 #include <Arduino.h>
 
 namespace Events
@@ -27,7 +29,6 @@ enum EventType
 class EventSubscriber
 {
 public:
-    // EventSubscriber(){};
     void subscribe(EventType event);
     virtual void reactForEvent(EventType event) = 0;
 };
@@ -41,7 +42,7 @@ public:
     static Event *getEvent(EventType event);
 
 private:
-    static Event *_events[7] = {};
+    static Event *_events[7] = {};  //event object list
     static void _new_subscriber(EventType event, EventSubscriber *subscriber);
 
     EventType _type;
@@ -57,6 +58,8 @@ void notifySubscribers();
 
 extern EventType EventsQueue[EVENT_QUEUE_LENGTH];
 extern int queueLength;
+
+const char EventTypeLabels[7][21] = {"EMPTY", "RELAY_STATE_CHANGE", "WATER_LOW", "WATER_HIGH", "TEMP_LOW", "TEMP_HIGH"};
 
 }; // namespace Events
 

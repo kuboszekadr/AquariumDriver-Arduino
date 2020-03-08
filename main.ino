@@ -1,6 +1,8 @@
 /*---------------------*/
 #include "src/I2CSlave.h"
 #include "src/Events.h"
+
+#include "src/Log.h"
 #include "src/Programs.h"
 
 #include "src/Reading.h"
@@ -25,7 +27,6 @@
 
 // Prototypes
 void changeWater();
-void turnOnHeater();
 
 /*---------------------*/
 
@@ -51,6 +52,7 @@ RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
 
 Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID,
+                        "WaterTemp",
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
@@ -62,13 +64,17 @@ Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
-#define WATER_LEVEL_SENSOR_ID 2
+
 #define WATER_LEVEL_POMP_PIN 1
 #define WATER_LEVEL_WATER_PIN 2
+
 #define WATER_LEVEL_LOW 15.0
 #define WATER_LEVEL_HIGH 10.0
 
+#define WATER_LEVEL_SENSOR_ID 2
+
 WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID,
+                              "WaterLevelSump",
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
@@ -86,20 +92,21 @@ char current_timestamp[30];
 
 void setup()
 {
-    Serial.begin(9600);
-    Serial.println("Starting");
+    Logger::log(F("Starting"), LogLevel::VERBOSE);
+
+    RTC::setTimestamp(2020, 3, 7, 10, 30, 0);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
+    Logger::setSD(SD_PIN);
 
-    Serial.println("Setup finished");
+    Logger::log(F("Setup finished"), LogLevel::VERBOSE);
 }
 
 void loop()
 {
-    memset(current_timestamp, 0, 30);
-
     if (i2c::transmissionStep == i2c::FINISHED)
     {
+        Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
         // executeOrder();
         i2c::clearBuffer();
         i2c::transmissionStep = i2c::EMPTY;
@@ -116,6 +123,8 @@ void loop()
 void scanSensors()
 {
     char reading_json[50]; // array to store reading of a sensor
+    char msg[50];          // for logging messages
+    Events::EventType event;
 
     // loop through sensors
     for (int i = 0; i < Sensor::sensors_amount; i++)
@@ -130,6 +139,9 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
+            sprintf(msg, "Sensor: %s ready", sensor->getName());
+            Logger::log(msg, LogLevel::APPLICATION);
+
             // request data from the sensor
             RTC::getTimestamp(current_timestamp);
             Reading reading = sensor->getReading();       // average over available data
@@ -139,7 +151,15 @@ void scanSensors()
             reading.toJSON(reading_json);
             i2c::addToBuffer(reading_json);
 
-            sensor->checkTriggers();
+            Logger::log(reading_json, LogLevel::DATA);
+
+            // check if some event has to be rised 
+            event = sensor->checkTriggers();
+            if (event != Events::EventType::EMPTY)
+            {
+                sprintf(msg, "%s", Events::EventTypeLabels[event]);
+                Logger::log(msg, LogLevel::EVENT);
+            }
             memset(current_timestamp, 0, 30);
         }
     }
@@ -148,10 +168,6 @@ void scanSensors()
 // Schedule programs
 void changeWater()
 {
+    Logger::log(F("Starting scheduled water change"), LogLevel::APPLICATION);
     water_change.changeWater();
-}
-
-void turnOnHeater()
-{
-    heater.start();
 }
