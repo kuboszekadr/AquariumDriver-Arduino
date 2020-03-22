@@ -32,14 +32,14 @@ void Programs::WaterChange::changeWater()
 
 void Programs::WaterChange::pumpOut()
 {
-    Logger::log(F("Pomping water our.."), LogLevel::APPLICATION);
+    Logger::log(F("Pomping water our."), LogLevel::APPLICATION);
     _water->turnOff();
     _pomp->turnOn();
 }
 
 void Programs::WaterChange::pour()
 {
-    Logger::log(F("Pouring water..."), LogLevel::APPLICATION);
+    Logger::log(F("Pouring water."), LogLevel::APPLICATION);
     _water->turnOn();
     _pomp->turnOff();
 }
