@@ -62,13 +62,17 @@ void Logger::_print_serial()
 
 void Logger::_write_to_sd()
 {
-    // char timestamp[30];
-    // RTC::getTimestamp(timestamp);
+    // Get current date from RTC
+    char date[9];
+    Timestamp ts = RTC::now();
+    utoa(ts.getDate(), date, 10);
 
-    // char log_file_name[12];
-    // substring(log_file_name, timestamp, 0, 8);
-    // strcat(log_file_name, ".txt");
-/*
+    // Create file name in YYYMMDD.txt format
+    char log_file_name[12];
+    substring(log_file_name, date, 0, 8);
+    strcat(log_file_name, ".txt");
+
+    // Load data into the file
     File log_file = SD.open(log_file_name, FILE_WRITE);
     if (log_file)
     {
@@ -84,7 +88,7 @@ void Logger::_write_to_sd()
             Serial.println(F("Cant reinitalize SD card."));
         }
     }
-*/
+
 }
 
 void Logger::_prepare(LogLevel log_level)
