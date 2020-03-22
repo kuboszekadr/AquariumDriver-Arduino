@@ -89,8 +89,6 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 // Ph sensor
 // TODO
 
-char current_timestamp[30];
-
 void setup()
 {
     Logger::log(F("Starting"), LogLevel::VERBOSE);
@@ -100,7 +98,7 @@ void setup()
     scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
-    // Logger::setSD(SD_PIN);
+    Logger::setSD(SD_PIN);
 
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
 }
@@ -127,6 +125,7 @@ void scanSensors()
 {
     char reading_json[50]; // array to store reading of a sensor
     char msg[50];          // for logging messages
+    char timestamp[30];    // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -146,9 +145,9 @@ void scanSensors()
             Logger::log(msg, LogLevel::APPLICATION);
 
             // request data from the sensor
-            RTC::getTimestamp(current_timestamp);
+            RTC::getTimestamp(timestamp);
             Reading reading = sensor->getReading();       // average over available data
-            strcpy(reading.timestamp, current_timestamp); // add timestamp to the reading
+            strcpy(reading.timestamp, timestamp); // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -163,7 +162,7 @@ void scanSensors()
                 sprintf(msg, "%s", Events::EventTypeLabels[event]);
                 Logger::log(msg, LogLevel::EVENT);
             }
-            memset(current_timestamp, 0, 30);
+            memset(timestamp, 0, 30);
         }
     }
 }
