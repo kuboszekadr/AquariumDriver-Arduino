@@ -1,11 +1,13 @@
 #ifndef RTC_h
 #define RTC_h
 
+#include "Timestamp.h"
+
 #include <Arduino.h>
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-typedef unsigned long long timestamp;
+typedef unsigned long timestamp;
 
 class RTC
 {
@@ -17,7 +19,7 @@ public:
     static void setTimestamp(int year, int month, int day, int hour, int minute, int second);
     static void getTimestamp(char *timestamp);
 
-    static timestamp now(bool full=true);
+    static Timestamp now();
     static DayOfWeek dayOfWeek();
 
 private:

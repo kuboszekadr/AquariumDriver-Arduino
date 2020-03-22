@@ -41,22 +41,11 @@ void RTC::getTimestamp(char *target)
     sprintf(target, "%d%02d%02d %02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
 }
 
-timestamp RTC::now(bool full = true)
+Timestamp RTC::now()
 {
     RTC &rtc = getInstance();
-
-    timestamp result = 0;
     RtcDateTime now = rtc._rtc->GetDateTime();
-    if (full)
-    {
-        result += now.Year() * 1000000000L; // 10^8
-        result += now.Month() * 10000000L;  // 10^6
-        result += now.Day() * 100000L;      // 10^4
-    }
-
-    result += now.Hour() * 100L; // 10^2
-    result += now.Minute() * 1L; // 10^0
-
+    Timestamp result = Timestamp(now);
     return result;
 }
 
