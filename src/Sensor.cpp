@@ -44,7 +44,7 @@ bool Sensor::isAvailable()
 bool Sensor::isReady()
 {
     // check if proper time amount passed since last reading
-    return (abs(millis() - _last_reading) >= SENSOR_SAMPLING_INTERVAL);
+    return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL);
 }
 
 char *Sensor::getName()
