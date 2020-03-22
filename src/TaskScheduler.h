@@ -6,7 +6,8 @@
 
 #include <Arduino.h>
 
-#define MAX_TASKS 6
+#define TASK_SCHEDULER_MAX_TASKS 6
+#define TASK_SCHEDULER_SCAN_INTERVAL 500L  // scan tasks once a minute
 
 namespace TaskScheduler
 {
@@ -19,8 +20,9 @@ public:
 
 private:
     Scheduler(){};
-    Task *_tasks[MAX_TASKS];
+    Task *_tasks[TASK_SCHEDULER_MAX_TASKS];
     unsigned int _tasks_amount = 0;
+    unsigned long _last_scan = 0L;
 };
 } // namespace TaskScheduler
 

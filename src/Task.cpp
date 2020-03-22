@@ -8,6 +8,7 @@ TaskScheduler::Task::Task(const char *name, void (*fnc)())
 
 char *TaskScheduler::Task::getName()
 {
+    Serial.println(_name);
     return _name;
 }
 
@@ -20,12 +21,14 @@ bool TaskScheduler::Task::isExecutable()
     }
 
     DayOfWeek day_of_week = RTC::dayOfWeek();
-    timestamp hour = RTC::now(false);
+    Timestamp ts = RTC::now();
 
-    bool result = false;
-    result = _schedule[day_of_week] >= hour;                       // check if task can be executed
-    result = result & (_last_run / 10000L != RTC::now() / 10000L); // check if task was run during a day
-    return result;
+    // check if task was run during a day
+    if (_last_run.getDate() == ts.getDate())
+    {
+        return false;
+    }
+    return _schedule[day_of_week] >= ts.getTime();
 }
 
 void TaskScheduler::Task::forceExecute()
@@ -36,7 +39,16 @@ void TaskScheduler::Task::forceExecute()
 void TaskScheduler::Task::execute()
 {
     forceExecute();
-    _last_run = RTC::now();
+    Timestamp ts = RTC::now();
+
+    // To simplify
+    _last_run.year = ts.year;
+    _last_run.month = ts.month;
+    _last_run.day = ts.day;
+
+    _last_run.hour = ts.hour;
+    _last_run.minute = ts.minute;
+    _last_run.second = ts.second;
 }
 
 void TaskScheduler::Task::activate()
@@ -49,15 +61,15 @@ void TaskScheduler::Task::deactivate()
     _is_active = false;
 }
 
-void TaskScheduler::Task::schedule(int hour, int minute = 0)
+void TaskScheduler::Task::schedule(uint8_t hour, uint8_t minute = 0)
 {
-    for (int day = 0; day <= DayOfWeek_Saturday; day++)
+    for (uint8_t day = 0; day <= DayOfWeek_Saturday; day++)
     {
         schedule(day, hour, minute);
     }
 }
 
-void TaskScheduler::Task::schedule(DayOfWeek day_of_week, int hour, int minute)
+void TaskScheduler::Task::schedule(DayOfWeek day_of_week, uint8_t hour, uint8_t minute)
 {
-    _schedule[day_of_week] = hour * 100L + minute;
+    _schedule[day_of_week] = (hour * 100L + minute) * 100L;
 }

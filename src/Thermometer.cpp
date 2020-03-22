@@ -25,7 +25,7 @@ Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor,
 bool Thermometer::isReady()
 {
     // check if proper time amount passed since last reading
-    return (abs(millis() - _last_reading) >= SENSOR_SAMPLING_INTERVAL) && _sensor->available();
+    return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL) && _sensor->available();
 }
 
 bool Thermometer::makeReading()

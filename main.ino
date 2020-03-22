@@ -13,6 +13,7 @@
 #include "src/Task.h"
 #include "src/TaskScheduler.h"
 #include "src/Thermometer.h"
+#include "src/Timestamp.h"
 
 #include "src/WaterChange.h"
 #include "src/WaterLevel.h"
@@ -88,13 +89,13 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 // Ph sensor
 // TODO
 
-char current_timestamp[30];
-
 void setup()
 {
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
     RTC::setTimestamp(2020, 3, 7, 10, 30, 0);
+    water_change_task.schedule(10, 30);
+    scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
     Logger::setSD(SD_PIN);
@@ -104,10 +105,10 @@ void setup()
 
 void loop()
 {
+
     if (i2c::transmissionStep == i2c::FINISHED)
     {
         Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
-        // executeOrder();
         i2c::clearBuffer();
         i2c::transmissionStep = i2c::EMPTY;
     }
@@ -124,6 +125,7 @@ void scanSensors()
 {
     char reading_json[50]; // array to store reading of a sensor
     char msg[50];          // for logging messages
+    char timestamp[30];    // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -143,9 +145,9 @@ void scanSensors()
             Logger::log(msg, LogLevel::APPLICATION);
 
             // request data from the sensor
-            RTC::getTimestamp(current_timestamp);
+            RTC::getTimestamp(timestamp);
             Reading reading = sensor->getReading();       // average over available data
-            strcpy(reading.timestamp, current_timestamp); // add timestamp to the reading
+            strcpy(reading.timestamp, timestamp); // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -160,7 +162,7 @@ void scanSensors()
                 sprintf(msg, "%s", Events::EventTypeLabels[event]);
                 Logger::log(msg, LogLevel::EVENT);
             }
-            memset(current_timestamp, 0, 30);
+            memset(timestamp, 0, 30);
         }
     }
 }

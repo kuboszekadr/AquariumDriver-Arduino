@@ -2,6 +2,7 @@
 #define TaskScheduler_Task_h
 
 #include "RTC.h"
+#include "Timestamp.h"
 
 #include <Arduino.h>
 #include <RtcDateTime.h>
@@ -23,16 +24,16 @@ public:
     void deactivate(); // deactive whole task
     void activate();   // active whole task
 
-    void schedule(int hour, int minute = 0);                        // set execution time the same for each day
-    void schedule(DayOfWeek day_of_week, int hour, int minute = 0); // time execution
+    void schedule(uint8_t hour, uint8_t minute = 0);                        // set execution time the same for each day
+    void schedule(DayOfWeek day_of_week, uint8_t hour, uint8_t minute = 0); // time execution
 
 private:
     char _name[16]; // name of the task
     void (*_fnc)(); // pointer to the function to be executed
 
-    bool _is_active = true;  // is task activate
-    timestamp _schedule[7];  // array of days with scheduled execution dates
-    timestamp _last_run = 0; // when task was run last time
+    bool _is_active = true;     // is task activate
+    unsigned long _schedule[7]; // array of days with scheduled execution dates
+    Timestamp _last_run = {};         // when task was run last time
 };
 } // namespace TaskScheduler
 

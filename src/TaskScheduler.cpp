@@ -8,7 +8,7 @@ TaskScheduler::Scheduler &TaskScheduler::Scheduler::getInstance()
 
 void TaskScheduler::Scheduler::addTask(Task *task)
 {
-    if (_tasks_amount >= MAX_TASKS)
+    if (_tasks_amount >= TASK_SCHEDULER_MAX_TASKS)
     {
         Logger::log(F("Task list is full"), LogLevel::WARNING);
         return;
@@ -19,6 +19,11 @@ void TaskScheduler::Scheduler::addTask(Task *task)
 
 void TaskScheduler::Scheduler::loop()
 {
+    if (millis() - _last_scan > TASK_SCHEDULER_SCAN_INTERVAL)
+    {
+        return;
+    }
+    
     char msg[30];
     for (int i = 0; i < _tasks_amount; i++)
     {
@@ -31,4 +36,5 @@ void TaskScheduler::Scheduler::loop()
             task->execute();
         }
     }
+    _last_scan = millis();    
 }
