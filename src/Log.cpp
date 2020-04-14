@@ -82,7 +82,6 @@ void Logger::_write_to_sd()
     else
     {
         Serial.println(F("Cant access the SD card-reinitalizing"));
-        SD.end();
         if (!SD.begin(_sd_pin))
         {
             Serial.println(F("Cant reinitalize SD card."));

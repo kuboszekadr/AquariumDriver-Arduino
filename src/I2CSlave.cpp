@@ -100,7 +100,6 @@ void i2c::addToBuffer(const char *data)
     {
         strcat(dataBuffer, ","); // add data object separator
     }
-
     strcat(dataBuffer, data);
 }
 

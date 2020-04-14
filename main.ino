@@ -43,7 +43,7 @@ RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 
 /*---------------------*/
 //SD
-#define SD_PIN 53
+#define SD_PIN 4
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
@@ -93,19 +93,16 @@ void setup()
 {
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
-    RTC::setTimestamp(2020, 3, 7, 10, 30, 0);
     water_change_task.schedule(10, 30);
     scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
     Logger::setSD(SD_PIN);
-
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
 }
 
 void loop()
 {
-
     if (i2c::transmissionStep == i2c::FINISHED)
     {
         Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
