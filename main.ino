@@ -87,7 +87,17 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
 
 // Ph sensor
-// TODO
+#define PH_SENSOR_PIN 12
+
+#define PH_SENSOR_CO2_PIN 30
+#define PH_SENSOR_PH_LOW 6.5
+#define PH_SENSOR_PH_HIGH 6.7
+#define PH_SENSOR_SENSOR_ID 3
+
+PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID,
+                    "PhSensor",
+                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
+                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
 void setup()
 {
