@@ -21,9 +21,8 @@ enum EventType
     TEMP_LOW,
     TEMP_HIGH
 
-    // TODO:
-    // CO2_LOW,
-    // CO2_HIGH
+    PH_LOW,
+    PH_HIGH
 };
 
 class EventSubscriber
