@@ -6,9 +6,6 @@
 #include "Sensor.h"
 #include <Arduino.h>
 
-#define PH_UPPER_LEVEL 6.9
-#define PH_LOWER_LEVEL 6.5
-
 class PhSensor : public Sensor
 {
 public:
@@ -16,7 +13,7 @@ public:
              const char *name,
              float trigger_value_low, float trigger_value_high,
              Events::EventType trigger_low, Events::EventType trigger_high);
-    bool make_reading();
+    bool makeReading();
     Events::EventType checkTriggers();
 
 private:

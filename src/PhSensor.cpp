@@ -9,7 +9,7 @@ PhSensor::PhSensor(int pin, int id_sensor,
 	_pin = pin;
 }
 
-bool PhSensor::make_reading()
+bool PhSensor::makeReading()
 {
 	//  check if sensor is ready or if data is full
 	if (!isReady() || isAvailable())
@@ -20,6 +20,8 @@ bool PhSensor::make_reading()
 
 	// count how many readings are available in the array
 	_readings_count = (_readings_count + 1) % SENSOR_SAMPLING_AMOUNT; // for safety reasons
+	
+	//TODO: after connecting ph sensor change return value
 	_readings[_readings_count] = 7.0;
 	// _readings[_readings_count] = ph;								  // insert new reading data
 
