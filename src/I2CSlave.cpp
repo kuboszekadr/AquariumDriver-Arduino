@@ -72,7 +72,7 @@ void i2c::requestEvent()
         package_start += package_size; // increment package start
         length -= package_size;        // shorten remaining data to be send
 
-        // check if data was send
+        // check if data was send completly
         if (length <= 0)
         {
             // restore initials
@@ -113,11 +113,9 @@ i2c::Order i2c::parseOrder()
     case '0':
         return Order::UPDATE_RTC;
     case '1':
-        return Order::UPDATE_WIFI_STATUS;
-    case '2':
         return Order::WATER_CHANGE;
     default:
-        return Order::UNKNOWN;
+        return Order::NONE;
     }
 }
 
