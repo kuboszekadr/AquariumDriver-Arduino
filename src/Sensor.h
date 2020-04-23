@@ -8,8 +8,8 @@
 #include <Arduino.h>
 
 // send new data in approx every 30s
-#define SENSOR_SAMPLING_INTERVAL 500L // sample every 1/2 second
-#define SENSOR_SAMPLING_AMOUNT 60     // readings array size
+#define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1/2 second
+#define SENSOR_SAMPLING_AMOUNT 5     // readings array size
 #define SENSOR_AMOUNT 5               // maximum amount of sensors
 
 class Sensor
