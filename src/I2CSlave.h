@@ -15,8 +15,8 @@ namespace i2c
 enum Order
 {
     UNKNOWN = -1,
+    NONE,
     UPDATE_RTC,
-    UPDATE_WIFI_STATUS,
     WATER_CHANGE
 };
 
@@ -27,7 +27,7 @@ enum TransmissionStep
     FINISHED // all data received from the master
 };
 
-extern char dataBuffer[DATA_BUFFER_SIZE];           // for storing data from sensors
+extern char dataBuffer[DATA_BUFFER_SIZE];        // for storing data from sensors
 extern char commandBuffer[RESPONSE_BUFFER_SIZE]; // for storing commands from the master
 
 extern TransmissionStep transmissionStep; // current transmission step

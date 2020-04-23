@@ -3,7 +3,9 @@
 #include "src/Events.h"
 
 #include "src/Log.h"
+
 #include "src/Programs.h"
+#include "src/PhSensor.h"
 
 #include "src/Reading.h"
 #include "src/RTC.h"
@@ -87,34 +89,61 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
 
 // Ph sensor
-// TODO
+#define PH_SENSOR_PIN 12
+
+#define PH_SENSOR_CO2_PIN 30
+#define PH_SENSOR_PH_LOW 6.5
+#define PH_SENSOR_PH_HIGH 6.7
+#define PH_SENSOR_SENSOR_ID 3
+
+PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID,
+                   "PhSensor",
+                   (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
+                   Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
 void setup()
 {
+    Logger::setSD(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
     water_change_task.schedule(10, 30);
     scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
-    Logger::setSD(SD_PIN);
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
 }
 
 void loop()
 {
+    // check if i2c transmission is finished
     if (i2c::transmissionStep == i2c::FINISHED)
     {
         Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
+
+        // if tranmission yield with order execute.
+        if (i2c::order > i2c::NONE)
+        {
+            Logger::log(F("Executing order: "), LogLevel::VERBOSE);
+            executeOrder();
+        }
+        else if (i2c::order == i2c::UNKNOWN)
+        {
+            Logger::log(F("Unknown order command"), LogLevel::APPLICATION);
+            Logger::log(i2c::commandBuffer, LogLevel::APPLICATION);
+        }
+
         i2c::clearBuffer();
+        i2c::order = i2c::NONE;
         i2c::transmissionStep = i2c::EMPTY;
     }
     // do not scan sensors when I2C transmission is in progress
     else if (i2c::transmissionStep == i2c::EMPTY)
     {
-        scanSensors();
+        scanSensors(); // get data from the sensors
+
+        // if event was added to the events queue, react
         Events::notifySubscribers();
-        scheduler.loop();
+        scheduler.loop(); // check for scheduled program runs
     }
 }
 
@@ -143,8 +172,8 @@ void scanSensors()
 
             // request data from the sensor
             RTC::getTimestamp(timestamp);
-            Reading reading = sensor->getReading();       // average over available data
-            strcpy(reading.timestamp, timestamp); // add timestamp to the reading
+            Reading reading = sensor->getReading(); // average over available data
+            strcpy(reading.timestamp, timestamp);   // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -152,7 +181,7 @@ void scanSensors()
 
             Logger::log(reading_json, LogLevel::DATA);
 
-            // check if some event has to be rised 
+            // check if some event has to be rised
             event = sensor->checkTriggers();
             if (event != Events::EventType::EMPTY)
             {
@@ -169,4 +198,17 @@ void changeWater()
 {
     Logger::log(F("Starting scheduled water change"), LogLevel::APPLICATION);
     water_change.changeWater();
+}
+
+void executeOrder()
+{
+    switch (i2c::order)
+    {
+    case i2c::Order::UPDATE_RTC: // update RTC
+        RTC::setTimestamp(i2c::commandBuffer+2);
+        break;
+
+    default:
+        break;
+    }
 }

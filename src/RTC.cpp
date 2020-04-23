@@ -24,6 +24,32 @@ RTC &RTC::init(int rts, int clk, int dat)
     return rtc;
 }
 
+void RTC::setTimestamp(const char *timestamp)
+{
+    char year[5];
+    char month[3];
+    char day[3];
+
+    char hour[3];
+    char minute[3];
+    char second[3];
+
+    substring(year, timestamp, 0, 4);
+    substring(month, timestamp, 4, 2);
+    substring(day, timestamp, 6, 2);
+
+    substring(hour, timestamp, 9, 2);
+    substring(minute, timestamp, 11, 2);
+    substring(second, timestamp, 13, 2);
+
+    setTimestamp(atoi(year),
+                 atoi(month),
+                 atoi(day),
+                 atoi(hour),
+                 atoi(minute),
+                 atoi(second) + 2);  // add extra seconds for processing time
+}
+
 void RTC::setTimestamp(int year, int month, int day, int hour, int minute, int second)
 {
     RTC &rtc = getInstance();
@@ -38,7 +64,14 @@ void RTC::getTimestamp(char *target)
     RTC &rtc = getInstance();
 
     RtcDateTime now = rtc._rtc->GetDateTime();
-    sprintf(target, "%d%02d%02d %02d%02d%02d", now.Year(), now.Month(), now.Day(), now.Hour(), now.Minute(), now.Second());
+    sprintf(target,
+            "%d%02d%02d %02d%02d%02d",
+            now.Year(),
+            now.Month(),
+            now.Day(),
+            now.Hour(),
+            now.Minute(),
+            now.Second());
 }
 
 Timestamp RTC::now()
