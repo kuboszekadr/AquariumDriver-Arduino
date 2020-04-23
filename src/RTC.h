@@ -2,6 +2,7 @@
 #define RTC_h
 
 #include "Timestamp.h"
+#include "Utils.h"
 
 #include <Arduino.h>
 #include <ThreeWire.h>
@@ -16,6 +17,7 @@ public:
 
     static RTC &init(int rts, int clk, int dat);
 
+    static void setTimestamp(const char *timestamp);
     static void setTimestamp(int year, int month, int day, int hour, int minute, int second);
     static void getTimestamp(char *timestamp);
 
