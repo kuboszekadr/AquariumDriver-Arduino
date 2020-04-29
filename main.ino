@@ -45,7 +45,7 @@ RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 
 /*---------------------*/
 //SD
-#define SD_PIN 4
+#define SD_PIN 53
 
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2

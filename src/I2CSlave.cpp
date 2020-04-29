@@ -4,7 +4,7 @@ char i2c::dataBuffer[DATA_BUFFER_SIZE];
 char i2c::commandBuffer[RESPONSE_BUFFER_SIZE];
 
 i2c::TransmissionStep i2c::transmissionStep = EMPTY;
-i2c::Order i2c::order = UNKNOWN;
+i2c::Order i2c::order = NONE;
 
 void i2c::begin(int address)
 {
