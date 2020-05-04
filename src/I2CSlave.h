@@ -1,7 +1,7 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define DATA_BUFFER_SIZE 512
+#define DATA_BUFFER_SIZE 1512
 #define RESPONSE_BUFFER_SIZE 256
 
 #include "Log.h"
@@ -27,10 +27,10 @@ enum TransmissionStep
     FINISHED // all data received from the master
 };
 
-extern char dataBuffer[DATA_BUFFER_SIZE];        // for storing data from sensors
-extern char commandBuffer[RESPONSE_BUFFER_SIZE]; // for storing commands from the master
+extern char data_buffer[DATA_BUFFER_SIZE];        // for storing data from sensors
+extern char command_buffer[RESPONSE_BUFFER_SIZE]; // for storing commands from the master
 
-extern TransmissionStep transmissionStep; // current transmission step
+extern TransmissionStep transmission_step; // current transmission step
 extern Order order;                       // task to be perfomed
 
 void begin(int address); // initalize I2C

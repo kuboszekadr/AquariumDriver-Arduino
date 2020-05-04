@@ -9,7 +9,7 @@
 class PhSensor : public Sensor
 {
 public:
-    PhSensor(int pin, int id_sensor,
+    PhSensor(int pin, int id_sensor, int id_measure,
              const char *name,
              float trigger_value_low, float trigger_value_high,
              Events::EventType trigger_low, Events::EventType trigger_high);

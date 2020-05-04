@@ -1,10 +1,10 @@
 #include "Thermometer.h"
 
-Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor,
+Thermometer::Thermometer(int pin, uint8_t *address, int id_sensor, int id_measure,
                          const char *name,
                          float trigger_value_low, float trigger_value_high,
                          Events::EventType trigger_low, Events::EventType trigger_high)
-    : Sensor(id_sensor, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+    : Sensor(id_sensor, id_measure, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
     _pin = pin;
 

@@ -9,7 +9,7 @@
 #include <SPI.h>
 #include <SD.h>
 
-#define LOG_BUFFER 100
+#define LOG_BUFFER 150
 
 enum LogLevel
 {
