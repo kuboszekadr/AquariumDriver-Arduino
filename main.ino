@@ -50,11 +50,12 @@ RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 // DS18B20 - Thermometer
 #define THERMOMETER_PIN 2
 #define THERMOMETER_SENSOR_ID 1
+#define THERMOMETER_MEASURE_ID 1
 #define THERMOMETER_TEMP_LOW 24.8
 #define THERMOMETER_TEMP_HIGH 25.2
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
 
-Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID,
+Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, THERMOMETER_MEASURE_ID,
                         "WaterTemp",
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
@@ -75,8 +76,9 @@ Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
 #define WATER_LEVEL_HIGH 10.0
 
 #define WATER_LEVEL_SENSOR_ID 2
+#define WATER_LEVEL_MEASURE_ID 2
 
-WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID,
+WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, WATER_LEVEL_MEASURE_ID,
                               "WaterLevelSump",
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
@@ -94,9 +96,11 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 #define PH_SENSOR_CO2_PIN 30
 #define PH_SENSOR_PH_LOW 6.5
 #define PH_SENSOR_PH_HIGH 6.7
-#define PH_SENSOR_SENSOR_ID 3
 
-PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID,
+#define PH_SENSOR_SENSOR_ID 3
+#define PH_SENSOR_MEASURE_ID 3
+
+PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, PH_SENSOR_MEASURE_ID,
                    "PhSensor",
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
@@ -116,9 +120,10 @@ void setup()
 void loop()
 {
     // check if i2c transmission is finished
-    if (i2c::transmissionStep == i2c::FINISHED)
+    if (i2c::transmission_step == i2c::FINISHED)
     {
         Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
+        Serial.println(strlen(i2c::data_buffer));
 
         // if tranmission yield with order execute.
         if (i2c::order > i2c::NONE)
@@ -129,15 +134,15 @@ void loop()
         else if (i2c::order == i2c::UNKNOWN)
         {
             Logger::log(F("Unknown order command"), LogLevel::APPLICATION);
-            Logger::log(i2c::commandBuffer, LogLevel::APPLICATION);
+            Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
         }
 
         i2c::clearBuffer();
         i2c::order = i2c::NONE;
-        i2c::transmissionStep = i2c::EMPTY;
+        i2c::transmission_step = i2c::EMPTY;
     }
     // do not scan sensors when I2C transmission is in progress
-    else if (i2c::transmissionStep == i2c::EMPTY)
+    else if (i2c::transmission_step == i2c::EMPTY)
     {
         scanSensors(); // get data from the sensors
 
@@ -149,9 +154,9 @@ void loop()
 
 void scanSensors()
 {
-    char reading_json[50]; // array to store reading of a sensor
-    char msg[50];          // for logging messages
-    char timestamp[30];    // reading timestamp
+    char reading_json[100]; // array to store reading of a sensor
+    char msg[150];          // for logging messages
+    char timestamp[16];    // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -188,7 +193,7 @@ void scanSensors()
                 sprintf(msg, "%s", Events::EventTypeLabels[event]);
                 Logger::log(msg, LogLevel::EVENT);
             }
-            memset(timestamp, 0, 30);
+            memset(timestamp, 0, 16);
         }
     }
 }
@@ -205,7 +210,7 @@ void executeOrder()
     switch (i2c::order)
     {
     case i2c::Order::UPDATE_RTC: // update RTC
-        RTC::setTimestamp(i2c::commandBuffer+2);
+        RTC::setTimestamp(i2c::command_buffer+2);
         break;
 
     default:

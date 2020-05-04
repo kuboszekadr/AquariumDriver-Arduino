@@ -3,6 +3,7 @@
 Logger::Logger()
 {
     Serial.begin(9600);
+    Serial.print(F("Serial test"));
 }
 
 Logger &Logger::getInstance()

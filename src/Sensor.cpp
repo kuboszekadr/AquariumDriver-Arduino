@@ -4,6 +4,7 @@ unsigned int Sensor::sensors_amount = 0;
 Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
 Sensor::Sensor(int id_sensor,
+               int id_measure,
                const char *name,
                float trigger_value_low, float trigger_value_high,
                Events::EventType trigger_low, Events::EventType trigger_high)
@@ -14,6 +15,7 @@ Sensor::Sensor(int id_sensor,
     strcpy(_name, name);
 
     _id_sensor = id_sensor;
+    _id_measure = id_measure;
 
     _trigger_value_low = trigger_value_low;
     _trigger_low = trigger_low;
@@ -27,6 +29,7 @@ Reading Sensor::getReading()
     // create reading data
     struct Reading reading;
     reading.id_sensor = _id_sensor; // sensor id in database
+    reading.id_measure = _id_measure; 
     reading.value = _avg();         // average over sampling time
 
     _readings_count = -1;                // restart counter

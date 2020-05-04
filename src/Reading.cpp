@@ -6,8 +6,13 @@ void Reading::toJSON(char *target)
     char _id_sensor[3];
     itoa(id_sensor, _id_sensor, 10);
 
+    char _id_measure[3];
+    itoa(id_measure, _id_measure, 10);
+
     char _value[6];
     dtostrf(value, 2, 2, _value);
 
-    sprintf(target, "{\"id\":%s,\"value\":%s,\"ts\":\"%s\"}", _id_sensor, _value, timestamp); // temporary constant value
+    sprintf(target,
+            "{\"sensor_id\":%s,\"reading\":[{\"measure_id\":%s,\"value\":%s}],\"ts\":\"%s\"}",
+            _id_sensor, _id_measure, _value, timestamp);
 }
