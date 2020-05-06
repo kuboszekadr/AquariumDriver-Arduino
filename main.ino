@@ -123,7 +123,6 @@ void loop()
     if (i2c::transmission_step == i2c::FINISHED)
     {
         Logger::log(F("I2C transmission finished"), LogLevel::APPLICATION);
-        Serial.println(strlen(i2c::data_buffer));
 
         // if tranmission yield with order execute.
         if (i2c::order > i2c::NONE)

@@ -63,7 +63,7 @@ void i2c::requestEvent()
 
         transmission_step = length > 0 ? ONGOING : FINISHED;
         step += length > 0 ? 1 : 0; // end first step of data sending
-        Logger::log(F("Starting I2C transmission"), Logger::VERBOSE);
+
     }
     else if (step == 1)
     {
