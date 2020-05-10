@@ -2,6 +2,8 @@
 #include "src/I2CSlave.h"
 #include "src/Events.h"
 
+#include "src/Display.h"
+
 #include "src/Log.h"
 
 #include "src/Programs.h"
@@ -24,8 +26,9 @@
 
 /*---------------------*/
 #include <Arduino.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <SoftwareSerial.h>
-
 /*---------------------*/
 
 // Prototypes
@@ -105,10 +108,21 @@ PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, PH_SENSOR_MEASURE_ID,
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+
+// Declaration for SSD1306 display connected using software SPI (default case):
+#define OLED_DC 10
+#define OLED_CS 11
+#define OLED_RESET 9
+Display display = Display::getInstance();
+
 void setup()
 {
     Logger::setSD(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
+
+    display.begin(OLED_DC, OLED_RESET, OLED_CS);
 
     water_change_task.schedule(10, 30);
     scheduler.addTask(&water_change_task);
@@ -155,7 +169,7 @@ void scanSensors()
 {
     char reading_json[100]; // array to store reading of a sensor
     char msg[150];          // for logging messages
-    char timestamp[16];    // reading timestamp
+    char timestamp[16];     // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -184,6 +198,7 @@ void scanSensors()
             i2c::addToBuffer(reading_json);
 
             Logger::log(reading_json, LogLevel::DATA);
+            displayReading(reading);
 
             // check if some event has to be rised
             event = sensor->checkTriggers();
@@ -192,6 +207,10 @@ void scanSensors()
                 sprintf(msg, "%s", Events::EventTypeLabels[event]);
                 Logger::log(msg, LogLevel::EVENT);
             }
+
+            sprintf(msg, "Buffer size %d", strlen(i2c::data_buffer));
+            display.printOther(msg);
+
             memset(timestamp, 0, 16);
         }
     }
@@ -209,9 +228,27 @@ void executeOrder()
     switch (i2c::order)
     {
     case i2c::Order::UPDATE_RTC: // update RTC
-        RTC::setTimestamp(i2c::command_buffer+2);
+        RTC::setTimestamp(i2c::command_buffer + 2);
         break;
 
+    default:
+        break;
+    }
+}
+
+void displayReading(Reading &r)
+{
+    switch (r.id_sensor)
+    {
+    case 1:
+        display.printTemp(r.value);
+        break;
+    case 2:
+        display.printWaterLevel(r.value);
+        break;
+    case 3:
+        display.printPh(r.value);
+        break;
     default:
         break;
     }
