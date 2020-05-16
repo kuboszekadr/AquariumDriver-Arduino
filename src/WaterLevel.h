@@ -13,7 +13,7 @@
 class WaterLevel : public Sensor
 {
 public:
-	WaterLevel(int echo, int trig, int id_sensor, int id_measure,
+	WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
 			   const char *name,
 			   float trigger_value_low, float trigger_value_high,
 			   Events::EventType trigger_low, Events::EventType trigger_high);
@@ -21,8 +21,8 @@ public:
 	Events::EventType checkTriggers();
 
 private:
-	int _echo;
-	int _trig;
+	uint8_t _echo;
+	uint8_t _trig;
 };
 
 #endif

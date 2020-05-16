@@ -1,21 +1,37 @@
 #include "Sensor.h"
 
-unsigned int Sensor::sensors_amount = 0;
+uint8_t Sensor::sensors_amount = 0;
 Sensor *Sensor::sensors[SENSOR_AMOUNT];
 
-Sensor::Sensor(int id_sensor,
-               int id_measure,
+Sensor::Sensor(uint8_t id_sensor,
+               Measures *id_measures,
+               uint8_t measures,
                const char *name,
                float trigger_value_low, float trigger_value_high,
                Events::EventType trigger_low, Events::EventType trigger_high)
 {
+    if (sensors_amount == SENSOR_AMOUNT)
+    {
+        return;
+    }
+
     sensors[sensors_amount] = this;                            // add sensor to the list of sensors
     sensors_amount += sensors_amount == SENSOR_AMOUNT ? 0 : 1; // increase amount of sensors
 
-    strcpy(_name, name);
+    _measures_amount = measures;
+    _readings = new float[_measures_amount]();
+    _last_readings = new float[_measures_amount]();
+    _id_measures = new uint8_t[_measures_amount]();
 
+    // convert measures enum into uint8_t
+    for (uint8_t i = 0; i < _measures_amount; i++)
+    {
+        _id_measures[i] = static_cast<uint8_t>(id_measures[i]);
+    }
+    // id_measures[0] = 1;
+
+    strcpy(_name, name); // copy sensor name
     _id_sensor = id_sensor;
-    _id_measure = id_measure;
 
     _trigger_value_low = trigger_value_low;
     _trigger_low = trigger_low;
@@ -28,20 +44,28 @@ Reading Sensor::getReading()
 {
     // create reading data
     struct Reading reading;
-    reading.id_sensor = _id_sensor; // sensor id in database
-    reading.id_measure = _id_measure; 
-    reading.value = _avg();         // average over sampling time
+    reading.id_sensor = _id_sensor;             // sensor id in database
+    reading.id_measures = _id_measures;         // measures get from the sensor
+    reading.measures_amount = _measures_amount; // technical to be able to loop through measures
 
-    _readings_count = -1;                // restart counter
-    _last_reading_value = reading.value; // save last reading
+    // calcualte average value over time
+    for (uint8_t i = 0; i < _measures_amount; i++)
+    {
+        _readings[i] /= _readings_count;
+        _last_readings[i] = _readings[i];
+        _readings[i] = 0.0;
+    }
+
+    reading.values = _last_readings; // copy it into reading struct
+    _readings_count = 0;             // restart counter
 
     return reading;
 }
 
 bool Sensor::isAvailable()
 {
-    // check if array is full
-    return (_readings_count + 1) == SENSOR_SAMPLING_AMOUNT;
+    // check if sensor collected enough data
+    return _readings_count >= SENSOR_SAMPLING_AMOUNT;
 }
 
 bool Sensor::isReady()
@@ -53,15 +77,6 @@ bool Sensor::isReady()
 char *Sensor::getName()
 {
     return _name;
-}
-
-float Sensor::_avg()
-{
-    float _avg = avg(_readings, SENSOR_SAMPLING_AMOUNT); // get average of readings
-    memset(_readings, 0, SENSOR_SAMPLING_AMOUNT);        // clear array content
-
-    _readings_count = -1; // restart counter after data sending
-    return _avg;          // return average of readings
 }
 
 Events::EventType Sensor::checkTriggers()

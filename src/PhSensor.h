@@ -1,15 +1,13 @@
 #ifndef PhMeter_h
 #define PhMeter_h
 
-#define PH_SAMPLING_INTERVAL 1000
-
 #include "Sensor.h"
 #include <Arduino.h>
 
 class PhSensor : public Sensor
 {
 public:
-    PhSensor(int pin, int id_sensor, int id_measure,
+    PhSensor(uint8_t pin, uint8_t id_sensor, Measures *id_measure,
              const char *name,
              float trigger_value_low, float trigger_value_high,
              Events::EventType trigger_low, Events::EventType trigger_high);
@@ -17,7 +15,7 @@ public:
     Events::EventType checkTriggers();
 
 private:
-    int _pin;
+    uint8_t _pin;
 };
 
 #endif

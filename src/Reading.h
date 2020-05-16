@@ -5,11 +5,12 @@
 
 struct Reading
 {
-    int id_sensor;
-    int id_measure;
+    uint8_t id_sensor;
+    uint8_t *id_measures;
+    uint8_t measures_amount;
 
-    float value;
-    char timestamp[16];
+    float *values;
+    char *timestamp;
 
     void toJSON(char *target);
 };

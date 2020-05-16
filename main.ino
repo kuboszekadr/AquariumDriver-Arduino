@@ -2,6 +2,7 @@
 #include "src/I2CSlave.h"
 #include "src/Events.h"
 
+#include "src/DHT22.h"
 #include "src/Display.h"
 
 #include "src/Log.h"
@@ -57,18 +58,19 @@ RTC &rtc = RTC::init(RTC_RTS, RTC_CLK, RTC_DAT);
 #define THERMOMETER_TEMP_LOW 24.8
 #define THERMOMETER_TEMP_HIGH 25.2
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+Measures t[1] = {Measures::TEMP};
 
-Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, THERMOMETER_MEASURE_ID,
+Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
                         "WaterTemp",
                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
-// Heater
-#define HEATER_PIN 3
-Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
+// // Heater
+// #define HEATER_PIN 3
+// Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
+// Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
 
-// WATER LEVEL SENSOR - HC-SR04
+// // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_SENSOR_ECHO_PIN 3
 #define WATER_LEVEL_SENSOR_TRIG_PIN 4
 
@@ -80,8 +82,9 @@ Programs::Program heater = Programs::Program(HEATER_PIN, heater_programs, 2);
 
 #define WATER_LEVEL_SENSOR_ID 2
 #define WATER_LEVEL_MEASURE_ID 2
+Measures w[1] = {Measures::WATER_LEVEL};
 
-WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, WATER_LEVEL_MEASURE_ID,
+WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, w,
                               "WaterLevelSump",
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
@@ -102,11 +105,22 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 
 #define PH_SENSOR_SENSOR_ID 3
 #define PH_SENSOR_MEASURE_ID 3
+Measures p[1] = {Measures::PH};
 
-PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, PH_SENSOR_MEASURE_ID,
+PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, p,
                    "PhSensor",
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
+
+// DHT
+#define DHT_COVER_PIN 12
+#define DHT_COVER_SENSOR_ID 4
+Measures d[2] = {Measures::TEMP, Measures::HUMIDITY};
+
+DHT22 dht_cover(DHT_COVER_PIN, DHT_COVER_SENSOR_ID, d,
+                "DHTCover",
+                0.0, 0.0,
+                Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 #define SCREEN_WIDTH 128 // OLED display width, in pixels
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
@@ -119,6 +133,7 @@ Display display = Display::getInstance();
 
 void setup()
 {
+    RTC::setTimestamp("20200516 060000");
     Logger::setSD(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
@@ -167,9 +182,9 @@ void loop()
 
 void scanSensors()
 {
-    char reading_json[100]; // array to store reading of a sensor
+    char reading_json[150]; // array to store reading of a sensor
     char msg[150];          // for logging messages
-    char timestamp[16];     // reading timestamp
+    char timestamp[20];     // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -188,30 +203,31 @@ void scanSensors()
             sprintf(msg, "Sensor: %s ready", sensor->getName());
             Logger::log(msg, LogLevel::APPLICATION);
 
-            // request data from the sensor
+            // // request data from the sensor
             RTC::getTimestamp(timestamp);
             Reading reading = sensor->getReading(); // average over available data
-            strcpy(reading.timestamp, timestamp);   // add timestamp to the reading
+            reading.timestamp = timestamp;          // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
-            i2c::addToBuffer(reading_json);
+            // i2c::addToBuffer(reading_json);
 
             Logger::log(reading_json, LogLevel::DATA);
             displayReading(reading);
 
-            // check if some event has to be rised
-            event = sensor->checkTriggers();
-            if (event != Events::EventType::EMPTY)
-            {
-                sprintf(msg, "%s", Events::EventTypeLabels[event]);
-                Logger::log(msg, LogLevel::EVENT);
-            }
+            // // check if some event has to be rised
+            // event = Events::EventType::EMPTY; //sensor->checkTriggers();
+            // if (event != Events::EventType::EMPTY)
+            // {
+            //     sprintf(msg, "%s", Events::EventTypeLabels[event]);
+            //     Logger::log(msg, LogLevel::EVENT);
+            // }
 
-            sprintf(msg, "Buffer size %d", strlen(i2c::data_buffer));
-            display.printOther(msg);
+            // sprintf(msg, "Buffer size %d", strlen(i2c::data_buffer));
+            // display.printOther(msg);
 
-            memset(timestamp, 0, 16);
+            memset(reading_json, 0, 150);
+            memset(timestamp, 0, 20);
         }
     }
 }
@@ -241,13 +257,13 @@ void displayReading(Reading &r)
     switch (r.id_sensor)
     {
     case 1:
-        display.printTemp(r.value);
+        // display.printTemp(r.value);
         break;
     case 2:
-        display.printWaterLevel(r.value);
+        // display.printWaterLevel(r.value);
         break;
     case 3:
-        display.printPh(r.value);
+        // display.printPh(r.value);
         break;
     default:
         break;
