@@ -9,18 +9,26 @@
 
 // send new data in approx every 30s
 #define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1/2 second
-#define SENSOR_SAMPLING_AMOUNT 5       // readings array size
-#define SENSOR_AMOUNT 5              // maximum amount of sensors
+#define SENSOR_SAMPLING_AMOUNT 2       // readings array size
+#define SENSOR_AMOUNT 10               // maximum amount of sensors
+
+enum Measures
+{
+  TEMP = 1,
+  WATER_LEVEL,
+  PH,
+  HUMIDITY,
+};
 
 class Sensor
 {
 public:
   static Sensor *sensors[SENSOR_AMOUNT]; // array of generated sensors
-  static unsigned int sensors_amount;    // how many sensors are initalized
-  static void collectData();             // collects data from all sensors
+  static uint8_t sensors_amount;         // how many sensors are initalized
 
-  Sensor(int id_sensor,
-         int id_measure,
+  Sensor(uint8_t id_sensor,
+         Measures *id_measure,
+         uint8_t measures,
          const char *name,
          float trigger_value_low, float trigger_value_high,
          Events::EventType trigger_low, Events::EventType trigger_high);
@@ -30,12 +38,24 @@ public:
 
   Reading getReading(); // returns averaged value over sampling
 
+  void setTriggerLow();
+  void setTriggerHigh();
+
   bool isAvailable(); // check if sensor gathered enough data
   bool isReady();     // check if sensor can gather data
 
   char *getName();
 
 protected:
+  uint8_t _id_sensor; // sensor id when exposing data by the Reading struct
+
+  float *_last_readings;       // to store
+  float *_readings;            // array to hold all readings done before publishing
+  uint8_t _readings_count = 0; // amount of readings done in the sesion
+
+  uint8_t *_id_measures;
+  uint8_t _measures_amount;
+
   float _trigger_value_low = -1.0; // average sensor value
   Events::EventType _trigger_low;  // event to be rised when sensor value is below low value
 
@@ -44,18 +64,9 @@ protected:
 
   Events::EventType _last_trigger = Events::EventType::EMPTY;
 
-  float _avg();                     // aggrage all readings within SENSOR_SAMPLING_AMOUNT
-  float _last_reading_value = -1.0; // last readed value by the sensor
-
-  float _readings[SENSOR_SAMPLING_AMOUNT]; // array to hold all readings done before publishing
-  unsigned long _last_reading = 0;         // when last reading was done (as millis)
-
-  int _readings_count = -1; // amount of readings done in the sesion
-
-  int _id_sensor; // sensor id when exposing data by the Reading struct
-  int _id_measure;
+  float _last_reading_value;
+  unsigned long _last_reading = 0; // when last reading was done (as millis)
 
   char _name[20]; // sensor name / label
-
-}; // namespace Sensor
+};                // namespace Sensor
 #endif

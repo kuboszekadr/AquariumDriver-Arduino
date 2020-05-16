@@ -12,7 +12,7 @@ float avg(const float *arr, const int arr_size)
     return sum / (arr_size*1.0);
 }
 
-void substring(char *target, const char *str, int start, int length)
+void substring(char *target, const char *str, const int start, const int length)
 {
     int c = 0;
     while (c < length)

@@ -1,10 +1,10 @@
 #include "WaterLevel.h"
 
-WaterLevel::WaterLevel(int echo, int trig, int id_sensor, int id_measure,
+WaterLevel::WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
 					   const char *name,
 					   float trigger_value_low, float trigger_value_high,
 					   Events::EventType trigger_low, Events::EventType trigger_high)
-	: Sensor(id_sensor, id_measure, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+	: Sensor(id_sensor, id_measure, 1, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
 {
 	_echo = echo; // echo pin
 	_trig = trig; // trig pin
@@ -21,7 +21,6 @@ bool WaterLevel::makeReading()
 		return false;
 	}
 
-	// returns water level in cm
 	digitalWrite(_trig, LOW);
 	delayMicroseconds(2);
 
@@ -31,9 +30,9 @@ bool WaterLevel::makeReading()
 	// Measuring distance
 	digitalWrite(_trig, LOW);
 
-	// count how many readings are available in the array
-	_readings_count = (_readings_count + 1) % SENSOR_SAMPLING_AMOUNT; // for safety reasons
-	_readings[_readings_count] = pulseIn(_echo, HIGH) / 58.0;		  // insert new reading data
+	// Get value
+	_readings[0] += pulseIn(_echo, HIGH) / 58.0; // returns water level in cm
+	_readings_count++;
 
 	_last_reading = millis();
 	return true;
