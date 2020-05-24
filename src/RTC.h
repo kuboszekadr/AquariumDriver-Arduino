@@ -22,6 +22,8 @@ public:
     static void getTimestamp(char *timestamp);
 
     static Timestamp now();
+    static void now(Timestamp &ts);
+
     static DayOfWeek dayOfWeek();
 
 private:

@@ -82,6 +82,23 @@ Timestamp RTC::now()
     return result;
 }
 
+void RTC::now(Timestamp &ts)
+{
+    RTC &rtc = getInstance();
+    RtcDateTime now = rtc._rtc->GetDateTime();
+    
+    Timestamp result = Timestamp(now);
+
+    // Haven't found cleaner solution yet...
+    ts.year = result.year;
+    ts.month = result.month;
+    ts.day = result.month;
+
+    ts.hour = result.hour;
+    ts.minute = result.minute;
+    ts.second = result.second;
+}
+
 DayOfWeek RTC::dayOfWeek()
 {
     RTC &rtc = getInstance();
