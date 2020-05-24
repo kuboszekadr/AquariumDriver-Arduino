@@ -3,6 +3,12 @@
 
 #define OLED_SCREEN_WIDTH 128 // OLED display width, in pixels
 #define OLED_SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define OLED_SCREEN_MAX_ROWS 16
+#define OLED_PAGE_ROWS 4
+#define OLED_PAGES_AMOUNT OLED_SCREEN_MAX_ROWS / OLED_PAGE_ROWS 
+#define OLED_SCREEN_PAGE_CHANGE_RATIO 3000L
+
+#include "Timestamp.h"
 
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -14,27 +20,29 @@ class Display
 public:
     static Display getInstance();
 
-    void begin(int dc, int rst, int cs);
-
-    void printTemp(float value);
-    void printPh(float value);
-    void printWaterLevel(float value);
-
-    void printDateTime(char *datetime);
-    void printOther(char *msg);
-
-private:
-    Display(){};
-
-    void printValue(int row, float value, const char *value_name);
+    void begin(int dc, int rst, int cs, Timestamp *timestamp);
+    void initRow(char *name, float *value);
     void show();
 
-    float _temp;
-    float _ph;
-    float _water_level;
+private:
+    struct Row
+    {
+        char name[20];
+        float *value;
+    };
 
-    char datetime[20];
-    char _msg[5][20];
+    Display(){};
+
+    void printRow(const Row &row);
+    void printTimestamp();
+
+    Row _rows[OLED_SCREEN_MAX_ROWS] = {};
+    
+    uint8_t _rows_amount = 0;
+    uint8_t _page = 0;
+    unsigned long _last_page_change = 0;
+
+    Timestamp *_timestamp;
 
     Adafruit_SSD1306 *_display;
 };

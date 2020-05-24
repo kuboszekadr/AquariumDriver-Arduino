@@ -22,9 +22,28 @@ Timestamp::Timestamp(const RtcDateTime &dt)
     second = dt.Second();
 }
 
-void Timestamp::format(uint8_t format, char *taget)
+void Timestamp::format(DateFormat format, char *target)
 {
-    // TODO
+    switch (format)
+    {
+    case STANDARD:
+        sprintf(target,
+                "%d%02d%02d",
+                year, month, day);
+        break;
+    case OLED:
+        sprintf(target,
+                "%04d-%02d-%02d %02d:%02d:%02d",
+                year,
+                month,
+                day,
+                hour,
+                minute,
+                second);
+        break;
+    default:
+        break;
+    }
 }
 
 void Timestamp::truncate(uint8_t level)
@@ -33,7 +52,7 @@ void Timestamp::truncate(uint8_t level)
     {
         return;
     }
-    
+
     second = level <= 4 ? 0 : second;
     minute = level <= 3 ? 0 : minute;
     hour = level <= 2 ? 0 : hour;
@@ -56,7 +75,7 @@ unsigned long Timestamp::getTime()
     result += month * 100L;
     result += second * 1L;
 
-    return result; 
+    return result;
 }
 
 bool Timestamp::operator>(const Timestamp &t1) const
@@ -67,9 +86,9 @@ bool Timestamp::operator>(const Timestamp &t1) const
     }
     else if (getTime() > t1.getTime())
     {
-        return true;   
+        return true;
     }
-    
+
     return false;
 }
 
@@ -81,19 +100,19 @@ bool Timestamp::operator<(const Timestamp &t1) const
     }
     else if (getTime() < t1.getTime())
     {
-        return true;   
+        return true;
     }
-    
+
     return false;
 }
 
 bool Timestamp::operator=(const Timestamp &t1) const
 {
-    if (year==t1.year &&
-        month == t1.month && 
-        day == t1.day && 
-        hour == t1.hour && 
-        minute == t1.minute && 
+    if (year == t1.year &&
+        month == t1.month &&
+        day == t1.day &&
+        hour == t1.hour &&
+        minute == t1.minute &&
         second == t1.second)
     {
         return true;

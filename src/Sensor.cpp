@@ -51,9 +51,9 @@ Reading Sensor::getReading()
     // calcualte average value over time
     for (uint8_t i = 0; i < _measures_amount; i++)
     {
-        _readings[i] /= _readings_count;
-        _last_readings[i] = _readings[i];
-        _readings[i] = 0.0;
+        _readings[i] /= _readings_count;  // calculate averages
+        _last_readings[i] = _readings[i]; // save values
+        _readings[i] = 0.0;               // prepare for new data
     }
 
     reading.values = _last_readings; // copy it into reading struct
@@ -77,6 +77,11 @@ bool Sensor::isReady()
 char *Sensor::getName()
 {
     return _name;
+}
+
+float *Sensor::getReadings()
+{
+    return _last_readings;
 }
 
 Events::EventType Sensor::checkTriggers()

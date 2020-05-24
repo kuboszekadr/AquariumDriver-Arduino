@@ -45,6 +45,7 @@ public:
   bool isReady();     // check if sensor can gather data
 
   char *getName();
+  float *getReadings();
 
 protected:
   uint8_t _id_sensor; // sensor id when exposing data by the Reading struct
