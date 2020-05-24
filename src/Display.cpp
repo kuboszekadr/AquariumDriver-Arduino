@@ -6,67 +6,84 @@ Display Display::getInstance()
     return instance;
 }
 
-void Display::begin(int dc, int rst, int cs)
+void Display::begin(int dc, int rst, int cs, Timestamp *timestamp)
 {
+    _timestamp = timestamp;
+
     _display = new Adafruit_SSD1306(OLED_SCREEN_WIDTH, OLED_SCREEN_HEIGHT, &SPI, dc, rst, cs);
     _display->begin(SSD1306_SWITCHCAPVCC);
     _display->clearDisplay();
     _display->setTextColor(WHITE);
     _display->setTextSize(1);
 
-    _display->setCursor(0,0);
-    printTemp(0.0);
-    printPh(0.0);
-    printWaterLevel(0.0);
-
+    _display->setCursor(0, 0);
     _display->display();
-}
-
-void Display::printTemp(float value)
-{
-    printValue(0, value, "Temp");
-}
-
-void Display::printPh(float value)
-{
-    printValue(1, value, "Ph");
-}
-
-void Display::printWaterLevel(float value)
-{
-    printValue(2, value, "WaterLevel");
-}
-
-void Display::printOther(char *msg)
-{
-    strncpy(_msg[4], msg, 19);
     show();
 }
 
-void Display::printValue(int row, float value, const char *value_name)
+void Display::initRow(char *name, float *value)
 {
-    char msg[20];
-    char _value[6];
+    if (_rows_amount == OLED_SCREEN_MAX_ROWS)
+    {
+        return;
+    }
 
-    strcpy(msg, value_name);
-    strcat(msg, ": ");
+    // create new row
+    Row row;
+    strcpy(row.name, name);
+    row.value = value;
 
-    dtostrf(value, 2, 2, _value);
-    strcat(msg, _value);
-
-    strcpy(_msg[row], msg);
-    show();
+    // put it into rows array
+    _rows[_rows_amount] = row;
+    _rows_amount++;
 }
 
 void Display::show()
 {
-    _display->clearDisplay();
-
-    for (int i = 0; i < 5; i++)
+    if (millis() - _last_page_change >= OLED_SCREEN_PAGE_CHANGE_RATIO)
     {
-        _display->setCursor(0, i*10+10);
-        _display->print(_msg[i]);
+        Serial.println("test");
+        _page = (_page + 1) == OLED_PAGES_AMOUNT ? 0 : _page + 1;
+        _last_page_change = millis();
+        Serial.println(_page);
+        Serial.println(OLED_PAGES_AMOUNT);
     }
 
+    _display->clearDisplay();
+    printTimestamp();
+    uint8_t row = 0;
+
+    // display page data
+    for (uint8_t i = OLED_PAGES_AMOUNT * _page; i < OLED_PAGES_AMOUNT * _page + OLED_PAGE_ROWS; i++)
+    {
+        Serial.println(i);
+        row++;
+        _display->setCursor(0, row * 10 + 5);
+        printRow(_rows[i]);
+    }
     _display->display();
+}
+
+void Display::printRow(const Row &row)
+{
+    char msg[35];
+
+    strcpy(msg, row.name);
+    strcat(msg, " ");
+
+    if (row.value != nullptr)
+    {
+        char value[10];
+        dtostrf(*row.value, 2, 2, value);
+        strcat(msg, value);
+    }
+    _display->print(msg);
+}
+
+void Display::printTimestamp()
+{
+    char ts[30];
+    _timestamp->format(DateFormat::OLED, ts);
+    _display->setCursor(0, 0);
+    _display->print(ts);
 }
