@@ -27,14 +27,10 @@ public:
 
     static void log(const char *msg, LogLevel log_level);
     static void log(const __FlashStringHelper *msg, LogLevel log_level);
-
     static void setLogLevel(LogLevel log_level);
-    static void setSD(int pin);
 
 private:
     Logger();
-
-    int _sd_pin;
 
     void _prepare(LogLevel log_level);
     void _log();
