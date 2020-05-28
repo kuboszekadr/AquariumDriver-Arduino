@@ -42,11 +42,8 @@ void Display::show()
 {
     if (millis() - _last_page_change >= OLED_SCREEN_PAGE_CHANGE_RATIO)
     {
-        Serial.println("test");
         _page = (_page + 1) == OLED_PAGES_AMOUNT ? 0 : _page + 1;
         _last_page_change = millis();
-        Serial.println(_page);
-        Serial.println(OLED_PAGES_AMOUNT);
     }
 
     _display->clearDisplay();
@@ -56,7 +53,6 @@ void Display::show()
     // display page data
     for (uint8_t i = OLED_PAGES_AMOUNT * _page; i < OLED_PAGES_AMOUNT * _page + OLED_PAGE_ROWS; i++)
     {
-        Serial.println(i);
         row++;
         _display->setCursor(0, row * 10 + 5);
         printRow(_rows[i]);

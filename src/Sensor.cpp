@@ -62,6 +62,24 @@ Reading Sensor::getReading()
     return reading;
 }
 
+void Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_value_high = -1.0)
+{
+    if (trigger_value_low > 0)
+    {
+        _trigger_value_low = trigger_value_low;
+    }
+
+    if (trigger_value_high > 0)
+    {
+        _trigger_value_high = trigger_value_high;
+    }        
+}
+
+float Sensor::getTriggerValue(bool low)
+{
+    return low ? _trigger_low : _trigger_high;
+}
+
 bool Sensor::isAvailable()
 {
     // check if sensor collected enough data

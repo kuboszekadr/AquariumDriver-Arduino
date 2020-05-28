@@ -8,9 +8,9 @@
 #include <Arduino.h>
 
 // send new data in approx every 30s
-#define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1/2 second
-#define SENSOR_SAMPLING_AMOUNT 2       // readings array size
-#define SENSOR_AMOUNT 10               // maximum amount of sensors
+#define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
+#define SENSOR_SAMPLING_AMOUNT 30
+#define SENSOR_AMOUNT 10 // maximum amount of sensors
 
 enum Measures
 {
@@ -38,8 +38,8 @@ public:
 
   Reading getReading(); // returns averaged value over sampling
 
-  void setTriggerLow();
-  void setTriggerHigh();
+  void setTriggers(float trigger_value_low = -1.0, float trigger_value_high = -1.0);
+  float getTriggerValue(bool low);
 
   bool isAvailable(); // check if sensor gathered enough data
   bool isReady();     // check if sensor can gather data

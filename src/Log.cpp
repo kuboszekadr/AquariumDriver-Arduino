@@ -41,14 +41,6 @@ void Logger::log(const __FlashStringHelper *msg, LogLevel log_level)
     logger._log();
 }
 
-void Logger::setSD(int pin)
-{
-    Logger &logger = getInstance();
-    logger._sd_pin = pin;
-
-    SD.begin(pin);
-}
-
 void Logger::_log()
 {
     _print_serial();
@@ -82,12 +74,12 @@ void Logger::_write_to_sd()
     else
     {
         Serial.println(F("Cant access the SD card-reinitalizing"));
-        if (!SD.begin(_sd_pin))
+        while (!SD.begin(53))
         {
             Serial.println(F("Cant reinitalize SD card."));
+            delay(500);
         }
     }
-
 }
 
 void Logger::_prepare(LogLevel log_level)
