@@ -20,7 +20,7 @@ class Display
 public:
     static Display getInstance();
 
-    void begin(int dc, int rst, int cs, Timestamp *timestamp);
+    void begin(int dc, int rst, int cs, uint32_t *timestamp);
     void initRow(char *name, float *value);
     void show();
 
@@ -42,7 +42,7 @@ private:
     uint8_t _page = 0;
     unsigned long _last_page_change = 0;
 
-    Timestamp *_timestamp;
+    uint32_t *_timestamp;
 
     Adafruit_SSD1306 *_display;
 };

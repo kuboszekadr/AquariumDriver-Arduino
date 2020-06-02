@@ -56,8 +56,8 @@ void Logger::_write_to_sd()
 {
     // Get current date from RTC
     char date[9];
-    Timestamp ts = RTC::now();
-    utoa(ts.getDate(), date, 10);
+    uint32_t now = RTC::now();
+    Timestamp::format(DateFormat::STANDARD, date, now);
 
     // Create file name in YYYMMDD.txt format
     char log_file_name[12];

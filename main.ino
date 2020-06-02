@@ -93,7 +93,7 @@ DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measur
 void changeWater();
 TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
 
-Timestamp ts;
+uint32_t timestamp;
 float i2c_buffer_size;
 
 void setup()
@@ -104,7 +104,7 @@ void setup()
     Config::saveSensorConfig();
     Config::loadSensorConfig();
 
-    display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &ts);
+    display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
     initDisplayRows();
 
     water_change_task.schedule(10, 30);
@@ -148,7 +148,7 @@ void loop()
         scheduler.loop(); // check for scheduled program runs
     }
 
-    RTC::now(ts);
+    timestamp = RTC::now();
     display.show();
 }
 
@@ -156,7 +156,7 @@ void scanSensors()
 {
     char reading_json[150]; // array to store reading of a sensor
     char msg[150];          // for logging messages
-    char timestamp[20];     // reading timestamp
+    char _timestamp[20];     // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -175,10 +175,10 @@ void scanSensors()
             sprintf(msg, "Sensor: %s ready", sensor->getName());
             Logger::log(msg, LogLevel::APPLICATION);
 
-            // // request data from the sensor
-            RTC::getTimestamp(timestamp);
+            // request data from the sensor
+            RTC::getTimestamp(_timestamp);
             Reading reading = sensor->getReading(); // average over available data
-            reading.timestamp = timestamp;          // add timestamp to the reading
+            reading.timestamp = _timestamp;          // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -186,7 +186,7 @@ void scanSensors()
 
             Logger::log(reading_json, LogLevel::DATA);
 
-            // // check if some event has to be rised
+            // check if some event has to be rised
             // event = Events::EventType::EMPTY; //sensor->checkTriggers();
             // if (event != Events::EventType::EMPTY)
             // {
@@ -197,9 +197,9 @@ void scanSensors()
             i2c_buffer_size = strlen(i2c::data_buffer);
 
             memset(reading_json, 0, 150);
-            memset(timestamp, 0, 20);
+            memset(_timestamp, 0, 20);
 
-            RTC::now(ts);
+            timestamp = RTC::now();
             display.show();
             Serial.println(freeMemory());
         }
