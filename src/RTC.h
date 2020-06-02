@@ -8,8 +8,6 @@
 #include <ThreeWire.h>
 #include <RtcDS1302.h>
 
-typedef unsigned long timestamp;
-
 class RTC
 {
 public:
@@ -21,18 +19,16 @@ public:
     static void setTimestamp(int year, int month, int day, int hour, int minute, int second);
     static void getTimestamp(char *timestamp);
 
-    static Timestamp now();
-    static void now(Timestamp &ts);
-
+    static uint32_t now();
     static DayOfWeek dayOfWeek();
 
 private:
     RTC() {}
     RTC(const RTC &){};
 
-    int _rts = -1;
-    int _clk = -1;
-    int _dat = -1;
+    int8_t _rts = -1;
+    int8_t _clk = -1;
+    int8_t _dat = -1;
 
     ThreeWire *_RTCWire;
     RtcDS1302<ThreeWire> *_rtc;

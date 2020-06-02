@@ -6,7 +6,7 @@ Display Display::getInstance()
     return instance;
 }
 
-void Display::begin(int dc, int rst, int cs, Timestamp *timestamp)
+void Display::begin(int dc, int rst, int cs, uint32_t *timestamp)
 {
     _timestamp = timestamp;
 
@@ -79,7 +79,8 @@ void Display::printRow(const Row &row)
 void Display::printTimestamp()
 {
     char ts[30];
-    _timestamp->format(DateFormat::OLED, ts);
+
+    Timestamp::format(DateFormat::OLED, ts, *_timestamp);
     _display->setCursor(0, 0);
     _display->print(ts);
 }

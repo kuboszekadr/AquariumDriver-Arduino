@@ -21,14 +21,14 @@ bool TaskScheduler::Task::isExecutable()
     }
 
     DayOfWeek day_of_week = RTC::dayOfWeek();
-    Timestamp ts = RTC::now();
+    Timestamp now = Timestamp(RTC::now());
 
     // check if task was run during a day
-    if (_last_run.getDate() == ts.getDate())
+    if (Timestamp::extract(DatePart::HHMM, _last_run) == now.extract(DatePart::HHMM))
     {
         return false;
     }
-    return _schedule[day_of_week] >= ts.getTime();
+    return _schedule[day_of_week] >= now.extract(DatePart::HHMM);
 }
 
 void TaskScheduler::Task::forceExecute()
@@ -39,16 +39,7 @@ void TaskScheduler::Task::forceExecute()
 void TaskScheduler::Task::execute()
 {
     forceExecute();
-    Timestamp ts = RTC::now();
-
-    // To simplify
-    _last_run.year = ts.year;
-    _last_run.month = ts.month;
-    _last_run.day = ts.day;
-
-    _last_run.hour = ts.hour;
-    _last_run.minute = ts.minute;
-    _last_run.second = ts.second;
+    _last_run = RTC::now();
 }
 
 void TaskScheduler::Task::activate()
