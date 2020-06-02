@@ -8,32 +8,29 @@ enum DateFormat
 {
     STANDARD, // YYYYMMDD
     JSON,     // YYYYMMDD hhmmss
-    OLED   // YYYY-MM-DD hh:mm:ss
-}; 
+    OLED,     // YYYY-MM-DD hh:mm:ss
+    TIMEONLY  // hhmmss
+};
 
-typedef struct Timestamp
+enum DatePart
 {
-    Timestamp(){};
+    YYYYMMDD,
+    HHMMSS,
+    HHMM,
+    WK
+};
+
+class Timestamp : public RtcDateTime
+{
+public:
+    Timestamp(uint32_t seconds);
     Timestamp(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second);
-    Timestamp(const RtcDateTime &dt);
 
     void format(DateFormat format, char *target);
-    void truncate(uint8_t level);
+    static void format(DateFormat format, char *target, uint32_t seconds);
 
-    unsigned long getDate();
-    unsigned long getTime();
-
-    bool operator>(const Timestamp &t1) const;
-    bool operator<(const Timestamp &t1) const;
-    bool operator=(const Timestamp &t1) const;
-
-    uint16_t year = 0;
-    uint8_t month = 0;
-    uint8_t day = 0;
-
-    uint8_t hour = 0;
-    uint8_t minute = 0;
-    uint8_t second = 0;
+    uint32_t extract(DatePart part);
+    static uint32_t extract(DatePart part, uint32_t seconds);
 };
 
 #endif

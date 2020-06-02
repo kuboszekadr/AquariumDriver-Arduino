@@ -1,25 +1,11 @@
 #include "Timestamp.h"
 
-Timestamp::Timestamp(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second)
+Timestamp::Timestamp(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second) : RtcDateTime(year, month, day, hour, minute, second)
 {
-    this->year = year;
-    this->month = month;
-    this->day = day;
-
-    this->hour = hour;
-    this->minute = minute;
-    this->second = second;
 }
 
-Timestamp::Timestamp(const RtcDateTime &dt)
+Timestamp::Timestamp(uint32_t seconds) : RtcDateTime(seconds)
 {
-    year = dt.Year();
-    month = dt.Month();
-    day = dt.Month();
-
-    hour = dt.Hour();
-    minute = dt.Minute();
-    second = dt.Second();
 }
 
 void Timestamp::format(DateFormat format, char *target)
@@ -29,96 +15,59 @@ void Timestamp::format(DateFormat format, char *target)
     case STANDARD:
         sprintf(target,
                 "%d%02d%02d",
-                year, month, day);
+                Year(), _month, _dayOfMonth);
         break;
     case OLED:
         sprintf(target,
                 "%04d-%02d-%02d %02d:%02d:%02d",
-                year,
-                month,
-                day,
-                hour,
-                minute,
-                second);
+                Year(),
+                _month,
+                _dayOfMonth,
+                _hour,
+                _minute,
+                _second);
         break;
     default:
         break;
     }
 }
 
-void Timestamp::truncate(uint8_t level)
+void Timestamp::format(DateFormat format, char *target, uint32_t seconds)
 {
-    if (level > 4)
-    {
-        return;
-    }
-
-    second = level <= 4 ? 0 : second;
-    minute = level <= 3 ? 0 : minute;
-    hour = level <= 2 ? 0 : hour;
-    day = level <= 1 ? 0 : day;
-    month = level = 0 ? 0 : month;
+    Timestamp ts = Timestamp(seconds);
+    ts.format(format, target);
 }
 
-unsigned long Timestamp::getDate()
+uint32_t Timestamp::extract(DatePart part)
 {
-    unsigned long result = year * 10000L; // 10^4
-    result += month * 100L;
-    result += day * 1L;
+    uint32_t result = 0;
+    switch (part)
+    {
+    case YYYYMMDD:
+        result += Year() * 10000L;
+        result += _month * 100L;
+        result += _dayOfMonth * 1L;
+        break;
 
+    case HHMMSS:
+        result += _hour * 10000L;
+        result += _minute * 100L;
+        result += _second * 1L;
+        break;
+
+    case HHMM:
+        result += _hour * 100L;
+        result += _minute * 1L;
+        break;
+
+    default:
+        break;
+    }
     return result;
 }
 
-unsigned long Timestamp::getTime()
+uint32_t Timestamp::extract(DatePart part, uint32_t seconds)
 {
-    unsigned long result = hour * 10000L; // 10^4
-    result += month * 100L;
-    result += second * 1L;
-
-    return result;
-}
-
-bool Timestamp::operator>(const Timestamp &t1) const
-{
-    if (getDate() > t1.getDate())
-    {
-        return true;
-    }
-    else if (getTime() > t1.getTime())
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool Timestamp::operator<(const Timestamp &t1) const
-{
-    if (getDate() < t1.getDate())
-    {
-        return true;
-    }
-    else if (getTime() < t1.getTime())
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool Timestamp::operator=(const Timestamp &t1) const
-{
-    if (year == t1.year &&
-        month == t1.month &&
-        day == t1.day &&
-        hour == t1.hour &&
-        minute == t1.minute &&
-        second == t1.second)
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    Timestamp ts = Timestamp(seconds);
+    return ts.extract(part);
 }
