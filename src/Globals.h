@@ -9,6 +9,7 @@
 #include "DHT22.h"
 #include "Display.h"
 
+#include "Lighting.h"
 #include "Log.h"
 
 #include "Programs.h"

@@ -96,10 +96,24 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
+uint16_t dawn_start = 930;
+uint16_t dawn_end = 1000;
+
+uint8_t dawn_start_cond[3] = {0, 0, 0};
+uint8_t dawn_end_cond[3] = {200, 255, 190};
+
+Lighting::Program dawn = Lighting::Program(dawn_start, dawn_end, dawn_start_cond, dawn_end_cond);
+
+Lighting::Cover cover_left = Lighting::Cover(0, 20, 3);
+
 void setup()
 {
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
+
+    RTC::setTimestamp("20200605 092955");
+
+    Serial.println(dawn_start);
 
     Config::saveSensorConfig();
     Config::loadSensorConfig();
@@ -146,6 +160,7 @@ void loop()
         // if event was added to the events queue, react
         Events::notifySubscribers();
         scheduler.loop(); // check for scheduled program runs
+        Lighting::loop(); // run Lighting program changes
     }
 
     timestamp = RTC::now();
