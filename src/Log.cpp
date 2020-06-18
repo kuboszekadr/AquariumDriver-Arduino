@@ -74,11 +74,11 @@ void Logger::_write_to_sd()
     else
     {
         Serial.println(F("Cant access the SD card-reinitalizing"));
-        while (!SD.begin(53))
-        {
-            Serial.println(F("Cant reinitalize SD card."));
-            delay(500);
-        }
+        // while (!SD.begin(53))
+        // {
+        //     Serial.println(F("Cant reinitalize SD card."));
+        //     delay(500);
+        // }
     }
 }
 
