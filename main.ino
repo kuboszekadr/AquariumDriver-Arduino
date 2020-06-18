@@ -1,12 +1,14 @@
-/*------ LOCAL LIBRARIES ------*/
+#include "src/Lighting.h"
+// /*------ LOCAL LIBRARIES ------*/
 #include "src/Pins.h"  // pins definisions
 #include "src/Globals.h" // global variables initalisation
 #include "src/Config.h"
 
-/*------ GLOBAL LIBRARIES ------*/
+// /*------ GLOBAL LIBRARIES ------*/
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoPixel.h>
 
 #include <SoftwareSerial.h>
 
@@ -96,24 +98,38 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
-uint16_t dawn_start = 930;
-uint16_t dawn_end = 1000;
 
+// R B W
 uint8_t dawn_start_cond[3] = {0, 0, 0};
-uint8_t dawn_end_cond[3] = {200, 255, 190};
+uint8_t dawn_end_cond[3] = {100, 50, 50};
 
-Lighting::Program dawn = Lighting::Program(dawn_start, dawn_end, dawn_start_cond, dawn_end_cond);
+Lighting::Program dawn_p1 = Lighting::Program(900, 1000, dawn_start_cond, dawn_end_cond);
 
-Lighting::Cover cover_left = Lighting::Cover(0, 20, 3);
+uint8_t dawn_start_cond_p2[3] = {100, 50, 50};
+uint8_t dawn_end_cond_p2[3] = {150, 200, 150};
+
+Lighting::Program dawn_p2 = Lighting::Program(1000, 1130, dawn_start_cond_p2, dawn_end_cond_p2);
+
+Lighting::Program daylight = Lighting::Program(1130, 1800, dawn_end_cond_p2, dawn_end_cond_p2);
+
+uint8_t dusk_start_cond_p1[3] = {150, 200, 150};
+uint8_t dusk_end_cond_p1[3] = {50, 50, 100};
+Lighting::Program dusk_p1 = Lighting::Program(1800, 2000, dusk_start_cond_p1, dusk_end_cond_p1);
+
+uint8_t dusk_start_cond_p2[3] = {50, 50, 100};
+uint8_t dusk_end_cond_p2[3] = {0, 0, 0};
+Lighting::Program dusk_p2 = Lighting::Program(2000, 2200, dusk_start_cond_p2, dusk_end_cond_p2);
+
+Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
+// Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
+// Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
 
 void setup()
-{
+{ 
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
     RTC::setTimestamp("20200605 092955");
-
-    Serial.println(dawn_start);
 
     Config::saveSensorConfig();
     Config::loadSensorConfig();
@@ -126,6 +142,7 @@ void setup()
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
+    cover_left.start();
 }
 
 void loop()
