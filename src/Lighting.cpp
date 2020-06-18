@@ -7,7 +7,7 @@ Lighting::Program *Lighting::programs[LIGHTING_PROGRAMS_AMOUNT]; // that not nec
 void Lighting::loop()
 {
     uint32_t now = RTC::now(); // get current timestamp
-    uint8_t pixels = 0;        // this is for shifting program start / end values
+    uint8_t pixels = 0;
 
     // loop through all covers with pixels
     for (uint8_t i = 0; i < LIGHTING_COVERS_AMOUNT; i++)
@@ -19,12 +19,12 @@ void Lighting::loop()
         }
         
         // loop through cover pixels
-        for (uint16_t pixel = 0; pixel < cover->numPixels(); pixel++)
+        for (uint8_t pixel = 0; pixel < cover->numPixels(); pixel++)
         {
-            uint32_t pixel_color = cover->getPixelColor(pixel);
-            cover->setPixelProgram(now, pixel, pixels);
+            cover->setPixelProgram(now, pixel, pixels);  
             pixels++;
         }
+        cover->show();
     }
 }
 
@@ -53,28 +53,31 @@ Lighting::Program *Lighting::Cover::getPixelProgram(uint32_t now, uint8_t pixel)
     return program;
 }
 
-Lighting::Cover::Cover(uint8_t order, uint16_t pin, uint16_t pixels_amount) : Adafruit_NeoPixel(pixels_amount, pin)
+Lighting::Cover::Cover(uint8_t order, uint16_t pin, uint16_t pixels_amount) : Adafruit_NeoPixel(pixels_amount, pin, NEO_GRB + NEO_KHZ800)
 {
     if (order >= LIGHTING_COVERS_AMOUNT)
     {
         return;
     }
-
     covers[order] = this;
 }
 
 void Lighting::Cover::setPixelProgram(uint32_t now, uint16_t pixel_cover, uint16_t pixel_number)
 {
     Program *program = getPixelProgram(now, pixel_number);
+    uint32_t pixel_color = 0; 
 
-    if (!program)  // no program to run
+    if (program)  // no program to run
     {
-        return;
-    }    
+        pixel_color = program->getPixelColor(now, pixel_number);
+    }
+    setPixelColor(pixel_cover, pixel_color);    
+}
 
-    uint32_t color = program->getPixelColor(now, pixel_number);
-
-    setPixelColor(pixel_cover, color);
+void Lighting::Cover::start()
+{
+    begin();
+    clear();
 }
 
 Lighting::Program::Program(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond)
@@ -104,13 +107,20 @@ uint32_t Lighting::Program::getPixelColor(uint32_t timestamp, uint8_t pixel_numb
     uint32_t ts = Timestamp::extract(DatePart::HHMMSS, timestamp);
     float progress = getProgress(ts, pixel_number);
     
-    uint8_t r = (uint8_t)(_pixel_start_cond[0] + _pixel_diff[0] * progress);
-    uint8_t w = (uint8_t)(_pixel_start_cond[1] + _pixel_diff[1] * progress);
-    uint8_t b = (uint8_t)(_pixel_start_cond[2] + _pixel_diff[2] * progress);
+    uint32_t r = (uint8_t)(_pixel_start_cond[0] + _pixel_diff[0] * progress);
+    uint32_t b = (uint8_t)(_pixel_start_cond[1] + _pixel_diff[1] * progress);
+    uint32_t w = (uint8_t)(_pixel_start_cond[2] + _pixel_diff[2] * progress);
 
-    uint32_t color = ((uint32_t)(r << 16)) |
-                     ((uint32_t)(w << 8)) |
-                     ((uint32_t)b);
+    // char msg[100];
+    // Serial.println(w);
+    // sprintf(msg, "Pixel %d r %d w %d b %d", pixel_number, r, w, b);
+    
+    // Serial.println('-------------');
+    // Serial.println(msg);
+    // Serial.println(progress);
+    // Serial.println('-------------');
+
+    uint32_t color = (b << 16) | (r << 8) | w;
     return color;
 }
 

@@ -3,10 +3,10 @@
 
 // that variable is relevant in that case because under the cover there are three
 // lighting covers, unfortunatelly complicates the case a bit
-#define LIGHTING_COVERS_AMOUNT 1
+#define LIGHTING_COVERS_AMOUNT 3
 #define LIGHTING_PROGRAM_OFFSET 30L // how each pixel row is turned ON (in seconds!)
 
-#define LIGHTING_PROGRAMS_AMOUNT 1
+#define LIGHTING_PROGRAMS_AMOUNT 5
 
 #include "RTC.h"
 #include "Timestamp.h"
@@ -32,7 +32,7 @@ namespace Lighting
 
         uint8_t _pixel_start_cond[3] = {};
         uint8_t _pixel_end_cond[3] = {};
-        uint8_t _pixel_diff[3] = {};
+        int16_t _pixel_diff[3] = {};
     };
 
     class Cover : public Adafruit_NeoPixel
@@ -40,16 +40,20 @@ namespace Lighting
     public:
         Cover(uint8_t order, uint16_t pin, uint16_t pixels_amount);
         void setPixelProgram(uint32_t now, uint16_t pixel_cover, uint16_t pixel_nuber);
+        // uint16_t numPixels();
+        void start();
+        // void update();
 
     private:
         Program *getPixelProgram(uint32_t now, uint8_t pixel);
+        // Adafruit_NeoPixel *_pixels;
 
     };
 
     void loop();
 
     extern Cover *covers[LIGHTING_COVERS_AMOUNT];       // that array has to be ordered properly
-    extern Program *programs[LIGHTING_COVERS_AMOUNT]; // that not necessarily
+    extern Program *programs[LIGHTING_PROGRAMS_AMOUNT]; // that not necessarily
 
     extern uint8_t programs_amount;
 } // namespace Lighting
