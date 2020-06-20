@@ -67,3 +67,100 @@ void Config::saveSensorConfig()
     // Close the file
     file.close();
 }
+
+void Config::loadLightingProgramsSetup()
+{
+    // Open the triggers.txt file which contains json with sensor low/high triggers
+    File config_file = SD.open(lighting_config_file);
+    if (!config_file) //check if file has been loaded successfully
+    {
+        Serial.println(F("Can not load config file"));
+        return;
+    }
+
+    StaticJsonDocument<CONFIG_LIGHTING_FILE_SIZE> doc;
+    DeserializationError error = deserializeJson(doc, config_file);
+
+    if (error)
+    {
+        Serial.println(F("Failed to serialize config file"));
+        return;
+    }
+
+    JsonArray json_programs = doc.as<JsonArray>();
+
+    uint8_t i = 0;
+    for (JsonVariant json_program : json_programs)
+    {
+        uint16_t program_start = json_program[0].as<int>();
+        uint16_t program_end = json_program[1].as<int>();
+
+        uint8_t program_start_cond[3] = {
+            json_program[2][0].as<int>(),
+            json_program[2][1].as<int>(),
+            json_program[2][2].as<int>()};
+
+        uint8_t program_end_cond[3] = {
+            json_program[3][0].as<int>(),
+            json_program[3][1].as<int>(),
+            json_program[3][2].as<int>()};
+
+        Lighting::Program *program = Lighting::programs[i++];
+        program->setup(program_start,
+                       program_end,
+                       program_start_cond,
+                       program_end_cond);
+    }
+}
+
+void Config::saveLightingProgramsSetup()
+{
+    StaticJsonDocument<CONFIG_LIGHTING_FILE_SIZE> doc;
+    JsonArray json_programs = doc.to<JsonArray>();
+
+    // Loop through all programs and convert to JSON
+    for (uint8_t i = 0; i < Lighting::programs_amount; i++)
+    {
+        Lighting::Program *program = Lighting::programs[i];
+        if (!program)
+        {
+            continue;
+        }
+
+        // add program array to Json document
+        JsonArray json_program = json_programs.createNestedArray();
+
+        json_program.add(program->getStart()); // program start time
+        json_program.add(program->getEnd());   // program end time
+
+        // create nested array in progam Json to include pixel conditions
+        JsonArray program_start_cond = json_program.createNestedArray();
+        uint8_t *start_cond = program->getStartCondition();
+
+        program_start_cond.add(start_cond[0]);
+        program_start_cond.add(start_cond[1]);
+        program_start_cond.add(start_cond[2]);
+
+        // create nested array in progam Json to include pixel conditions
+        JsonArray program_end_cond = json_program.createNestedArray();
+        uint8_t *end_cond = program->getEndCondition();
+
+        program_end_cond.add(end_cond[0]);
+        program_end_cond.add(end_cond[1]);
+        program_end_cond.add(end_cond[2]);
+    }
+
+    File file = SD.open(lighting_config_file, FILE_WRITE);
+    if (!file)
+    {
+        Serial.println(F("Failed to open the file"));
+        return;
+    }
+
+    if (serializeJson(doc, file) == 0)
+    {
+        Serial.println(F("Failed to write to file"));
+    }
+    Serial.println(F("Config updated"));
+    file.close();
+}
