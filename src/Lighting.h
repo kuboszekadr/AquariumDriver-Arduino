@@ -6,7 +6,7 @@
 #define LIGHTING_COVERS_AMOUNT 3
 #define LIGHTING_PROGRAM_OFFSET 30L // how each pixel row is turned ON (in seconds!)
 
-#define LIGHTING_PROGRAMS_AMOUNT 5
+#define LIGHTING_PROGRAMS_AMOUNT 6
 
 #include "RTC.h"
 #include "Timestamp.h"
@@ -18,11 +18,16 @@ namespace Lighting
     class Program
     {
     public:
-        Program(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond);
-        uint32_t getPixelColor(uint32_t timestamp, uint8_t pixel_number);
+        Program();
+        void setup(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond);
 
-        uint32_t start() {return _start;};
-        uint32_t end() {return _end;};
+        uint32_t getPixelColor(uint32_t timestamp, uint8_t pixel_number);
+        
+        uint32_t getStart() {return _start/100;};
+        uint32_t getEnd() {return _end/100;};
+
+        uint8_t *getStartCondition() {return _pixel_start_cond;};
+        uint8_t *getEndCondition() {return _pixel_end_cond;}
 
     private:
         float getProgress(uint32_t timestamp, uint8_t pixel_number);
@@ -40,13 +45,10 @@ namespace Lighting
     public:
         Cover(uint8_t order, uint16_t pin, uint16_t pixels_amount);
         void setPixelProgram(uint32_t now, uint16_t pixel_cover, uint16_t pixel_nuber);
-        // uint16_t numPixels();
         void start();
-        // void update();
 
     private:
         Program *getPixelProgram(uint32_t now, uint8_t pixel);
-        // Adafruit_NeoPixel *_pixels;
 
     };
 

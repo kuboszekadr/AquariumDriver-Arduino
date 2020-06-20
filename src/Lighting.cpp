@@ -41,8 +41,8 @@ Lighting::Program *Lighting::Cover::getPixelProgram(uint32_t now, uint8_t pixel)
         Program *p = programs[i]; // take the program
 
         // check when the program for the pixel should start
-        uint32_t p_start = p->start() + LIGHTING_PROGRAM_OFFSET * pixel;
-        uint32_t p_end = p->end() + LIGHTING_PROGRAM_OFFSET * pixel;
+        uint32_t p_start = p->getStart() + LIGHTING_PROGRAM_OFFSET * pixel;
+        uint32_t p_end = p->getEnd() + LIGHTING_PROGRAM_OFFSET * pixel;
 
         // if 'now' is within program duration start start the program
         if ((now >= p_start) & (now <= p_end))
@@ -80,13 +80,19 @@ void Lighting::Cover::start()
     clear();
 }
 
-Lighting::Program::Program(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond)
+Lighting::Program::Program()
 {
     if (programs_amount == LIGHTING_PROGRAMS_AMOUNT)
     {
         return;
     }
 
+    programs[programs_amount] = this;
+    programs_amount++;
+}
+
+void Lighting::Program::setup(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond)
+{
     // translate timestamp into HHMM
     _start = start * 100; // to be able to add seconds later on
     _end = end * 100;
@@ -98,8 +104,6 @@ Lighting::Program::Program(uint32_t start, uint32_t end, uint8_t *pixel_start_co
     _pixel_diff[1] = pixel_end_cond[1] - pixel_start_cond[1];
     _pixel_diff[2] = pixel_end_cond[2] - pixel_start_cond[2];
 
-    programs[programs_amount] = this;
-    programs_amount++;
 }
 
 uint32_t Lighting::Program::getPixelColor(uint32_t timestamp, uint8_t pixel_number)
