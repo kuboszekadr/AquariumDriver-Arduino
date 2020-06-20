@@ -7,6 +7,7 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
+#include <Adafruit_NeoPixel.h>
 
 #include <SoftwareSerial.h>
 
@@ -70,7 +71,6 @@ PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
-
 // DHT's
 Measures dht_measures[2] = {Measures::TEMP, Measures::HUMIDITY};
 
@@ -96,14 +96,26 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
+// R B W
+Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
+// Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
+// Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
+
 void setup()
-{
+{ 
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
+    RTC::setTimestamp("20200605 092955");
+
+    // It is importat to load configs before OLED dislay initialization
+    // (huge memory consuption of OLED)
     Config::saveSensorConfig();
     Config::loadSensorConfig();
+    Config::loadLightingProgramsSetup();
+    Config::saveLightingProgramsSetup();
 
+    // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
     initDisplayRows();
 
@@ -146,6 +158,7 @@ void loop()
         // if event was added to the events queue, react
         Events::notifySubscribers();
         scheduler.loop(); // check for scheduled program runs
+        Lighting::loop(); // run Lighting program changes
     }
 
     timestamp = RTC::now();
