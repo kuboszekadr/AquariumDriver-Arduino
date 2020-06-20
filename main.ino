@@ -1,10 +1,9 @@
-#include "src/Lighting.h"
-// /*------ LOCAL LIBRARIES ------*/
+/*------ LOCAL LIBRARIES ------*/
 #include "src/Pins.h"  // pins definisions
 #include "src/Globals.h" // global variables initalisation
 #include "src/Config.h"
 
-// /*------ GLOBAL LIBRARIES ------*/
+/*------ GLOBAL LIBRARIES ------*/
 #include <Arduino.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
@@ -72,7 +71,6 @@ PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
-
 // DHT's
 Measures dht_measures[2] = {Measures::TEMP, Measures::HUMIDITY};
 
@@ -98,28 +96,7 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
-
 // R B W
-uint8_t dawn_start_cond[3] = {0, 0, 0};
-uint8_t dawn_end_cond[3] = {100, 50, 50};
-
-Lighting::Program dawn_p1 = Lighting::Program(900, 1000, dawn_start_cond, dawn_end_cond);
-
-uint8_t dawn_start_cond_p2[3] = {100, 50, 50};
-uint8_t dawn_end_cond_p2[3] = {150, 200, 150};
-
-Lighting::Program dawn_p2 = Lighting::Program(1000, 1130, dawn_start_cond_p2, dawn_end_cond_p2);
-
-Lighting::Program daylight = Lighting::Program(1130, 1800, dawn_end_cond_p2, dawn_end_cond_p2);
-
-uint8_t dusk_start_cond_p1[3] = {150, 200, 150};
-uint8_t dusk_end_cond_p1[3] = {50, 50, 100};
-Lighting::Program dusk_p1 = Lighting::Program(1800, 2000, dusk_start_cond_p1, dusk_end_cond_p1);
-
-uint8_t dusk_start_cond_p2[3] = {50, 50, 100};
-uint8_t dusk_end_cond_p2[3] = {0, 0, 0};
-Lighting::Program dusk_p2 = Lighting::Program(2000, 2200, dusk_start_cond_p2, dusk_end_cond_p2);
-
 Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
 // Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
 // Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
@@ -131,9 +108,14 @@ void setup()
 
     RTC::setTimestamp("20200605 092955");
 
+    // It is importat to load configs before OLED dislay initialization
+    // (huge memory consuption of OLED)
     Config::saveSensorConfig();
     Config::loadSensorConfig();
+    Config::loadLightingProgramsSetup();
+    Config::saveLightingProgramsSetup();
 
+    // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
     initDisplayRows();
 
@@ -142,7 +124,6 @@ void setup()
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
-    cover_left.start();
 }
 
 void loop()
