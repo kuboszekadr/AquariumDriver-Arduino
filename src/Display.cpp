@@ -21,7 +21,7 @@ void Display::begin(int dc, int rst, int cs, uint32_t *timestamp)
     show();
 }
 
-void Display::initRow(char *name, float *value)
+void Display::initRow(const __FlashStringHelper *name, float *value)
 {
     if (_rows_amount == OLED_SCREEN_MAX_ROWS)
     {
@@ -30,7 +30,7 @@ void Display::initRow(char *name, float *value)
 
     // create new row
     Row row;
-    strcpy(row.name, name);
+    strcpy_P(row.name, (PGM_P) name);
     row.value = value;
 
     // put it into rows array

@@ -21,7 +21,7 @@ public:
     static Display getInstance();
 
     void begin(int dc, int rst, int cs, uint32_t *timestamp);
-    void initRow(char *name, float *value);
+    void initRow(const __FlashStringHelper *name, float *value);
     void show();
 
 private:
