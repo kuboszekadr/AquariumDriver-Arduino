@@ -96,7 +96,6 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
-// R B W
 Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
 // Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
 // Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
@@ -110,10 +109,8 @@ void setup()
 
     // It is importat to load configs before OLED dislay initialization
     // (huge memory consuption of OLED)
-    Config::saveSensorConfig();
     Config::loadSensorConfig();
     Config::loadLightingProgramsSetup();
-    Config::saveLightingProgramsSetup();
 
     // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
@@ -148,7 +145,6 @@ void loop()
         i2c::clearBuffer();
         i2c::order = i2c::NONE;
         i2c::transmission_step = i2c::EMPTY;
-        Serial.println(freeMemory());
     }
     // do not scan sensors when I2C transmission is in progress
     else if (i2c::transmission_step == i2c::EMPTY)
@@ -185,7 +181,7 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            sprintf(msg, "Sensor: %s ready", sensor->getName());
+            sprintf_P(msg, F("Sensor: %s ready"), sensor->getName());
             Logger::log(msg, LogLevel::APPLICATION);
 
             // request data from the sensor
@@ -200,12 +196,14 @@ void scanSensors()
             Logger::log(reading_json, LogLevel::DATA);
 
             // check if some event has to be rised
-            // event = Events::EventType::EMPTY; //sensor->checkTriggers();
-            // if (event != Events::EventType::EMPTY)
-            // {
-            //     sprintf(msg, "%s", Events::EventTypeLabels[event]);
-            //     Logger::log(msg, LogLevel::EVENT);
-            // }
+            event = Events::EventType::EMPTY; 
+            sensor->checkTriggers();
+            
+            if (event != Events::EventType::EMPTY)
+            {
+                sprintf(msg, "%s", Events::EventTypeLabels[event]);
+                Logger::log(msg, LogLevel::EVENT);
+            }
 
             i2c_buffer_size = strlen(i2c::data_buffer);
 
@@ -242,26 +240,26 @@ void executeOrder()
 void initDisplayRows()
 {
     // Page 1
-    display.initRow("Temp", (dht_cover_left.getReadings() + 1)); // to change to temp
-    display.initRow("Ph", ph_sensor.getReadings());
-    display.initRow("Water level", water_level_sensor.getReadings());
-    display.initRow("Buffer size", &i2c_buffer_size);
+    display.initRow(F("Temp"), (dht_cover_left.getReadings() + 1)); // to change to temp
+    display.initRow(F("Ph"), ph_sensor.getReadings());
+    display.initRow(F("Water level"), water_level_sensor.getReadings());
+    display.initRow(F("Buffer size"), &i2c_buffer_size);
 
     // Page 2
-    display.initRow("Cover-left", nullptr);
-    display.initRow("Temp", dht_cover_left.getReadings());
-    display.initRow("Humidity", (dht_cover_left.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-left"), nullptr);
+    display.initRow(F("Temp"), dht_cover_left.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_left.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 
     // Page 3
-    display.initRow("Cover-center", nullptr);
-    display.initRow("Temp", dht_cover_center.getReadings());
-    display.initRow("Humidity", (dht_cover_center.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-center"), nullptr);
+    display.initRow(F("Temp"), dht_cover_center.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_center.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 
     // Page 4
-    display.initRow("Cover-right", nullptr);
-    display.initRow("Temp", dht_cover_right.getReadings());
-    display.initRow("Humidity", (dht_cover_right.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-right"), nullptr);
+    display.initRow(F("Temp"), dht_cover_right.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_right.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 }
