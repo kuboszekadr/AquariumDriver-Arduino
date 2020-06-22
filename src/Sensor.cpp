@@ -28,7 +28,6 @@ Sensor::Sensor(uint8_t id_sensor,
     {
         _id_measures[i] = static_cast<uint8_t>(id_measures[i]);
     }
-    // id_measures[0] = 1;
 
     strcpy(_name, name); // copy sensor name
     _id_sensor = id_sensor;

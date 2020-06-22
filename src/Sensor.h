@@ -23,7 +23,7 @@ enum Measures
 class Sensor
 {
 public:
-  static Sensor *sensors[SENSOR_AMOUNT]; // array of generated sensors
+  static Sensor *sensors[SENSOR_AMOUNT] = {}; // array of generated sensors
   static uint8_t sensors_amount;         // how many sensors are initalized
 
   Sensor(uint8_t id_sensor,
