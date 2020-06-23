@@ -181,7 +181,7 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            sprintf_P(msg, F("Sensor: %s ready"), sensor->getName());
+            sprintf(msg, "Sensor: %s ready", sensor->getName());
             Logger::log(msg, LogLevel::APPLICATION);
 
             // request data from the sensor
@@ -201,7 +201,7 @@ void scanSensors()
             
             if (event != Events::EventType::EMPTY)
             {
-                sprintf(msg, "%s", Events::EventTypeLabels[event]);
+                sprintf(msg, "%s", Events::getEventLabel(event));
                 Logger::log(msg, LogLevel::EVENT);
             }
 
@@ -209,10 +209,6 @@ void scanSensors()
 
             memset(reading_json, 0, 150);
             memset(_timestamp, 0, 20);
-
-            timestamp = RTC::now();
-            display.show();
-            Serial.println(freeMemory());
         }
     }
 }
