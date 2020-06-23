@@ -53,9 +53,10 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 
 #define WATER_LEVEL_MEASURE_ID 2
 Measures water_level_measure[1] = {Measures::WATER_LEVEL};
+const char water_level_sensor_name[] PROGMEM = "WaterLevelSump";
 
 WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, water_level_measure,
-                              "WaterLevelSump",
+                              water_level_sensor_name,
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
@@ -65,27 +66,31 @@ WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TR
 
 #define PH_SENSOR_MEASURE_ID 3
 Measures ph_measure[1] = {Measures::PH};
+const char ph_sensor_name[] PROGMEM = "PhSensor";
 
 PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
-                   "PhSensor",
+                   ph_sensor_name,
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
 // DHT's
 Measures dht_measures[2] = {Measures::TEMP, Measures::HUMIDITY};
+const char dht_cover_left_name[] PROGMEM = "CoverLeft";
+const char dht_cover_center_name[] PROGMEM = "CoverCenter";
+const char dht_cover_right_name[] PROGMEM = "CoverRight";
 
 DHT22 dht_cover_left(DHT_COVER_LEFT_PIN, DHT_COVER_LEFT_SENSOR_ID, dht_measures,
-                     "CoverLeft",
+                     dht_cover_left_name,
                      0.0, 0.0,
                      Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 DHT22 dht_cover_center(DHT_COVER_CENTER_PIN, DHT_COVER_CENTER_SENSOR_ID, dht_measures,
-                       "CoverCenter",
+                       dht_cover_center_name,
                        0.0, 0.0,
                        Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measures,
-                      "CoverRight",
+                      dht_cover_right_name,
                       0.0, 0.0,
                       Events::EventType::EMPTY, Events::EventType::EMPTY);
 

@@ -29,7 +29,7 @@ Sensor::Sensor(uint8_t id_sensor,
         _id_measures[i] = static_cast<uint8_t>(id_measures[i]);
     }
 
-    strcpy(_name, name); // copy sensor name
+    _name = name;
     _id_sensor = id_sensor;
 
     _trigger_value_low = trigger_value_low;
@@ -93,7 +93,9 @@ bool Sensor::isReady()
 
 char *Sensor::getName()
 {
-    return _name;
+    char name[SENSOR_NAME_LENGHT+1] = {};
+    strncpy_P(name, (PGM_P) _name, SENSOR_NAME_LENGHT);
+    return name;
 }
 
 float *Sensor::getReadings()
