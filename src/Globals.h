@@ -48,5 +48,6 @@ extern DHT22 dht_cover_center;
 extern DHT22 dht_cover_right;
 
 extern TaskScheduler::Scheduler &scheduler;
+extern uint32_t timestamp;
 
 #endif

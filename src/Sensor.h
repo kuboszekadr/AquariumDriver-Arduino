@@ -11,6 +11,7 @@
 #define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
 #define SENSOR_SAMPLING_AMOUNT 30
 #define SENSOR_AMOUNT 10 // maximum amount of sensors
+#define SENSOR_NAME_LENGHT 20 
 
 enum Measures
 {
@@ -23,7 +24,7 @@ enum Measures
 class Sensor
 {
 public:
-  static Sensor *sensors[SENSOR_AMOUNT]; // array of generated sensors
+  static Sensor *sensors[SENSOR_AMOUNT] = {}; // array of generated sensors
   static uint8_t sensors_amount;         // how many sensors are initalized
 
   Sensor(uint8_t id_sensor,
@@ -68,6 +69,6 @@ protected:
   float _last_reading_value;
   unsigned long _last_reading = 0; // when last reading was done (as millis)
 
-  char _name[20]; // sensor name / label
+  const char* _name; // sensor name / label
 };                // namespace Sensor
 #endif

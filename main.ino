@@ -53,9 +53,10 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 
 #define WATER_LEVEL_MEASURE_ID 2
 Measures water_level_measure[1] = {Measures::WATER_LEVEL};
+const char water_level_sensor_name[] PROGMEM = "WaterLevelSump";
 
 WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, water_level_measure,
-                              "WaterLevelSump",
+                              water_level_sensor_name,
                               (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
                               Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
@@ -65,27 +66,31 @@ WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TR
 
 #define PH_SENSOR_MEASURE_ID 3
 Measures ph_measure[1] = {Measures::PH};
+const char ph_sensor_name[] PROGMEM = "PhSensor";
 
 PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
-                   "PhSensor",
+                   ph_sensor_name,
                    (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
                    Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
 // DHT's
 Measures dht_measures[2] = {Measures::TEMP, Measures::HUMIDITY};
+const char dht_cover_left_name[] PROGMEM = "CoverLeft";
+const char dht_cover_center_name[] PROGMEM = "CoverCenter";
+const char dht_cover_right_name[] PROGMEM = "CoverRight";
 
 DHT22 dht_cover_left(DHT_COVER_LEFT_PIN, DHT_COVER_LEFT_SENSOR_ID, dht_measures,
-                     "CoverLeft",
+                     dht_cover_left_name,
                      0.0, 0.0,
                      Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 DHT22 dht_cover_center(DHT_COVER_CENTER_PIN, DHT_COVER_CENTER_SENSOR_ID, dht_measures,
-                       "CoverCenter",
+                       dht_cover_center_name,
                        0.0, 0.0,
                        Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measures,
-                      "CoverRight",
+                      dht_cover_right_name,
                       0.0, 0.0,
                       Events::EventType::EMPTY, Events::EventType::EMPTY);
 
@@ -96,7 +101,6 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", chang
 uint32_t timestamp;
 float i2c_buffer_size;
 
-// R B W
 Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
 // Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
 // Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
@@ -110,10 +114,8 @@ void setup()
 
     // It is importat to load configs before OLED dislay initialization
     // (huge memory consuption of OLED)
-    Config::saveSensorConfig();
     Config::loadSensorConfig();
     Config::loadLightingProgramsSetup();
-    Config::saveLightingProgramsSetup();
 
     // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
@@ -148,7 +150,6 @@ void loop()
         i2c::clearBuffer();
         i2c::order = i2c::NONE;
         i2c::transmission_step = i2c::EMPTY;
-        Serial.println(freeMemory());
     }
     // do not scan sensors when I2C transmission is in progress
     else if (i2c::transmission_step == i2c::EMPTY)
@@ -200,21 +201,19 @@ void scanSensors()
             Logger::log(reading_json, LogLevel::DATA);
 
             // check if some event has to be rised
-            // event = Events::EventType::EMPTY; //sensor->checkTriggers();
-            // if (event != Events::EventType::EMPTY)
-            // {
-            //     sprintf(msg, "%s", Events::EventTypeLabels[event]);
-            //     Logger::log(msg, LogLevel::EVENT);
-            // }
+            event = Events::EventType::EMPTY; 
+            sensor->checkTriggers();
+            
+            if (event != Events::EventType::EMPTY)
+            {
+                sprintf(msg, "%s", Events::getEventLabel(event));
+                Logger::log(msg, LogLevel::EVENT);
+            }
 
             i2c_buffer_size = strlen(i2c::data_buffer);
 
             memset(reading_json, 0, 150);
             memset(_timestamp, 0, 20);
-
-            timestamp = RTC::now();
-            display.show();
-            Serial.println(freeMemory());
         }
     }
 }
@@ -242,26 +241,26 @@ void executeOrder()
 void initDisplayRows()
 {
     // Page 1
-    display.initRow("Temp", (dht_cover_left.getReadings() + 1)); // to change to temp
-    display.initRow("Ph", ph_sensor.getReadings());
-    display.initRow("Water level", water_level_sensor.getReadings());
-    display.initRow("Buffer size", &i2c_buffer_size);
+    display.initRow(F("Temp"), (dht_cover_left.getReadings() + 1)); // to change to temp
+    display.initRow(F("Ph"), ph_sensor.getReadings());
+    display.initRow(F("Water level"), water_level_sensor.getReadings());
+    display.initRow(F("Buffer size"), &i2c_buffer_size);
 
     // Page 2
-    display.initRow("Cover-left", nullptr);
-    display.initRow("Temp", dht_cover_left.getReadings());
-    display.initRow("Humidity", (dht_cover_left.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-left"), nullptr);
+    display.initRow(F("Temp"), dht_cover_left.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_left.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 
     // Page 3
-    display.initRow("Cover-center", nullptr);
-    display.initRow("Temp", dht_cover_center.getReadings());
-    display.initRow("Humidity", (dht_cover_center.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-center"), nullptr);
+    display.initRow(F("Temp"), dht_cover_center.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_center.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 
     // Page 4
-    display.initRow("Cover-right", nullptr);
-    display.initRow("Temp", dht_cover_right.getReadings());
-    display.initRow("Humidity", (dht_cover_right.getReadings()) + 1);
-    display.initRow("", nullptr);
+    display.initRow(F("Cover-right"), nullptr);
+    display.initRow(F("Temp"), dht_cover_right.getReadings());
+    display.initRow(F("Humidity"), (dht_cover_right.getReadings()) + 1);
+    display.initRow(F(""), nullptr);
 }

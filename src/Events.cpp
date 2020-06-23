@@ -1,8 +1,8 @@
 #include "Events.h"
 
-int Events::queueLength = 0;
+int Events::queue_length = 0;
 Events::EventType Events::EventsQueue[EVENT_QUEUE_LENGTH];
-Events::Event *Events::Event::_events[7];
+Events::Event *Events::Event::_events[EVENT_DEFINED_EVENTS];
 
 void Events::EventSubscriber::subscribe(EventType event)
 {
@@ -20,8 +20,7 @@ Events::Event::Event(EventType event_type)
 {
     // TODO: check if event has been init
     _events[event_type] = this; // place event pointer in the array of events
-
-    _type = event_type; // assing event type
+    _type = event_type;         // assing event type
 }
 
 void Events::Event::_new_subscriber(EventType event, EventSubscriber *subscriber)
@@ -51,7 +50,7 @@ Events::Event *Events::Event::getEvent(EventType event)
 void Events::raise(EventType event)
 {
     // if queue is full or event is empty ommit
-    if (queueLength >= EVENT_QUEUE_LENGTH)
+    if (queue_length >= EVENT_QUEUE_LENGTH)
     {
         Logger::log(F("Events queue is full"), LogLevel::WARNING);
         return;
@@ -61,13 +60,13 @@ void Events::raise(EventType event)
         return;
     }
 
-    EventsQueue[queueLength++] = event; // insert event into queue
+    EventsQueue[queue_length++] = event; // insert event into queue
 }
 
 void Events::notifySubscribers()
 {
     // loop through subscribers and notify about event
-    for (int i = 0; i < queueLength; i++)
+    for (int i = 0; i < queue_length; i++)
     {
         EventType event_type = EventsQueue[i];      // take event type from the queue
         Event *event = Event::getEvent(event_type); // get event object based on event type
@@ -82,5 +81,14 @@ void Events::notifySubscribers()
         }
         EventsQueue[i] = EventType::EMPTY;
     }
-    queueLength = 0; // restart queue
+    queue_length = 0; // restart queue
+}
+
+char *Events::getEventLabel(EventType event)
+{
+    char buffer[21] = {};
+    strncpy_P(buffer,
+              (char *)pgm_read_word(&(event_type_labels[event])),
+              20); // Necessary casts and dereferencing, just copy.
+    return buffer;
 }
