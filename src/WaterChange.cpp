@@ -1,9 +1,11 @@
 #include "WaterChange.h"
 
-Programs::WaterChange::WaterChange(int pin_pomp, int pin_water)
+Programs::WaterChange::WaterChange(uint8_t pin_pomp, uint8_t pin_water)
 {
     _pomp = new Relay(pin_pomp);
     _water = new Relay(pin_water);
+
+    _id = WATER_CHANGE_PROGRAM_ID;
 
     subscribe(Events::WATER_LOW);
     subscribe(Events::WATER_HIGH);
@@ -33,15 +35,19 @@ void Programs::WaterChange::changeWater()
 void Programs::WaterChange::pumpOut()
 {
     Logger::log(F("Pomping water our."), LogLevel::APPLICATION);
-    _water->turnOff();
-    _pomp->turnOn();
+    _water->turnOff(); // close water flow
+    _pomp->turnOn();   // turn the pomp on
+
+    addToI2CBuffer(1, 1);
 }
 
 void Programs::WaterChange::pour()
 {
     Logger::log(F("Pouring water."), LogLevel::APPLICATION);
-    _water->turnOn();
-    _pomp->turnOff();
+    _pomp->turnOff(); // turn the pomp off
+    _water->turnOn(); // open water flow
+
+    addToI2CBuffer(1, 2);
 }
 
 void Programs::WaterChange::reactForEvent(Events::EventType event)
@@ -58,9 +64,13 @@ void Programs::WaterChange::reactForEvent(Events::EventType event)
         Logger::log(F("Closing water flow..."), LogLevel::APPLICATION);
 
         _is_active = false; // finish water change
-        _water->turnOff();
+        
+        // turn of the relays
+        _water->turnOff(); 
         _pomp->turnOff();
+
         _state = event;
+        addToI2CBuffer(0, 0); // inform about program ending
     }
     // check if water has to be poured
     else if (event == Events::WATER_LOW)

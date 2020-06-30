@@ -3,12 +3,14 @@
 
 #include "Programs.h"
 
+#define WATER_CHANGE_PROGRAM_ID 2 
+
 namespace Programs
 {
 class WaterChange : public Program
 {
 public:
-    WaterChange(int pin_pomp, int pin_water);
+    WaterChange(uint8_t pin_pomp, uint8_t pin_water);
     void changeWater();
     void pumpOut();
     void pour();
