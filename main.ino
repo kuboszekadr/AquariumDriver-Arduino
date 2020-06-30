@@ -1,5 +1,5 @@
 /*------ LOCAL LIBRARIES ------*/
-#include "src/Pins.h"  // pins definisions
+#include "src/Pins.h"    // pins definisions
 #include "src/Globals.h" // global variables initalisation
 #include "src/Config.h"
 
@@ -19,7 +19,7 @@ RTC &rtc = RTC::init(RTC_RTS_PIN, RTC_CLK_PIN, RTC_DAT_PIN);
 
 // Heater
 Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, heater_programs, 2);
+Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, 2, heater_programs, 2);
 
 Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_RELAY_POMP_PIN, WATER_LEVEL_RELAY_WATER_PIN);
 TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
@@ -96,7 +96,8 @@ DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measur
 
 /*---------------------*/
 void changeWater();
-TaskScheduler::Task water_change_task = TaskScheduler::Task("WaterChange", changeWater);
+const char water_change_task_name[] PROGMEM = "WaterChange";
+TaskScheduler::Task water_change_task = TaskScheduler::Task(water_change_task_name, changeWater);
 
 uint32_t timestamp;
 float i2c_buffer_size;
@@ -106,11 +107,11 @@ Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
 // Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
 
 void setup()
-{ 
+{
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
-    RTC::setTimestamp("20200605 092955");
+    RTC::setTimestamp("20200605 092945");
 
     // It is importat to load configs before OLED dislay initialization
     // (huge memory consuption of OLED)
@@ -121,7 +122,7 @@ void setup()
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
     initDisplayRows();
 
-    water_change_task.schedule(10, 30);
+    water_change_task.schedule(930);
     scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
@@ -147,7 +148,7 @@ void loop()
             Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
         }
 
-        i2c::clearBuffer();
+        i2c::clearBuffers();
         i2c::order = i2c::NONE;
         i2c::transmission_step = i2c::EMPTY;
     }
@@ -170,7 +171,7 @@ void scanSensors()
 {
     char reading_json[150]; // array to store reading of a sensor
     char msg[150];          // for logging messages
-    char _timestamp[20];     // reading timestamp
+    char _timestamp[20];    // reading timestamp
     Events::EventType event;
 
     // loop through sensors
@@ -186,13 +187,12 @@ void scanSensors()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            sprintf(msg, "Sensor: %s ready", sensor->getName());
+            sprintf_P(msg, PSTR("Sensor: %s ready"), sensor->getName());
             Logger::log(msg, LogLevel::APPLICATION);
 
-            // request data from the sensor
             RTC::getTimestamp(_timestamp);
             Reading reading = sensor->getReading(); // average over available data
-            reading.timestamp = _timestamp;          // add timestamp to the reading
+            reading.timestamp = _timestamp;         // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -201,9 +201,9 @@ void scanSensors()
             Logger::log(reading_json, LogLevel::DATA);
 
             // check if some event has to be rised
-            event = Events::EventType::EMPTY; 
+            event = Events::EventType::EMPTY;
             sensor->checkTriggers();
-            
+
             if (event != Events::EventType::EMPTY)
             {
                 sprintf(msg, "%s", Events::getEventLabel(event));
@@ -214,6 +214,8 @@ void scanSensors()
 
             memset(reading_json, 0, 150);
             memset(_timestamp, 0, 20);
+
+            Serial.println(i2c::data_buffer);
         }
     }
 }
@@ -221,7 +223,7 @@ void scanSensors()
 // Schedule programs
 void changeWater()
 {
-    Logger::log(F("Starting scheduled water change"), LogLevel::APPLICATION);
+    Logger::log(F("Starting water change"), LogLevel::APPLICATION);
     water_change.changeWater();
 }
 
@@ -232,7 +234,9 @@ void executeOrder()
     case i2c::Order::UPDATE_RTC: // update RTC
         RTC::setTimestamp(i2c::command_buffer + 2);
         break;
-
+    case i2c::Order::WATER_CHANGE:
+        changeWater();
+        break;
     default:
         break;
     }

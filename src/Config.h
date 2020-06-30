@@ -23,6 +23,9 @@ namespace Config
 
     void loadLightingProgramsSetup();
     void saveLightingProgramsSetup();
+
+    void loadTasksConfig();
+    void saveTasksConfig();
 }
 
 #endif

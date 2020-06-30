@@ -1,8 +1,8 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define DATA_BUFFER_SIZE 1512
-#define RESPONSE_BUFFER_SIZE 256
+#define I2C_DATA_BUFFER_SIZE 1512
+#define I2C_COMMAND_BUFFER_SIZE 128
 
 #include "Log.h"
 #include "Utils.h"
@@ -12,35 +12,35 @@
 
 namespace i2c
 {
-enum Order
-{
-    UNKNOWN = -1,
-    NONE,
-    UPDATE_RTC,
-    WATER_CHANGE
-};
+    enum Order
+    {
+        UNKNOWN = -1,
+        NONE,
+        UPDATE_RTC,
+        WATER_CHANGE
+    };
 
-enum TransmissionStep
-{
-    EMPTY,   // to be set separatelly when slave is done with parsing the command
-    ONGOING, // transmission is in progress
-    FINISHED // all data received from the master
-};
+    enum TransmissionStep
+    {
+        EMPTY,   // to be set separatelly when slave is done with parsing the command
+        ONGOING, // transmission is in progress
+        FINISHED // all data received from the master
+    };
 
-extern char data_buffer[DATA_BUFFER_SIZE];        // for storing data from sensors
-extern char command_buffer[RESPONSE_BUFFER_SIZE]; // for storing commands from the master
+    extern char data_buffer[I2C_DATA_BUFFER_SIZE];       // for storing data from sensors
+    extern char command_buffer[I2C_COMMAND_BUFFER_SIZE]; // for storing commands from the master
 
-extern TransmissionStep transmission_step; // current transmission step
-extern Order order;                       // task to be perfomed
+    extern TransmissionStep transmission_step; // current transmission step
+    extern Order order;                        // task to be perfomed
 
-void begin(int address); // initalize I2C
-void receiveEvent(int count);
-void requestEvent();
+    void begin(int address); // initalize I2C
+    void receiveEvent(int count);
+    void requestEvent();
 
-void clearBuffer();
-void addToBuffer(const char *data);
+    void clearBuffers();
+    void addToBuffer(const char *data);
 
-Order parseOrder();
+    Order parseOrder();
 } // namespace i2c
 
 #endif

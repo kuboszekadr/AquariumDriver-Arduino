@@ -20,7 +20,6 @@
 
 #include "Sensor.h"
 
-#include "Task.h"
 #include "TaskScheduler.h"
 #include "Thermometer.h"
 #include "Timestamp.h"

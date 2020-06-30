@@ -1,7 +1,7 @@
 #include "I2CSlave.h"
 
-char i2c::data_buffer[DATA_BUFFER_SIZE];
-char i2c::command_buffer[RESPONSE_BUFFER_SIZE];
+char i2c::data_buffer[I2C_DATA_BUFFER_SIZE];
+char i2c::command_buffer[I2C_COMMAND_BUFFER_SIZE];
 
 i2c::TransmissionStep i2c::transmission_step = EMPTY;
 i2c::Order i2c::order = NONE;
@@ -18,7 +18,7 @@ void i2c::receiveEvent(int count)
     static int size = 0; // amount of currently readed bytes
     if (transmission_step != ONGOING)
     {
-        memset(command_buffer, 0, RESPONSE_BUFFER_SIZE); // clear buffer
+        memset(command_buffer, 0, I2C_DATA_BUFFER_SIZE); // clear buffer
         transmission_step = ONGOING;                     // change current transmission status
     }
 
@@ -34,7 +34,7 @@ void i2c::receiveEvent(int count)
     // check if last char is transmission terminator
     if (c == '#')
     {
-        size = 0;                    // restore buffer
+        size = 0;                     // restore buffer
         transmission_step = FINISHED; // end transmission
         order = parseOrder();
     }
@@ -59,17 +59,17 @@ void i2c::requestEvent()
     {
         // get length of the data
         length = strlen(data_buffer);
-        Wire.write(length_byte, 4); //notify master about data length
+        data_buffer[length++] = '}'; // close the JSON array
+        Wire.write(length_byte, 4);  //notify master about data length
 
         transmission_step = length > 0 ? ONGOING : FINISHED;
         step += length > 0 ? 1 : 0; // end first step of data sending
-
     }
     else if (step == 1)
     {
         // send package to the master
         package_size = package_size < length ? package_size : length; // determine amount of data to be send
-        substring(package, data_buffer, package_start, package_size);  // copy part of the data
+        substring(package, data_buffer, package_start, package_size); // copy part of the data
 
         Wire.write(package); // send package to the master
 
@@ -94,8 +94,8 @@ void i2c::addToBuffer(const char *data)
     unsigned int buffer_length = strlen(data_buffer);
 
     // check if buffer has enough space
-    if ((buffer_length > DATA_BUFFER_SIZE - 1) ||
-        (buffer_length + strlen(data) > DATA_BUFFER_SIZE - 1))
+    if ((buffer_length > I2C_DATA_BUFFER_SIZE - 2) ||
+        (buffer_length + strlen(data) > I2C_DATA_BUFFER_SIZE - 2))
     {
         Logger::log(F("Not enough space in buffer"), LogLevel::WARNING);
         return; // avoid buffer overwride
@@ -123,8 +123,9 @@ i2c::Order i2c::parseOrder()
     }
 }
 
-void i2c::clearBuffer()
+void i2c::clearBuffers()
 {
-    memset(command_buffer, 0, RESPONSE_BUFFER_SIZE);
-    memset(data_buffer, 0, DATA_BUFFER_SIZE);
+    memset(command_buffer, 0, I2C_COMMAND_BUFFER_SIZE);
+    memset(data_buffer, 0, I2C_DATA_BUFFER_SIZE);
+    data_buffer[0] = '{'; // initalize JSON array
 }
