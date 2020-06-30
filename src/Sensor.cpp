@@ -50,7 +50,12 @@ Reading Sensor::getReading()
     // calcualte average value over time
     for (uint8_t i = 0; i < _measures_amount; i++)
     {
-        _readings[i] /= _readings_count;  // calculate averages
+        _readings[i] /= _readings_count; // calculate averages
+
+        // make sure that reading values are between MIN and MAX theresholds
+        _readings[i] = _readings[i] > SENSOR_THRESHOLD_MAX ? SENSOR_THRESHOLD_MAX : _readings[i];
+        _readings[i] = _readings[i] < SENSOR_THRESHOLD_MIN ? SENSOR_THRESHOLD_MIN : _readings[i];
+
         _last_readings[i] = _readings[i]; // save values
         _readings[i] = 0.0;               // prepare for new data
     }
@@ -71,7 +76,7 @@ void Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_value_hig
     if (trigger_value_high > 0)
     {
         _trigger_value_high = trigger_value_high;
-    }        
+    }
 }
 
 float Sensor::getTriggerValue(bool low)
@@ -93,8 +98,8 @@ bool Sensor::isReady()
 
 char *Sensor::getName()
 {
-    char name[SENSOR_NAME_LENGHT+1] = {};
-    strncpy_P(name, (PGM_P) _name, SENSOR_NAME_LENGHT);
+    char name[SENSOR_NAME_LENGHT + 1] = {};
+    strncpy_P(name, (PGM_P)_name, SENSOR_NAME_LENGHT);
     return name;
 }
 
