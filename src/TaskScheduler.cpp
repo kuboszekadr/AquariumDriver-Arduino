@@ -15,6 +15,7 @@ void TaskScheduler::Scheduler::addTask(Task *task)
     }
 
     _tasks[_tasks_amount++] = task;
+    Serial.println(_tasks_amount);
 }
 
 void TaskScheduler::Scheduler::loop()
@@ -30,9 +31,8 @@ void TaskScheduler::Scheduler::loop()
         Task *task = _tasks[i];
         if (task->isExecutable())
         {        
-            sprintf(msg, "Task %s is starting", task->getName());
+            sprintf_P(msg, PSTR("Task %s is starting"), task->getName());
             Logger::log(msg, LogLevel::APPLICATION);
-
             task->execute();
         }
     }

@@ -2,14 +2,15 @@
 
 TaskScheduler::Task::Task(const char *name, void (*fnc)())
 {
-    strcpy(_name, name);
+    _name = name;
     _fnc = fnc;
 }
 
 char *TaskScheduler::Task::getName()
 {
-    Serial.println(_name);
-    return _name;
+    char name[TASK_NAME_LENGTH + 1] = {};
+    strncpy_P(name, (PGM_P)_name, TASK_NAME_LENGTH);
+    return name;
 }
 
 bool TaskScheduler::Task::isExecutable()
@@ -28,7 +29,7 @@ bool TaskScheduler::Task::isExecutable()
     {
         return false;
     }
-    return _schedule[day_of_week] >= now.extract(DatePart::HHMM);
+    return _schedule[day_of_week] <= now.extract(DatePart::HHMM);
 }
 
 void TaskScheduler::Task::forceExecute()
@@ -52,15 +53,15 @@ void TaskScheduler::Task::deactivate()
     _is_active = false;
 }
 
-void TaskScheduler::Task::schedule(uint8_t hour, uint8_t minute = 0)
+void TaskScheduler::Task::schedule(uint16_t hour)
 {
     for (uint8_t day = 0; day <= DayOfWeek_Saturday; day++)
     {
-        schedule(day, hour, minute);
+        schedule(day, hour);
     }
 }
 
-void TaskScheduler::Task::schedule(DayOfWeek day_of_week, uint8_t hour, uint8_t minute)
+void TaskScheduler::Task::schedule(DayOfWeek day_of_week, uint16_t hour)
 {
-    _schedule[day_of_week] = (hour * 100L + minute) * 100L;
+    _schedule[day_of_week] = hour;
 }

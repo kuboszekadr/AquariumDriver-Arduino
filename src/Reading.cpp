@@ -16,9 +16,10 @@ void Reading::toJSON(char *target)
 
         // m - measure_id
         // v - reading_value
-        sprintf(reading,
-                "{\"m\":%s,\"v\":%s},",
+        sprintf_P(reading,
+                PSTR("{\"m\":%s,\"v\":%s},"),
                 _id_measure, _value);
+                
         // copy into the buffer
         strcat(readings, reading);
 
@@ -42,8 +43,8 @@ void Reading::toJSON(char *target)
     // t - timestamp in YYYYMMDD HHmmSS format
     // Format: {"s":1,"r":["m":1:,"v":22.22],"t":20200513 063312}
     // using single chars save a lot in buffer
-    sprintf(target,
-            "{\"s\":%s,\"r\":[%s],\"t\":\"%s\"}",
+    sprintf_P(target,
+            PSTR("{\"s\":%s,\"r\":[%s],\"t\":\"%s\"}"),
             _id_sensor, readings, timestamp);
     delete[] readings;
 }

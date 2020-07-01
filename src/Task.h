@@ -7,6 +7,8 @@
 #include <Arduino.h>
 #include <RtcDateTime.h>
 
+#define TASK_NAME_LENGTH 20
+
 namespace TaskScheduler
 {
     class Task
@@ -24,16 +26,16 @@ namespace TaskScheduler
         void deactivate(); // deactive whole task
         void activate();   // active whole task
 
-        void schedule(uint8_t hour, uint8_t minute = 0);                        // set execution time the same for each day
-        void schedule(DayOfWeek day_of_week, uint8_t hour, uint8_t minute = 0); // time execution
+        void schedule(uint16_t hour);                        // set execution time the same for each day
+        void schedule(DayOfWeek day_of_week, uint16_t hour); // time execution
 
     private:
-        char _name[16]; // name of the task
+        const char *_name; // name of the task
         void (*_fnc)(); // pointer to the function to be executed
 
         bool _is_active = true;     // is task activate
         uint32_t _schedule[7]; // array of days with scheduled execution dates
-        uint32_t _last_run = {};    // when task was run last time
+        uint32_t _last_run = 0L;    // when task was run last time
     };
 } // namespace TaskScheduler
 

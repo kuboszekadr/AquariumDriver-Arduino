@@ -1,6 +1,8 @@
 #ifndef Reading_h
 #define Reading_h
 
+#include "RTC.h"
+
 #include <Arduino.h>
 
 struct Reading
