@@ -53,5 +53,4 @@ void Programs::Program::addToI2CBuffer(uint8_t active, uint8_t step=1)
     sprintf_P(json, PSTR("{\"pid\":%d,\"a\":%d,\"s\":%d,\"t\":%s}"), _id, active, step, timestamp);
     
     i2c::addToBuffer(json);
-    Serial.println(json);
 }

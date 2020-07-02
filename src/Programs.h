@@ -18,7 +18,7 @@ namespace Programs
         Program(){};
         Program(uint8_t relay_pin, uint8_t id, const Events::EventType *events_subscription, uint8_t events);
 
-        void start();
+        virtual void start();
         void end();
         void reactForEvent(Events::EventType event);
 
