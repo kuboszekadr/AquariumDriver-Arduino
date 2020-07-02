@@ -17,6 +17,7 @@ namespace Config
 {
     static const char sensor_config_file[] = "triggers.txt";
     static const char lighting_config_file[] = "lighting.txt";
+    static const char tasks_config_file[] = "task_%d.txt";
 
     void loadSensorConfig();
     void saveSensorConfig();
@@ -24,8 +25,10 @@ namespace Config
     void loadLightingProgramsSetup();
     void saveLightingProgramsSetup();
 
-    void loadTasksConfig();
-    void saveTasksConfig();
+    void loadTaskConfig();
+    // void saveTaskConfig();
+
+    bool loadFile(const char *file_name, JsonDocument &doc);
 }
 
 #endif
