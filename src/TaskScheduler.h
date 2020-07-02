@@ -7,7 +7,7 @@
 
 #include <Arduino.h>
 
-#define TASK_SCHEDULER_SCAN_INTERVAL 10000L // scan tasks once a minute
+#define TASK_SCHEDULER_SCAN_INTERVAL 500L // scan tasks once a minute
 
 namespace TaskScheduler
 {
