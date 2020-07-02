@@ -41,7 +41,7 @@ bool TaskScheduler::Task::isExecutable()
     Timestamp now = Timestamp(RTC::now());
 
     // check if task was run during a day
-    if (Timestamp::extract(DatePart::HHMM, _last_run) == now.extract(DatePart::HHMM))
+    if (Timestamp::extract(DatePart::YYYYMMDD, _last_run) == now.extract(DatePart::YYYYMMDD))
     {
         return false;
     }
