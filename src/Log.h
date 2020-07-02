@@ -11,9 +11,31 @@
 
 #define LOG_BUFFER 150
 
+// Definitions of all log labels in PROGMEM
+const char log_level_application_str[] PROGMEM = "APPLICATION";
+const char log_level_task_str[] PROGMEM = "TASK";
+
+const char log_level_data_str[] PROGMEM = "DATA";
+const char log_level_event_str[] PROGMEM = "EVENT";
+
+const char log_level_warning_str[] PROGMEM = "WARNING";
+const char log_level_verbose_str[] PROGMEM = "VERBOSE";
+
+const char* const log_level_labels[] PROGMEM = {
+    log_level_application_str,
+    log_level_task_str,
+
+    log_level_data_str,
+    log_level_event_str,
+
+    log_level_warning_str,
+    log_level_verbose_str
+};
+
 enum LogLevel
 {
     APPLICATION = 0, // print only data from the main
+    TASK,            // for task events
     DATA,            // data from sensors
     EVENT,           // log events
     WARNING,         // warnings
@@ -40,7 +62,6 @@ private:
     LogLevel _log_level = VERBOSE;
 
     char _msg[LOG_BUFFER];
-    const char LogLevelLabels[5][12] = {"APPLICATION", "DATA", "EVENT", "WARNING", "VERBOSE"};
 };
 
 #endif

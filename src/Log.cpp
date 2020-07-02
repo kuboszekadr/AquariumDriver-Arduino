@@ -92,5 +92,10 @@ void Logger::_prepare(LogLevel log_level)
     RTC::getTimestamp(timestamp);
 
     // prepare initial message for logging
-    sprintf(_msg, "%s: [%s] ", timestamp, LogLevelLabels[log_level]);
+    char label[12];
+    strcpy_P(label, (char *)pgm_read_word(&(log_level_labels[log_level])));
+
+    sprintf_P(_msg, 
+        PSTR("%s: [%s] "), 
+        timestamp, label);
 }
