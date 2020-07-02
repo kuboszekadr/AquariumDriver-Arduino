@@ -118,12 +118,11 @@ void setup()
     Config::loadSensorConfig();
     Config::loadLightingProgramsSetup();
 
+    Config::loadTaskConfig();
+
     // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
     initDisplayRows();
-
-    water_change_task.schedule(930);
-    scheduler.addTask(&water_change_task);
 
     i2c::begin(I2C_ADDRESS); // join I2C bus
     Logger::log(F("Setup finished"), LogLevel::VERBOSE);
@@ -214,8 +213,6 @@ void scanSensors()
 
             memset(reading_json, 0, 150);
             memset(_timestamp, 0, 20);
-
-            Serial.println(i2c::data_buffer);
         }
     }
 }
@@ -224,7 +221,7 @@ void scanSensors()
 void changeWater()
 {
     Logger::log(F("Starting water change"), LogLevel::APPLICATION);
-    water_change.changeWater();
+    water_change.start();
 }
 
 void executeOrder()

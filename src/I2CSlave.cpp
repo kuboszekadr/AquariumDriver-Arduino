@@ -100,7 +100,7 @@ void i2c::addToBuffer(const char *data)
         Logger::log(F("Not enough space in buffer"), LogLevel::WARNING);
         return; // avoid buffer overwride
     }
-    else if (buffer_length > 0)
+    else if (buffer_length > 1)
     {
         strcat(data_buffer, ","); // add data object separator
     }

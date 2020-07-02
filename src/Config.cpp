@@ -2,21 +2,10 @@
 
 void Config::loadSensorConfig()
 {
-    // Open the triggers.txt file which contains json with sensor low/high triggers
-    File config_file = SD.open(sensor_config_file);
-    if (!config_file) //check if file has been loaded successfully
-    {
-        Serial.println(F("Can not load config file"));
-        return;
-    }
-
     // deserialize config JSON
     StaticJsonDocument<256> config;
-    DeserializationError error = deserializeJson(config, config_file);
-
-    if (error)
+    if(!loadFile(sensor_config_file, config))
     {
-        Serial.println(F("Failed to serialize config file"));
         return;
     }
 
@@ -28,7 +17,6 @@ void Config::loadSensorConfig()
         Sensor *sensor = Sensor::sensors[v["s"].as<int>() - 1];
         sensor->setTriggers(v["vl"].as<float>(), v["vh"].as<float>());
     }
-    config_file.close();
 }
 
 void Config::saveSensorConfig()
@@ -70,20 +58,9 @@ void Config::saveSensorConfig()
 
 void Config::loadLightingProgramsSetup()
 {
-    // Open the triggers.txt file which contains json with sensor low/high triggers
-    File config_file = SD.open(lighting_config_file);
-    if (!config_file) //check if file has been loaded successfully
-    {
-        Serial.println(F("Can not load config file"));
-        return;
-    }
-
     StaticJsonDocument<CONFIG_LIGHTING_FILE_SIZE> doc;
-    DeserializationError error = deserializeJson(doc, config_file);
-
-    if (error)
+    if(!loadFile(lighting_config_file, doc))
     {
-        Serial.println(F("Failed to serialize config file"));
         return;
     }
 
@@ -163,4 +140,42 @@ void Config::saveLightingProgramsSetup()
     }
     Serial.println(F("Config updated"));
     file.close();
+}
+
+void Config::loadTaskConfig()
+{
+    StaticJsonDocument<256> doc;
+    char config_file[12];
+    sprintf(config_file, tasks_config_file, 1);
+    Serial.println(config_file);
+
+    loadFile(config_file, doc);
+    JsonArray schedules = doc.as<JsonArray>();
+
+    for (JsonVariant day : schedules) 
+    {
+        TaskScheduler::Task *task = TaskScheduler::Task::tasks[0];
+        task->schedule(day["d"].as<int>(), day["h"].as<int>());
+    }
+}
+
+bool Config::loadFile(const char *file_name, JsonDocument &doc)
+{
+    File config_file = SD.open(file_name);
+    if (!config_file)
+    {
+        Serial.println(F("Can not load file from SD"));
+        return false;
+    }
+
+    DeserializationError error = deserializeJson(doc, config_file);
+    if (error)
+    {
+        Serial.println(F("Failed to serialize config file"));
+        return false;
+    }
+    serializeJson(doc, Serial);
+
+    config_file.close();
+    return true;
 }

@@ -9,7 +9,7 @@
 
 #include <Arduino.h>
 
-// Definition of all event labels in progmem
+// Definition of all event labels in PROGMEM
 const char event_empty_str[] PROGMEM = "EMPTY";
 const char event_relay_change_str[] PROGMEM = "RELAY_STATE_CHANGE";
 
@@ -90,8 +90,6 @@ char *getEventLabel(EventType event);
 
 extern EventType EventsQueue[EVENT_QUEUE_LENGTH];
 extern int queue_length;
-
-// const char EventTypeLabels[7][21] = {"EMPTY", "RELAY_STATE_CHANGE", "WATER_LOW", "WATER_HIGH", "TEMP_LOW", "TEMP_HIGH"};
 
 }; // namespace Events
 

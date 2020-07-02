@@ -11,7 +11,7 @@ Programs::WaterChange::WaterChange(uint8_t pin_pomp, uint8_t pin_water)
     subscribe(Events::WATER_HIGH);
 }
 
-void Programs::WaterChange::changeWater()
+void Programs::WaterChange::start()
 {
     if (_is_active)
     {
