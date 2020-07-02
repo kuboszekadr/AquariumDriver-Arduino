@@ -8,7 +8,7 @@ TaskScheduler::Scheduler &TaskScheduler::Scheduler::getInstance()
 
 void TaskScheduler::Scheduler::loop()
 {
-    if (millis() - _last_scan > TASK_SCHEDULER_SCAN_INTERVAL)
+    if (millis() - _last_scan < TASK_SCHEDULER_SCAN_INTERVAL)
     {
         return;
     }
