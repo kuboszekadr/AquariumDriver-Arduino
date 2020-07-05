@@ -1,9 +1,9 @@
 #include "Sensor.h"
 
-uint8_t Sensor::sensors_amount = 0;
-Sensor *Sensor::sensors[SENSOR_AMOUNT];
+uint8_t Sensor::Sensor::sensors_amount = 0;
+Sensor::Sensor *Sensor::Sensor::sensors[SENSOR_AMOUNT];
 
-Sensor::Sensor(uint8_t id_sensor,
+Sensor::Sensor::Sensor(uint8_t id_sensor,
                Measures *id_measures,
                uint8_t measures,
                const char *name,
@@ -39,7 +39,7 @@ Sensor::Sensor(uint8_t id_sensor,
     _trigger_high = trigger_high;
 }
 
-Reading Sensor::getReading()
+Reading Sensor::Sensor::getReading()
 {
     // create reading data
     struct Reading reading;
@@ -66,7 +66,7 @@ Reading Sensor::getReading()
     return reading;
 }
 
-void Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_value_high = -1.0)
+void Sensor::Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_value_high = -1.0)
 {
     if (trigger_value_low > 0)
     {
@@ -79,36 +79,14 @@ void Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_value_hig
     }
 }
 
-float Sensor::getTriggerValue(bool low)
-{
-    return low ? _trigger_low : _trigger_high;
-}
-
-bool Sensor::isAvailable()
-{
-    // check if sensor collected enough data
-    return _readings_count >= SENSOR_SAMPLING_AMOUNT;
-}
-
-bool Sensor::isReady()
-{
-    // check if proper time amount passed since last reading
-    return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL);
-}
-
-char *Sensor::getName()
+char *Sensor::Sensor::getName()
 {
     char name[SENSOR_NAME_LENGHT + 1] = {};
     strncpy_P(name, (PGM_P)_name, SENSOR_NAME_LENGHT);
     return name;
 }
 
-float *Sensor::getReadings()
-{
-    return _last_readings;
-}
-
-Events::EventType Sensor::checkTriggers()
+Events::EventType Sensor::Sensor::checkTrigger()
 {
     Events::EventType event = Events::EventType::EMPTY;
     // check current level of water
@@ -128,4 +106,110 @@ Events::EventType Sensor::checkTriggers()
     }
 
     return event;
+}
+
+void Sensor::Sensor::saveConfig()
+{
+    StaticJsonDocument<SENSOR_JSON_SIZE> doc;
+    doc["id"] = _id_sensor;
+    doc["vh"] = _trigger_value_high;
+    doc["vl"] = _trigger_value_low;
+
+    char file_name[12] = {};
+    strncpy(file_name, getName(), 8);
+    Serial.println(file_name); //To remove later
+
+    char file_path[40];
+    sprintf_P(file_path, config_path, file_name);
+
+    saveToFile(file_path, doc);
+}
+
+void Sensor::Sensor::loadConfig()
+{
+    char file_name[9] = {};
+    strncpy(file_name, getName(), 8);
+    Serial.println(file_name); //To remove later
+
+    char file_path[40];
+    sprintf_P(file_path, config_path, file_name);
+
+    StaticJsonDocument<SENSOR_JSON_SIZE> doc;
+    if (!loadFile(file_path, doc))
+    {
+        return;
+    }
+    
+    _id_sensor = doc["id"].as<int>();
+    _trigger_value_high = doc["vh"].as<float>();
+    _trigger_value_low = doc["vl"].as<float>();
+}
+
+void Sensor::loadConfig()
+{
+    for (uint8_t i = 0; i < Sensor::sensors_amount; i++)
+    {
+        Sensor *sensor = Sensor::sensors[i];
+        sensor->loadConfig();
+    }    
+}
+
+void Sensor::saveConfig()
+{
+    for (uint8_t i = 0; i < Sensor::sensors_amount; i++)
+    {
+        Sensor *sensor = Sensor::sensors[i];
+        sensor->saveConfig();
+    }    
+}
+
+void Sensor::loop()
+{
+    char timestamp[20];    // reading timestamp
+    RTC::getTimestamp(timestamp);
+
+    Events::EventType event;
+    char reading_json[50]; // array to store reading of a sensor
+    char msg[150];          // for logging messages
+
+    // loop through sensors
+    for (int i = 0; i < Sensor::sensors_amount; i++)
+    {
+        Sensor *sensor = Sensor::sensors[i]; // take sensor
+        // check if sensor is reading for data collection
+        if (sensor->isReady())
+        {
+            sensor->makeReading();
+        }
+
+        // check if sensor has collected enough data to share
+        if (sensor->isAvailable())
+        {
+            char sensor_name[SENSOR_NAME_LENGHT +1];
+            strcpy(sensor_name, sensor->getName());
+
+            sprintf_P(msg, PSTR("Sensor: %s ready"), sensor_name);
+            Logger::log(msg, LogLevel::APPLICATION);
+
+            Reading reading = sensor->getReading(); // average over available data
+            reading.timestamp = timestamp;         // add timestamp to the reading
+
+            // generate JSON and add to data buffer to be send to the database
+            reading.toJSON(reading_json);
+            i2c::addToBuffer(reading_json);
+            Logger::log(reading_json, LogLevel::DATA);
+
+            // check if some event has to be rised
+            event = Events::EventType::EMPTY;
+            sensor->checkTrigger();
+
+            if (event != Events::EventType::EMPTY)
+            {
+                sprintf_P(msg, PSTR("%s"), Events::getEventLabel(event));
+                Logger::log(msg, LogLevel::EVENT);
+            }
+
+            memset(reading_json, 0, 50);
+        }
+    }    
 }

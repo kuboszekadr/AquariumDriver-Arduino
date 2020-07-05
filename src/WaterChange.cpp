@@ -1,11 +1,11 @@
 #include "WaterChange.h"
 
-Programs::WaterChange::WaterChange(uint8_t pin_pomp, uint8_t pin_water)
+Programs::WaterChange::WaterChange(uint8_t pin_pomp, uint8_t pin_water, uint8_t id)
 {
     _pomp = new Relay(pin_pomp);
     _water = new Relay(pin_water);
 
-    _id = WATER_CHANGE_PROGRAM_ID;
+    _id = id;
 
     subscribe(Events::WATER_LOW);
     subscribe(Events::WATER_HIGH);

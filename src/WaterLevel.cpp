@@ -1,6 +1,6 @@
 #include "WaterLevel.h"
 
-WaterLevel::WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
+Sensor::WaterLevel::WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
 					   const char *name,
 					   float trigger_value_low, float trigger_value_high,
 					   Events::EventType trigger_low, Events::EventType trigger_high)
@@ -13,7 +13,7 @@ WaterLevel::WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *
 	pinMode(_echo, INPUT);
 }
 
-bool WaterLevel::makeReading()
+bool Sensor::WaterLevel::makeReading()
 {
 	//  check if sensor is ready or if data array is full
 	if (!isReady() || isAvailable())
@@ -38,7 +38,7 @@ bool WaterLevel::makeReading()
 	return true;
 }
 
-Events::EventType WaterLevel::checkTriggers()
+Events::EventType Sensor::WaterLevel::checkTriggers()
 {
 	Events::EventType event = Events::EventType::EMPTY;
 	// check current level of water

@@ -3,16 +3,20 @@
 
 #include "RTC.h"
 #include "Timestamp.h"
+#include "Config.h"
 
 #include <Arduino.h>
 #include <RtcDateTime.h>
 
 #define TASK_MAX_TASKS 1
 #define TASK_NAME_LENGTH 20
+#define TASK_JSON_SIZE 256
 
 namespace TaskScheduler
 {
-    class Task
+    const char config_path[] PROGMEM = "config/tasks/%s.txt";
+
+    class Task : public Config
     {
     public:
         static Task *tasks[TASK_MAX_TASKS];
@@ -21,18 +25,21 @@ namespace TaskScheduler
         Task(const char *name, void (*fnc)());
 
         char *getName();
-        uint8_t getId();
 
         bool isExecutable(); // check if task can be executed
 
-        void forceExecute(); // forces task execution regardless of it status
+        void forceExecute() { _fnc(); }; // forces task execution regardless of it status
         void execute();
 
-        void deactivate(); // deactive whole task
-        void activate();   // active whole task
+        void deactivate() { _is_active = false; }; // deactive whole task
+        void activate() { _is_active = true; };    // active whole task
 
-        void schedule(uint16_t hour);                        // set execution time the same for each day
-        void schedule(DayOfWeek day_of_week, uint16_t hour); // time execution
+        void schedule(uint16_t hour); // set execution time the same for each day
+
+        void schedule(DayOfWeek day_of_week, uint16_t hour) { _schedule[day_of_week] = hour; }; // time execution
+
+        void loadConfig();
+        void saveConfig();
 
     private:
         const char *_name; // name of the task
@@ -41,9 +48,10 @@ namespace TaskScheduler
         bool _is_active = true;  // is task activate
         uint32_t _schedule[7];   // array of days with scheduled execution dates
         uint32_t _last_run = 0L; // when task was run last time
-
-        uint8_t _id;
     };
+
+    void loadConfig();
+    void saveConfig();
 } // namespace TaskScheduler
 
 #endif
