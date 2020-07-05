@@ -19,9 +19,14 @@ RTC &rtc = RTC::init(RTC_RTS_PIN, RTC_CLK_PIN, RTC_DAT_PIN);
 
 // Heater
 Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, 2, heater_programs, 2);
+Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, 1, heater_programs, 2);
 
-Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_RELAY_POMP_PIN, WATER_LEVEL_RELAY_WATER_PIN);
+Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_RELAY_POMP_PIN, WATER_LEVEL_RELAY_WATER_PIN, 2);
+
+// CO2
+Events::EventType co2_programs[2] = {Events::EventType::PH_LOW, Events::EventType::PH_HIGH};
+Programs::Program co2 = Programs::Program(PH_SENSOR_RELAY_CO2_PIN, 3, co2_programs, 2);
+
 TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 
 /*------ SENSORS IDs -----------*/
@@ -40,9 +45,9 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 // #define THERMOMETER_TEMP_LOW 24.8
 // #define THERMOMETER_TEMP_HIGH 25.2
 // uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-// Measures t[1] = {Measures::TEMP};
+// Measures t[1] = {Sensor::Measures::TEMP};
 
-// Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
+// Sensor::Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
 //                         "WaterTemp",
 //                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
 //                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
@@ -52,47 +57,50 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 #define WATER_LEVEL_HIGH 10.0
 
 #define WATER_LEVEL_MEASURE_ID 2
-Measures water_level_measure[1] = {Measures::WATER_LEVEL};
+Sensor::Measures water_level_measure[1] = {Sensor::Measures::WATER_LEVEL};
 const char water_level_sensor_name[] PROGMEM = "WaterLevelSump";
 
-WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, water_level_measure,
-                              water_level_sensor_name,
-                              (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
-                              Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
+Sensor::WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, water_level_measure,
+                                      water_level_sensor_name,
+                                      (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
+                                      Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
 
 // Ph sensor
 #define PH_SENSOR_PH_LOW 6.5
 #define PH_SENSOR_PH_HIGH 6.7
 
 #define PH_SENSOR_MEASURE_ID 3
-Measures ph_measure[1] = {Measures::PH};
+Sensor::Measures ph_measure[1] = {Sensor::Measures::PH};
 const char ph_sensor_name[] PROGMEM = "PhSensor";
 
-PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
-                   ph_sensor_name,
-                   (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
-                   Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
+Sensor::PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
+                           ph_sensor_name,
+                           (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
+                           Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
 
 // DHT's
-Measures dht_measures[2] = {Measures::TEMP, Measures::HUMIDITY};
+Sensor::Measures dht_measures[2] = {
+    Sensor::Measures::TEMP,
+    Sensor::Measures::HUMIDITY};
+
 const char dht_cover_left_name[] PROGMEM = "CoverLeft";
 const char dht_cover_center_name[] PROGMEM = "CoverCenter";
 const char dht_cover_right_name[] PROGMEM = "CoverRight";
 
-DHT22 dht_cover_left(DHT_COVER_LEFT_PIN, DHT_COVER_LEFT_SENSOR_ID, dht_measures,
-                     dht_cover_left_name,
-                     0.0, 0.0,
-                     Events::EventType::EMPTY, Events::EventType::EMPTY);
+Sensor::DHT22 dht_cover_left(DHT_COVER_LEFT_PIN, DHT_COVER_LEFT_SENSOR_ID, dht_measures,
+                             dht_cover_left_name,
+                             0.0, 0.0,
+                             Events::EventType::EMPTY, Events::EventType::EMPTY);
 
-DHT22 dht_cover_center(DHT_COVER_CENTER_PIN, DHT_COVER_CENTER_SENSOR_ID, dht_measures,
-                       dht_cover_center_name,
-                       0.0, 0.0,
-                       Events::EventType::EMPTY, Events::EventType::EMPTY);
+Sensor::DHT22 dht_cover_center(DHT_COVER_CENTER_PIN, DHT_COVER_CENTER_SENSOR_ID, dht_measures,
+                               dht_cover_center_name,
+                               0.0, 0.0,
+                               Events::EventType::EMPTY, Events::EventType::EMPTY);
 
-DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measures,
-                      dht_cover_right_name,
-                      0.0, 0.0,
-                      Events::EventType::EMPTY, Events::EventType::EMPTY);
+Sensor::DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measures,
+                              dht_cover_right_name,
+                              0.0, 0.0,
+                              Events::EventType::EMPTY, Events::EventType::EMPTY);
 
 /*---------------------*/
 void changeWater();
@@ -112,13 +120,16 @@ void setup()
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
     RTC::setTimestamp("20200605 092945");
+    
+    // Load configs 
+    Sensor::loadConfig();
+    Lighting::loadConfig();
+    TaskScheduler::loadConfig();
 
-    // It is importat to load configs before OLED dislay initialization
-    // (huge memory consuption of OLED)
-    Config::loadSensorConfig();
-    Config::loadLightingProgramsSetup();
 
-    Config::loadTaskConfig();
+    Sensor::saveConfig();
+    Lighting::saveConfig();
+    TaskScheduler::saveConfig();
 
     // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
@@ -154,67 +165,18 @@ void loop()
     // do not scan sensors when I2C transmission is in progress
     else if (i2c::transmission_step == i2c::EMPTY)
     {
-        scanSensors(); // get data from the sensors
+        // get data from the sensors
+        Sensor::loop();
 
         // if event was added to the events queue, react
         Events::notifySubscribers();
+
         scheduler.loop(); // check for scheduled program runs
         Lighting::loop(); // run Lighting program changes
     }
 
     timestamp = RTC::now();
     display.show();
-}
-
-void scanSensors()
-{
-    char reading_json[150]; // array to store reading of a sensor
-    char msg[150];          // for logging messages
-    char _timestamp[20];    // reading timestamp
-    Events::EventType event;
-
-    // loop through sensors
-    for (int i = 0; i < Sensor::sensors_amount; i++)
-    {
-        Sensor *sensor = Sensor::sensors[i]; // take sensor
-        // check if sensor is reading for data collection
-        if (sensor->isReady())
-        {
-            sensor->makeReading();
-        }
-
-        // check if sensor has collected enough data to share
-        if (sensor->isAvailable())
-        {
-            sprintf_P(msg, PSTR("Sensor: %s ready"), sensor->getName());
-            Logger::log(msg, LogLevel::APPLICATION);
-
-            RTC::getTimestamp(_timestamp);
-            Reading reading = sensor->getReading(); // average over available data
-            reading.timestamp = _timestamp;         // add timestamp to the reading
-
-            // generate JSON and add to data buffer to be send to the database
-            reading.toJSON(reading_json);
-            i2c::addToBuffer(reading_json);
-
-            Logger::log(reading_json, LogLevel::DATA);
-
-            // check if some event has to be rised
-            event = Events::EventType::EMPTY;
-            sensor->checkTriggers();
-
-            if (event != Events::EventType::EMPTY)
-            {
-                sprintf(msg, "%s", Events::getEventLabel(event));
-                Logger::log(msg, LogLevel::EVENT);
-            }
-
-            i2c_buffer_size = strlen(i2c::data_buffer);
-
-            memset(reading_json, 0, 150);
-            memset(_timestamp, 0, 20);
-        }
-    }
 }
 
 // Schedule programs
