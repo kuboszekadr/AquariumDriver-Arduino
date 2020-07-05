@@ -7,7 +7,9 @@
 #define LIGHTING_PROGRAM_OFFSET 30L // how each pixel row is turned ON (in seconds!)
 
 #define LIGHTING_PROGRAMS_AMOUNT 6
+#define LIGHTING_CONFIG_SIZE 120
 
+#include "Config.h"
 #include "RTC.h"
 #include "Timestamp.h"
 
@@ -15,23 +17,29 @@
 
 namespace Lighting
 {
-    class Program
+    const char lighting_config_path[] PROGMEM = "config/lighting/%s.txt";
+
+    class Program : public Config
     {
     public:
-        Program();
+        Program(const char *name);
         void setup(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond);
 
         uint32_t getPixelColor(uint32_t timestamp, uint8_t pixel_number);
-        
-        uint32_t getStart() {return _start/100;};
-        uint32_t getEnd() {return _end/100;};
 
-        uint8_t *getStartCondition() {return _pixel_start_cond;};
-        uint8_t *getEndCondition() {return _pixel_end_cond;}
+        uint32_t getStart() { return _start / 100; };
+        uint32_t getEnd() { return _end / 100; };
+
+        uint8_t *getStartCondition() { return _pixel_start_cond; };
+        uint8_t *getEndCondition() { return _pixel_end_cond; };
+
+        void loadConfig();
+        void saveConfig();
 
     private:
         float getProgress(uint32_t timestamp, uint8_t pixel_number);
-        
+        const char _name[9];
+
         uint32_t _start; // when the program starts (HHMM)
         uint32_t _end;   // when the program ends (HHMM)
 
@@ -49,15 +57,16 @@ namespace Lighting
 
     private:
         Program *getPixelProgram(uint32_t now, uint8_t pixel);
-
     };
-
-    void loop();
 
     extern Cover *covers[LIGHTING_COVERS_AMOUNT];       // that array has to be ordered properly
     extern Program *programs[LIGHTING_PROGRAMS_AMOUNT]; // that not necessarily
 
     extern uint8_t programs_amount;
+
+    void loop();
+    void loadConfig();
+    void saveConfig();
 } // namespace Lighting
 
 #endif

@@ -70,7 +70,7 @@ public:
     Event(EventType event_type);
     void notifySubscribers();
 
-    static Event *getEvent(EventType event);
+    static Event *getEvent(EventType event) {return _events[event]; };
 
 private:
     static Event *_events[EVENT_DEFINED_EVENTS] = {};  //event object list

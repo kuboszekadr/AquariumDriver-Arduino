@@ -1,6 +1,6 @@
 #include "Thermometer.h"
 
-Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_sensor, Measures *id_measure,
+Sensor::Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_sensor, Measures *id_measure,
                          const char *name,
                          float trigger_value_low, float trigger_value_high,
                          Events::EventType trigger_low, Events::EventType trigger_high)
@@ -22,13 +22,13 @@ Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_sensor, Measu
     _sensor->request(_address);
 }
 
-bool Thermometer::isReady()
+bool Sensor::Thermometer::isReady()
 {
     // check if proper time amount passed since last reading
     return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL) && _sensor->available();
 }
 
-bool Thermometer::makeReading()
+bool Sensor::Thermometer::makeReading()
 {
     // check if device can be requested
     if (!isReady() || isAvailable() || !_sensor->available())

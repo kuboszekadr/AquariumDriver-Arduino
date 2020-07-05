@@ -19,8 +19,12 @@ void TaskScheduler::Scheduler::loop()
         Task *task = Task::tasks[i];
         if (task->isExecutable())
         {        
-            sprintf_P(msg, PSTR("Task %s is starting"), task->getName());
+            char task_name[TASK_NAME_LENGTH +1];
+            strcpy(task_name, task->getName());
+            
+            sprintf_P(msg, PSTR("Task %s is starting"), task_name);
             Logger::log(msg, LogLevel::APPLICATION);
+            
             task->execute();
         }
     }

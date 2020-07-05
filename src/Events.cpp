@@ -42,11 +42,6 @@ void Events::Event::notifySubscribers()
     }
 }
 
-Events::Event *Events::Event::getEvent(EventType event)
-{
-    return _events[event];
-}
-
 void Events::raise(EventType event)
 {
     // if queue is full or event is empty ommit
@@ -77,7 +72,13 @@ void Events::notifySubscribers()
         }
         else
         {
-            Logger::log(F("Event has no subscribers"), LogLevel::WARNING);
+            char event_name[20];
+            strcpy(event_name, getEventLabel(event_type));
+
+            char msg[50];
+            sprintf_P(msg, PSTR("Event %s has no subscribers"), event_name);
+
+            Logger::log(msg, LogLevel::WARNING);
         }
         EventsQueue[i] = EventType::EMPTY;
     }

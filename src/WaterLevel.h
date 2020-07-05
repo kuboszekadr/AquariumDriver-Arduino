@@ -10,19 +10,21 @@
 #include "Sensor.h"
 #include <Arduino.h>
 
-class WaterLevel : public Sensor
+namespace Sensor
 {
-public:
-	WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
-			   const char *name,
-			   float trigger_value_low, float trigger_value_high,
-			   Events::EventType trigger_low, Events::EventType trigger_high);
-	bool makeReading();
-	Events::EventType checkTriggers();
+	class WaterLevel : public Sensor
+	{
+	public:
+		WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
+				   const char *name,
+				   float trigger_value_low, float trigger_value_high,
+				   Events::EventType trigger_low, Events::EventType trigger_high);
+		bool makeReading();
+		Events::EventType checkTriggers();
 
-private:
-	uint8_t _echo;
-	uint8_t _trig;
-};
-
+	private:
+		uint8_t _echo;
+		uint8_t _trig;
+	};
+} // namespace Sensor
 #endif

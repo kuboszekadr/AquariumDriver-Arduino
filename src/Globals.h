@@ -39,12 +39,12 @@ extern Programs::Program heater;
 extern Programs::WaterChange water_change;
 
 //extern Thermometer thermometer;
-extern WaterLevel water_level_sensor;
-extern PhSensor ph_sensor;
+extern Sensor::WaterLevel water_level_sensor;
+extern Sensor::PhSensor ph_sensor;
 
-extern DHT22 dht_cover_left;
-extern DHT22 dht_cover_center;
-extern DHT22 dht_cover_right;
+extern Sensor::DHT22 dht_cover_left;
+extern Sensor::DHT22 dht_cover_center;
+extern Sensor::DHT22 dht_cover_right;
 
 extern TaskScheduler::Scheduler &scheduler;
 extern uint32_t timestamp;
