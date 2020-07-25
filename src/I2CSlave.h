@@ -2,7 +2,7 @@
 #define I2CSlave_h
 
 #define I2C_DATA_BUFFER_SIZE 1512
-#define I2C_COMMAND_BUFFER_SIZE 128
+#define I2C_COMMAND_BUFFER_SIZE 256
 
 #include "Log.h"
 #include "Utils.h"

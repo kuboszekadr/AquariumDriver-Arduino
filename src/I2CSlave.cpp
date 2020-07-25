@@ -18,7 +18,7 @@ void i2c::receiveEvent(int count)
     static int size = 0; // amount of currently readed bytes
     if (transmission_step != ONGOING)
     {
-        memset(command_buffer, 0, I2C_DATA_BUFFER_SIZE); // clear buffer
+        memset(command_buffer, 0, I2C_COMMAND_BUFFER_SIZE); // clear buffer
         transmission_step = ONGOING;                     // change current transmission status
     }
 
