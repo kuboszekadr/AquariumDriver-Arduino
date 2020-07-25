@@ -119,17 +119,14 @@ void setup()
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
-    RTC::setTimestamp("20200605 092945");
+    RTC::setTimestamp("20200605 225345");
     
     // Load configs 
     Sensor::loadConfig();
     Lighting::loadConfig();
     TaskScheduler::loadConfig();
 
-
-    Sensor::saveConfig();
-    Lighting::saveConfig();
-    TaskScheduler::saveConfig();
+    Lighting::start();
 
     // After loading config init OLED display
     display.begin(OLED_DC_PIN, OLED_RESET_PIN, OLED_CS_PIN, &timestamp);
@@ -150,12 +147,17 @@ void loop()
         if (i2c::order > i2c::NONE)
         {
             Logger::log(F("Executing order: "), LogLevel::VERBOSE);
+            Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
             executeOrder();
         }
         else if (i2c::order == i2c::UNKNOWN)
         {
             Logger::log(F("Unknown order command"), LogLevel::APPLICATION);
             Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
+        }
+        else 
+        {
+            Serial.println(i2c::data_buffer);
         }
 
         i2c::clearBuffers();
@@ -176,6 +178,7 @@ void loop()
     }
 
     timestamp = RTC::now();
+    i2c_buffer_size = strlen(i2c::data_buffer);
     display.show();
 }
 
