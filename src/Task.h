@@ -34,8 +34,6 @@ namespace TaskScheduler
         void deactivate() { _is_active = false; }; // deactive whole task
         void activate() { _is_active = true; };    // active whole task
 
-        void schedule(uint16_t hour); // set execution time the same for each day
-
         void schedule(DayOfWeek day_of_week, uint16_t hour) { _schedule[day_of_week] = hour; }; // time execution
 
         void loadConfig();
