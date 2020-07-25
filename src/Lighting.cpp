@@ -43,7 +43,7 @@ Lighting::Program *Lighting::Cover::getPixelProgram(uint32_t now, uint8_t pixel)
         // check when the program for the pixel should start
         uint32_t p_start = p->getStart() + LIGHTING_PROGRAM_OFFSET * pixel;
         uint32_t p_end = p->getEnd() + LIGHTING_PROGRAM_OFFSET * pixel;
-
+   
         // if 'now' is within program duration start start the program
         if ((now >= p_start) & (now <= p_end))
         {
@@ -95,8 +95,8 @@ Lighting::Program::Program(const char *name)
 void Lighting::Program::setup(uint32_t start, uint32_t end, uint8_t *pixel_start_cond, uint8_t *pixel_end_cond)
 {
     // translate timestamp into HHMM
-    _start = start * 100; // to be able to add seconds later on
-    _end = end * 100;
+    _start = start * 100L; // to be able to add seconds later on
+    _end = end * 100L;
 
     memcpy(_pixel_start_cond, pixel_start_cond, 3);
     memcpy(_pixel_end_cond, pixel_end_cond, 3);
@@ -114,6 +114,13 @@ uint32_t Lighting::Program::getPixelColor(uint32_t timestamp, uint8_t pixel_numb
     uint32_t r = (uint8_t)(_pixel_start_cond[0] + _pixel_diff[0] * progress);
     uint32_t b = (uint8_t)(_pixel_start_cond[1] + _pixel_diff[1] * progress);
     uint32_t w = (uint8_t)(_pixel_start_cond[2] + _pixel_diff[2] * progress);
+
+    // Serial.print("r:\t");
+    // Serial.print(r);
+    // Serial.print("b:\t");
+    // Serial.print(b);
+    // Serial.print("w:\t");
+    // Serial.println(w);
 
     uint32_t color = (b << 16) | (r << 8) | w;
     return color;
@@ -149,8 +156,8 @@ void Lighting::Program::loadConfig()
     };
 
     uint8_t end_cond[3] = {
-        doc["e_cond"][0], 
-        doc["e_cond"][1], 
+        doc["e_cond"][0],
+        doc["e_cond"][1],
         doc["e_cond"][2]
     };
 
@@ -161,18 +168,18 @@ void Lighting::Program::saveConfig()
 {
     StaticJsonDocument<LIGHTING_CONFIG_SIZE> doc;
 
-    doc["s_h"] = getStart();
-    doc["e_h"] = getEnd();
+    doc["s_h"] = getStart() / 100L;
+    doc["e_h"] = getEnd() / 100L;
 
     JsonArray s_cond = doc.createNestedArray("s_cond");
-    s_cond.add(_pixel_start_cond[0]);    
-    s_cond.add(_pixel_start_cond[1]);    
-    s_cond.add(_pixel_start_cond[2]);    
+    s_cond.add(_pixel_start_cond[0]);
+    s_cond.add(_pixel_start_cond[1]);
+    s_cond.add(_pixel_start_cond[2]);
 
     JsonArray e_cond = doc.createNestedArray("e_cond");
-    e_cond.add(_pixel_end_cond[0]);    
-    e_cond.add(_pixel_end_cond[1]);    
-    e_cond.add(_pixel_end_cond[2]);    
+    e_cond.add(_pixel_end_cond[0]);
+    e_cond.add(_pixel_end_cond[1]);
+    e_cond.add(_pixel_end_cond[2]);
 
     char file_name[40] = {};
     sprintf_P(file_name, lighting_config_path, _name);
@@ -204,16 +211,30 @@ void Lighting::loadConfig()
         {
             break;
         }
-        char file_name[15];
+        char file_name[15] = {};
         strcpy(file_name, entry.name());
 
-        char program_name[9];
+        char program_name[9] = {};
         strncpy(program_name, file_name, strlen(file_name) - 4);
-        
-        Program *program = new Program(program_name); 
+
+        Program *program = new Program(program_name);
         program->loadConfig();
         programs[i++] = program;
 
         entry.close();
     }
+}
+
+void Lighting::start()
+{
+     // loop through all covers with pixels
+    for (uint8_t i = 0; i < LIGHTING_COVERS_AMOUNT; i++)
+    {
+        Cover *cover = covers[i];
+        if (!cover)
+        {
+            return; // just in case when null ptr is found
+        }
+        cover->start();
+    }   
 }
