@@ -10,6 +10,8 @@
 
 #include <Arduino.h>
 
+#define PROGRAM_JSON_CLASS 1
+
 namespace Programs
 {
     class Program : public Events::EventSubscriber
@@ -26,9 +28,10 @@ namespace Programs
 
     protected:
         uint8_t _id;
+        uint32_t _execution_id = 0;
         bool _is_active = false;
         Events::EventType _state;
-        void addToI2CBuffer(uint8_t active, uint8_t step=1);
+        void addToI2CBuffer(const uint8_t active, const uint8_t step=1);
 
     private:
         Relay *_relay;

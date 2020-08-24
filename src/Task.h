@@ -6,6 +6,7 @@
 #include "Config.h"
 
 #include <Arduino.h>
+#include <EEPROM.h>
 #include <RtcDateTime.h>
 
 #define TASK_MAX_TASKS 1
@@ -34,20 +35,29 @@ namespace TaskScheduler
         void deactivate() { _is_active = false; }; // deactive whole task
         void activate() { _is_active = true; };    // active whole task
 
-        void schedule(uint16_t hour); // set execution time the same for each day
-
         void schedule(DayOfWeek day_of_week, uint16_t hour) { _schedule[day_of_week] = hour; }; // time execution
 
         void loadConfig();
         void saveConfig();
 
     private:
+        // TODO: add task ID
         const char *_name; // name of the task
         void (*_fnc)();    // pointer to the function to be executed
+        
+        void _lastRunEEPROMValueSave();
+        void _lastRunEEPROMValueRead();
 
         bool _is_active = true;  // is task activate
         uint32_t _schedule[7];   // array of days with scheduled execution dates
-        uint32_t _last_run = 0L; // when task was run last time
+        
+        // when task was run last time
+        union last_run {
+            uint32_t value = 0L;
+            uint8_t byte_array[4];     
+        };
+
+        last_run _last_run;
     };
 
     void loadConfig();

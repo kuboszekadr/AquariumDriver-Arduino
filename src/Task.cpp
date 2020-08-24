@@ -14,18 +14,20 @@ TaskScheduler::Task::Task(const char *name, void (*fnc)())
     }
 
     tasks[tasks_amount++] = this;
+    _lastRunEEPROMValueRead();
 }
 
 char *TaskScheduler::Task::getName()
 {
     char name[TASK_NAME_LENGTH + 1] = {};
     strncpy_P(name, (PGM_P)_name, TASK_NAME_LENGTH);
-    Serial.println(name);
     return name;
 }
 
 bool TaskScheduler::Task::isExecutable()
 {
+    _lastRunEEPROMValueRead();
+
     // return false always when task is deactivated
     if (!_is_active)
     {
@@ -36,7 +38,7 @@ bool TaskScheduler::Task::isExecutable()
     Timestamp now = Timestamp(RTC::now());
 
     // check if task was run during a day
-    if (Timestamp::extract(DatePart::YYYYMMDD, _last_run) == now.extract(DatePart::YYYYMMDD))
+    if (Timestamp::extract(DatePart::YYYYMMDD, _last_run.value) == now.extract(DatePart::YYYYMMDD))
     {
         return false;
     }
@@ -45,29 +47,19 @@ bool TaskScheduler::Task::isExecutable()
 
 void TaskScheduler::Task::execute()
 {
-    forceExecute();
-    _last_run = RTC::now();
-}
+    _last_run.value = RTC::now();
+    _lastRunEEPROMValueSave(); // save last run date into EEPROM
 
-void TaskScheduler::Task::schedule(uint16_t hour)
-{
-    for (uint8_t day = 0; day <= DayOfWeek_Saturday; day++)
-    {
-        Serial.println(day);
-        Serial.println(hour);
-        schedule(day, hour);
-    }
+    forceExecute();
 }
 
 void TaskScheduler::Task::loadConfig()
 {
-    char file_name[12];
+    char file_name[12] = {};
     strncpy(file_name, getName(), 8);
-    Serial.println(file_name);
 
-    char file_path[50];
+    char file_path[40] = {};
     sprintf_P(file_path, config_path, file_name);
-    Serial.println(file_path);
 
     StaticJsonDocument<TASK_JSON_SIZE> doc;
     if(!loadFile(file_path, doc))
@@ -78,7 +70,6 @@ void TaskScheduler::Task::loadConfig()
     JsonArray schedules = doc.as<JsonArray>();
     for (JsonVariant day : schedules) 
     {
-        Serial.println(day["d"].as<int>());
         schedule(day["d"].as<int>(), day["h"].as<int>());
     }    
 }
@@ -97,9 +88,27 @@ void TaskScheduler::Task::saveConfig()
     strncpy(file_name, getName(), 8);
 
     char config_file[40];
-    sprintf(config_file, "config/tasks/%s.txt", file_name);
+    sprintf_P(config_file, config_path, file_name);
     
     saveToFile(config_file, doc);
+}
+
+void TaskScheduler::Task::_lastRunEEPROMValueSave()
+{
+    // TODO: add task ID
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        EEPROM.write(i, _last_run.byte_array[i]);
+    }
+}
+
+void TaskScheduler::Task::_lastRunEEPROMValueRead()
+{
+    // TODO: add task ID
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        _last_run.byte_array[i] = EEPROM.read(i);
+    }
 }
 
 void TaskScheduler::loadConfig()
