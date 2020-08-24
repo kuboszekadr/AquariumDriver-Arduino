@@ -59,18 +59,21 @@ void Programs::WaterChange::reactForEvent(Events::EventType event)
     }
 
     // Check if program can be closed
-    if (_state == Events::WATER_LOW && event == Events::WATER_HIGH)
+    if (event == Events::WATER_HIGH)
     {
         Logger::log(F("Closing water flow..."), LogLevel::APPLICATION);
 
-        _is_active = false; // finish water change
+        if (_is_active)
+        {
+            _is_active = false; // finish water change
+            addToI2CBuffer(0, 0); // inform about program ending
+        }
         
         // turn of the relays
         _water->turnOff(); 
         _pomp->turnOff();
 
         _state = event;
-        addToI2CBuffer(0, 0); // inform about program ending
     }
     // check if water has to be poured
     else if (event == Events::WATER_LOW)

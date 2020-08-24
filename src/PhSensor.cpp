@@ -18,7 +18,7 @@ bool Sensor::PhSensor::makeReading()
 	float voltage = analogRead(_pin); // read voltage from the analog pin
 	float ph = voltage * 5.0 / 1024;  // translate voltage into Ph
 
-	_readings[0] += 7.0;
+	_readings[0] += ph;
 	_readings_count++;
 
 	_last_reading = millis();

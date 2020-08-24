@@ -1,12 +1,18 @@
 #ifndef DHT22_h
 #define DHT22_h
 
+// #ifdef SENSOR_SAMPLING_INTERVAL
+// #undef SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
+// #endif
+// #define SENSOR_SAMPLING_INTERVAL 1000L 
+
 #include "DHT.h"
 #include "Sensor.h"
 
 #include <Arduino.h>
 
 #define DHTTYPE DHT_22 // manually changed in DHT.h from DHT22 
+
 
 namespace Sensor
 {

@@ -11,8 +11,11 @@
 #include <Arduino.h>
 
 // send new data in approx every 30s
+#ifndef SENSOR_SAMPLING_INTERVAL
 #define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
-#define SENSOR_SAMPLING_AMOUNT 30
+#endif
+
+#define SENSOR_SAMPLING_AMOUNT 1
 #define SENSOR_AMOUNT 10 // maximum amount of sensors
 #define SENSOR_NAME_LENGHT 20
 
@@ -79,8 +82,7 @@ namespace Sensor
 
     Events::EventType _last_trigger = Events::EventType::EMPTY;
 
-    float _last_reading_value;
-    unsigned long _last_reading = 0; // when last reading was done (as millis)
+    uint32_t _last_reading = 0L; // when last reading was done (as millis)
 
     const char *_name; // sensor name / label
   };                   // namespace Sensor

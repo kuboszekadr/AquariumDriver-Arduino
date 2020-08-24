@@ -9,10 +9,7 @@ Sensor::Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_senso
     _pin = pin;
 
     // Copy thermometer address
-    for (int i = 0; i < 8; i++)
-    {
-        _address[i] = *(address + i);
-    }
+    memcpy(_address, address, 8);
 
     // initalize relevant variables
     _onewire = OneWire(_pin);
@@ -36,8 +33,7 @@ bool Sensor::Thermometer::makeReading()
         return false;
     }
 
-    _readings[0] += 22.55;
-    // _readings[0] += _sensor->readTemperature(_address);  // insert new reading data
+    _readings[0] += _sensor->readTemperature(_address);  // insert new reading data
     _readings_count++;
 
     _sensor->request(_address); // request for new data

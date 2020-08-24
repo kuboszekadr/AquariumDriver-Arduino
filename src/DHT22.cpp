@@ -16,18 +16,16 @@ bool Sensor::DHT22::makeReading()
 	if (!isReady() || isAvailable())
 		return false;
 
-	// float humid = readHumidity();
-	// float temp = readTemperature();
+	float humid = readHumidity();
+	float temp = readTemperature();
 
-	// if (isnan(humid) || isnan(temp))
-	// {
-	// 	return false;
-	// }
+	if (isnan(humid) || isnan(temp))
+	{
+		return false;
+	}
 	
-	// _readings[0] += humid;
-	// _readings[1] += temp;
-	_readings[0] += 70.0;
-	_readings[1] += 35.0;
+	_readings[0] += temp;
+	_readings[1] += humid;
 	_readings_count++;
 
 	_last_reading = millis();

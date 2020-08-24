@@ -14,6 +14,7 @@ TaskScheduler::Task::Task(const char *name, void (*fnc)())
     }
 
     tasks[tasks_amount++] = this;
+    _lastRunEEPROMValueRead();
 }
 
 char *TaskScheduler::Task::getName()
@@ -25,6 +26,8 @@ char *TaskScheduler::Task::getName()
 
 bool TaskScheduler::Task::isExecutable()
 {
+    _lastRunEEPROMValueRead();
+
     // return false always when task is deactivated
     if (!_is_active)
     {
@@ -35,7 +38,7 @@ bool TaskScheduler::Task::isExecutable()
     Timestamp now = Timestamp(RTC::now());
 
     // check if task was run during a day
-    if (Timestamp::extract(DatePart::YYYYMMDD, _last_run) == now.extract(DatePart::YYYYMMDD))
+    if (Timestamp::extract(DatePart::YYYYMMDD, _last_run.value) == now.extract(DatePart::YYYYMMDD))
     {
         return false;
     }
@@ -44,8 +47,10 @@ bool TaskScheduler::Task::isExecutable()
 
 void TaskScheduler::Task::execute()
 {
+    _last_run.value = RTC::now();
+    _lastRunEEPROMValueSave(); // save last run date into EEPROM
+
     forceExecute();
-    _last_run = RTC::now();
 }
 
 void TaskScheduler::Task::loadConfig()
@@ -86,6 +91,24 @@ void TaskScheduler::Task::saveConfig()
     sprintf_P(config_file, config_path, file_name);
     
     saveToFile(config_file, doc);
+}
+
+void TaskScheduler::Task::_lastRunEEPROMValueSave()
+{
+    // TODO: add task ID
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        EEPROM.write(i, _last_run.byte_array[i]);
+    }
+}
+
+void TaskScheduler::Task::_lastRunEEPROMValueRead()
+{
+    // TODO: add task ID
+    for (uint8_t i = 0; i < 4; i++)
+    {
+        _last_run.byte_array[i] = EEPROM.read(i);
+    }
 }
 
 void TaskScheduler::loadConfig()

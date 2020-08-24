@@ -13,24 +13,7 @@
 
 #include <MemoryFree.h>
 
-/*------ GLOBAL VARIABLES ------*/
-Display display = Display::getInstance();
-RTC &rtc = RTC::init(RTC_RTS_PIN, RTC_CLK_PIN, RTC_DAT_PIN);
-
-// Heater
-Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
-Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, 1, heater_programs, 2);
-
-Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_RELAY_POMP_PIN, WATER_LEVEL_RELAY_WATER_PIN, 2);
-
-// CO2
-Events::EventType co2_programs[2] = {Events::EventType::PH_LOW, Events::EventType::PH_HIGH};
-Programs::Program co2 = Programs::Program(PH_SENSOR_RELAY_CO2_PIN, 3, co2_programs, 2);
-
-TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
-
 /*------ SENSORS IDs -----------*/
-/*------ (by ID)   -----------*/
 #define THERMOMETER_SENSOR_ID 1
 #define WATER_LEVEL_SENSOR_ID 2
 #define PH_SENSOR_SENSOR_ID 3
@@ -39,22 +22,44 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 #define DHT_COVER_CENTER_SENSOR_ID 5
 #define DHT_COVER_RIGHT_SENSOR_ID 6
 
+/*------ PROGRAMS IDs -----------*/
+#define PROGRAM_HEATER_ID 1
+#define PROGRAM_WATER_CHANGE_ID 2
+#define PROGRAM_CO2_ID 3
+
+/*------ GLOBAL VARIABLES ------*/
+Display display = Display::getInstance();
+RTC &rtc = RTC::init(RTC_RTS_PIN, RTC_CLK_PIN, RTC_DAT_PIN);
+
+// Heater
+Events::EventType heater_programs[2] = {Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH};
+Programs::Program heater = Programs::Program(HEATER_RELAY_PIN, PROGRAM_HEATER_ID, heater_programs, 2);
+
+Programs::WaterChange water_change = Programs::WaterChange(WATER_LEVEL_RELAY_POMP_PIN, WATER_LEVEL_RELAY_WATER_PIN, PROGRAM_WATER_CHANGE_ID);
+
+// CO2
+Events::EventType co2_programs[2] = {Events::EventType::PH_LOW, Events::EventType::PH_HIGH};
+Programs::Program co2 = Programs::Program(PH_SENSOR_RELAY_CO2_PIN, PROGRAM_CO2_ID, co2_programs, 2);
+
+TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
+
 /*------ SENSOR INIT ------------*/
 /*------ (by its' ID) ---------------*/
-// DS18B20 - Thermometer
-// #define THERMOMETER_TEMP_LOW 24.8
-// #define THERMOMETER_TEMP_HIGH 25.2
-// uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
-// Measures t[1] = {Sensor::Measures::TEMP};
+//DS18B20 - Thermometer
+#define THERMOMETER_TEMP_LOW 24.8
+#define THERMOMETER_TEMP_HIGH 25.2
+uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
+Sensor::Measures t[1] = {Sensor::Measures::TEMP};
+const char thermometer_sensor_name[] PROGMEM = "WaterTemp";
 
-// Sensor::Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
-//                         "WaterTemp",
-//                         (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
-//                         Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
+Sensor::Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
+                        thermometer_sensor_name,
+                        (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
+                        Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
 
 // WATER LEVEL SENSOR - HC-SR04
-#define WATER_LEVEL_LOW 15.0
-#define WATER_LEVEL_HIGH 10.0
+#define WATER_LEVEL_LOW 20.0
+#define WATER_LEVEL_HIGH 15.0
 
 #define WATER_LEVEL_MEASURE_ID 2
 Sensor::Measures water_level_measure[1] = {Sensor::Measures::WATER_LEVEL};
@@ -110,9 +115,9 @@ TaskScheduler::Task water_change_task = TaskScheduler::Task(water_change_task_na
 uint32_t timestamp;
 float i2c_buffer_size;
 
-Lighting::Cover cover_left = Lighting::Cover(0, 2, 6);
-// Lighting::Cover cover_center = Lighting::Cover(1, 21, 8);
-// Lighting::Cover cover_right = Lighting::Cover(2, 22, 6);
+Lighting::Cover cover_left = Lighting::Cover(0, COVER_LEFT_PIN, 6);
+// Lighting::Cover cover_center = Lighting::Cover(1, COVER_CENTER_PIN, 8);
+// Lighting::Cover cover_right = Lighting::Cover(2, COVER_RIGHT_PIN, 6);
 
 void setup()
 {
@@ -207,7 +212,7 @@ void executeOrder()
 void initDisplayRows()
 {
     // Page 1
-    display.initRow(F("Temp"), (dht_cover_left.getReadings() + 1)); // to change to temp
+    display.initRow(F("Temp"), thermometer.getReadings());
     display.initRow(F("Ph"), ph_sensor.getReadings());
     display.initRow(F("Water level"), water_level_sensor.getReadings());
     display.initRow(F("Buffer size"), &i2c_buffer_size);

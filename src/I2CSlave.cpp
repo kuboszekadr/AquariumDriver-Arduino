@@ -59,7 +59,12 @@ void i2c::requestEvent()
     {
         // get length of the data
         length = strlen(data_buffer);
-        data_buffer[length++] = '}'; // close the JSON array
+
+        if(length)
+        {
+            data_buffer[length++] = ']'; // close the JSON array
+        }
+
         Wire.write(length_byte, 4);  //notify master about data length
 
         transmission_step = length > 0 ? ONGOING : FINISHED;
@@ -104,6 +109,10 @@ void i2c::addToBuffer(const char *data)
     {
         strcat(data_buffer, ","); // add data object separator
     }
+    else if (buffer_length == 0)
+    {
+        strcat(data_buffer, "["); // add data object separator
+    }
     strcat(data_buffer, data);
 }
 
@@ -127,5 +136,4 @@ void i2c::clearBuffers()
 {
     memset(command_buffer, 0, I2C_COMMAND_BUFFER_SIZE);
     memset(data_buffer, 0, I2C_DATA_BUFFER_SIZE);
-    data_buffer[0] = '{'; // initalize JSON array
 }

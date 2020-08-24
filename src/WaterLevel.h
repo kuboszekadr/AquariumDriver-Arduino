@@ -20,7 +20,7 @@ namespace Sensor
 				   float trigger_value_low, float trigger_value_high,
 				   Events::EventType trigger_low, Events::EventType trigger_high);
 		bool makeReading();
-		Events::EventType checkTriggers();
+		Events::EventType checkTrigger();
 
 	private:
 		uint8_t _echo;

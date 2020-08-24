@@ -5,6 +5,8 @@
 
 #include <Arduino.h>
 
+#define READING_JSON_CLASS 0
+
 struct Reading
 {
     uint8_t id_sensor;
