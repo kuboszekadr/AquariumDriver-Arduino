@@ -10,6 +10,7 @@
 #include <SD.h>
 
 #define LOG_BUFFER 150
+#define DEBUG
 
 // Definitions of all log labels in PROGMEM
 const char log_level_application_str[] PROGMEM = "APPLICATION";
@@ -56,12 +57,15 @@ private:
 
     void _prepare(LogLevel log_level);
     void _log();
-    void _print_serial();
     void _write_to_sd();
 
     LogLevel _log_level = VERBOSE;
 
     char _msg[LOG_BUFFER];
+
+#ifdef DEBUG 
+    void _print_serial();
+#endif
 };
 
 #endif

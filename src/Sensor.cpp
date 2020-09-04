@@ -88,7 +88,7 @@ char *Sensor::Sensor::getName()
 
 Events::EventType Sensor::Sensor::checkTrigger()
 {
-/    Events::EventType event = Events::EventType::EMPTY;
+    Events::EventType event = Events::EventType::EMPTY;
     // check current level of water
     if (_last_readings[0] < _trigger_value_low)
     {

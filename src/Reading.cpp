@@ -44,7 +44,7 @@ void Reading::toJSON(char *target)
     // Format: {"s":1,"r":["m":1:,"v":22.22],"t":20200513 063312}
     // using single chars save a lot in buffer
     sprintf_P(target,
-            PSTR("{\"id\":%s,\"r\":[%s],\"t\":%s,\"c\":%d}"),
+            PSTR("{\"id\":%s,\"r\":[%s],\"t\":\"%s\",\"c\":%d}"),
                 _id_sensor, readings, timestamp, READING_JSON_CLASS);
     delete[] readings;
 }

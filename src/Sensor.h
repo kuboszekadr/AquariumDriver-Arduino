@@ -15,7 +15,7 @@
 #define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
 #endif
 
-#define SENSOR_SAMPLING_AMOUNT 1
+#define SENSOR_SAMPLING_AMOUNT 30
 #define SENSOR_AMOUNT 10 // maximum amount of sensors
 #define SENSOR_NAME_LENGHT 20
 
@@ -30,7 +30,7 @@ namespace Sensor
     TEMP = 1,
     WATER_LEVEL,
     PH,
-    HUMIDITY,
+    HUMIDITY
   };
 
   const char config_path[] PROGMEM = "config/sensors/%s.txt";
@@ -48,7 +48,7 @@ namespace Sensor
            float trigger_value_low, float trigger_value_high,
            Events::EventType trigger_low, Events::EventType trigger_high);
 
-    virtual bool makeReading() = 0;            // to be overwriten by the subclasses
+    virtual bool makeReading() = 0;           // to be overwriten by the subclasses
     virtual Events::EventType checkTrigger(); // check if current level of sensor value is between low and high trigger
 
     Reading getReading(); // returns averaged value over sampling
@@ -57,12 +57,12 @@ namespace Sensor
     void saveConfig();
     void loadConfig();
 
-    float getTriggerValue(bool low) {    return low ? _trigger_low : _trigger_high;};
+    float getTriggerValue(bool low) { return low ? _trigger_low : _trigger_high; };
     bool isAvailable() { return _readings_count >= SENSOR_SAMPLING_AMOUNT; };          // check if sensor gathered enough data
     bool isReady() { return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL); }; // check if sensor can gather data
 
     char *getName();
-    float *getReadings() {return _last_readings;};
+    float *getReadings() { return _last_readings; };
 
   protected:
     uint8_t _id_sensor; // sensor id when exposing data by the Reading struct
