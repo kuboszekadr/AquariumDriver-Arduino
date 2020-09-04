@@ -1,8 +1,9 @@
 #ifndef I2CSlave_h
 #define I2CSlave_h
 
-#define I2C_DATA_BUFFER_SIZE 1512
+#define I2C_DATA_BUFFER_SIZE 512
 #define I2C_COMMAND_BUFFER_SIZE 256
+#define I2C_TIMEOUT 2000L
 
 #include "Log.h"
 #include "Utils.h"
@@ -22,8 +23,8 @@ namespace i2c
 
     enum TransmissionStep
     {
-        EMPTY,   // to be set separatelly when slave is done with parsing the command
-        ONGOING, // transmission is in progress
+        EMPTY,    // to be set separatelly when slave is done with parsing the command
+        ONGOING,  // transmission is in progress
         FINISHED // all data received from the master
     };
 
@@ -41,6 +42,9 @@ namespace i2c
     void addToBuffer(const char *data);
 
     Order parseOrder();
+
+    extern uint32_t last_request;
+    bool isTimeouted();
 } // namespace i2c
 
 #endif

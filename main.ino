@@ -124,8 +124,6 @@ void setup()
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
-    RTC::setTimestamp("20200605 225345");
-    
     // Load configs 
     Sensor::loadConfig();
     Lighting::loadConfig();
@@ -160,11 +158,12 @@ void loop()
             Logger::log(F("Unknown order command"), LogLevel::APPLICATION);
             Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
         }
+#ifdef DEBUG
         else 
         {
             Serial.println(i2c::data_buffer);
         }
-
+#endif
         i2c::clearBuffers();
         i2c::order = i2c::NONE;
         i2c::transmission_step = i2c::EMPTY;
@@ -180,11 +179,19 @@ void loop()
 
         scheduler.loop(); // check for scheduled program runs
         Lighting::loop(); // run Lighting program changes
+
+        timestamp = RTC::now();
+        i2c_buffer_size = strlen(i2c::data_buffer);
+        display.show();
     }
 
-    timestamp = RTC::now();
-    i2c_buffer_size = strlen(i2c::data_buffer);
-    display.show();
+    if (i2c::isTimeouted())
+    {
+        Logger::log(F("I2C timeout..."), LogLevel::WARNING);
+        i2c::transmission_step = i2c::EMPTY;
+        i2c::clearBuffers();
+    }
+    
 }
 
 // Schedule programs

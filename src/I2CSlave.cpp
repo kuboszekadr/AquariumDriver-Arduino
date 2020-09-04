@@ -6,6 +6,8 @@ char i2c::command_buffer[I2C_COMMAND_BUFFER_SIZE];
 i2c::TransmissionStep i2c::transmission_step = EMPTY;
 i2c::Order i2c::order = NONE;
 
+uint32_t i2c::last_request = 0L;
+
 void i2c::begin(int address)
 {
     Wire.begin(address);
@@ -19,7 +21,7 @@ void i2c::receiveEvent(int count)
     if (transmission_step != ONGOING)
     {
         memset(command_buffer, 0, I2C_COMMAND_BUFFER_SIZE); // clear buffer
-        transmission_step = ONGOING;                     // change current transmission status
+        transmission_step = ONGOING;                        // change current transmission status
     }
 
     // read incoming data
@@ -38,6 +40,8 @@ void i2c::receiveEvent(int count)
         transmission_step = FINISHED; // end transmission
         order = parseOrder();
     }
+
+    last_request = millis();
     return;
 }
 
@@ -53,22 +57,22 @@ void i2c::requestEvent()
     };
 
     int package_size = 32; // maximum package size (derived from Wire.h)
-    char package[33];      // empty char array for package data
+    char package[33] = {}; // empty char array for package data
 
     if (step == 0)
     {
-        // get length of the data
-        length = strlen(data_buffer);
+        // get length of the data, and respond as fast as possible
+        length = strlen(data_buffer); 
+        length += length > 0 ? 1 : 0; // add one to include closing braclet
+        Wire.write(length_byte, 4);       //notify master about data length
 
-        if(length)
+        if (length > 1)
         {
-            data_buffer[length++] = ']'; // close the JSON array
+            data_buffer[length-1] = ']'; // close the JSON array
         }
 
-        Wire.write(length_byte, 4);  //notify master about data length
-
-        transmission_step = length > 0 ? ONGOING : FINISHED;
-        step += length > 0 ? 1 : 0; // end first step of data sending
+        transmission_step = length > 1 ? ONGOING : FINISHED;
+        step += length > 1 ? 1 : 0; // end first step of data sending
     }
     else if (step == 1)
     {
@@ -90,6 +94,8 @@ void i2c::requestEvent()
             transmission_step = FINISHED;
         }
     }
+
+    last_request = millis();  // to track potential timeout
     return;
 }
 
@@ -136,4 +142,9 @@ void i2c::clearBuffers()
 {
     memset(command_buffer, 0, I2C_COMMAND_BUFFER_SIZE);
     memset(data_buffer, 0, I2C_DATA_BUFFER_SIZE);
+}
+
+bool i2c::isTimeouted()
+{
+    return (transmission_step == ONGOING) && (millis() - last_request >= I2C_TIMEOUT);
 }
