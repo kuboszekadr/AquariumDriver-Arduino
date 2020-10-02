@@ -1,10 +1,34 @@
 #include "WaterLevel.h"
 
-Sensor::WaterLevel::WaterLevel(uint8_t echo, uint8_t trig, uint8_t id_sensor, Measures *id_measure,
-					   const char *name,
-					   float trigger_value_low, float trigger_value_high,
-					   Events::EventType trigger_low, Events::EventType trigger_high)
-	: Sensor(id_sensor, id_measure, 1, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+Sensor::WaterLevel::WaterLevel(
+	uint8_t echo,
+	uint8_t trig,
+	uint8_t id_sensor,
+	Measures *id_measure,
+	const char *name,
+
+	float trigger_value_low,
+	float trigger_value_high,
+
+	uint32_t sampling_interval,
+	uint8_t sampling_amount,
+
+	Events::EventType trigger_low,
+	Events::EventType trigger_high)
+	: Sensor(
+		  id_sensor,
+		  id_measure,
+		  1,
+		  name,
+
+		  sampling_interval,
+		  sampling_amount,
+
+		  trigger_value_low,
+		  trigger_value_high,
+
+		  trigger_low,
+		  trigger_high)
 {
 	_echo = echo; // echo pin
 	_trig = trig; // trig pin

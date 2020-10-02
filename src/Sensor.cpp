@@ -4,11 +4,18 @@ uint8_t Sensor::Sensor::sensors_amount = 0;
 Sensor::Sensor *Sensor::Sensor::sensors[SENSOR_AMOUNT];
 
 Sensor::Sensor::Sensor(uint8_t id_sensor,
-               Measures *id_measures,
-               uint8_t measures,
-               const char *name,
-               float trigger_value_low, float trigger_value_high,
-               Events::EventType trigger_low, Events::EventType trigger_high)
+                       Measures *id_measures,
+                       uint8_t measures,
+                       const char *name,
+
+                       uint32_t sampling_interval,
+                       uint8_t sampling_amount,
+
+                       float trigger_value_low,
+                       float trigger_value_high,
+
+                       Events::EventType trigger_low,
+                       Events::EventType trigger_high)
 {
     if (sensors_amount == SENSOR_AMOUNT)
     {
@@ -32,11 +39,15 @@ Sensor::Sensor::Sensor(uint8_t id_sensor,
     _name = name;
     _id_sensor = id_sensor;
 
+    // setup trigger values and trigers
     _trigger_value_low = trigger_value_low;
     _trigger_low = trigger_low;
 
     _trigger_value_high = trigger_value_high;
     _trigger_high = trigger_high;
+
+    _sampling_amount = sampling_amount;
+    _sampling_interval = sampling_interval;
 }
 
 Reading Sensor::Sensor::getReading()
@@ -89,7 +100,6 @@ char *Sensor::Sensor::getName()
 Events::EventType Sensor::Sensor::checkTrigger()
 {
     Events::EventType event = Events::EventType::EMPTY;
-    // check current level of water
     if (_last_readings[0] < _trigger_value_low)
     {
         event = _trigger_low;
@@ -139,7 +149,7 @@ void Sensor::Sensor::loadConfig()
     {
         return;
     }
-    
+
     _id_sensor = doc["id"].as<int>();
     _trigger_value_high = doc["vh"].as<float>();
     _trigger_value_low = doc["vl"].as<float>();
@@ -151,7 +161,7 @@ void Sensor::loadConfig()
     {
         Sensor *sensor = Sensor::sensors[i];
         sensor->loadConfig();
-    }    
+    }
 }
 
 void Sensor::saveConfig()
@@ -160,17 +170,17 @@ void Sensor::saveConfig()
     {
         Sensor *sensor = Sensor::sensors[i];
         sensor->saveConfig();
-    }    
+    }
 }
 
 void Sensor::loop()
 {
-    char timestamp[20];    // reading timestamp
+    char timestamp[20]; // reading timestamp
     RTC::getTimestamp(timestamp);
 
     Events::EventType event;
     char reading_json[50]; // array to store reading of a sensor
-    char msg[150];          // for logging messages
+    char msg[150];         // for logging messages
 
     // loop through sensors
     for (int i = 0; i < Sensor::sensors_amount; i++)
@@ -185,14 +195,14 @@ void Sensor::loop()
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            char sensor_name[SENSOR_NAME_LENGHT +1];
+            char sensor_name[SENSOR_NAME_LENGHT + 1];
             strcpy(sensor_name, sensor->getName());
 
             sprintf_P(msg, PSTR("Sensor: %s ready"), sensor_name);
             Logger::log(msg, LogLevel::APPLICATION);
 
             Reading reading = sensor->getReading(); // average over available data
-            reading.timestamp = timestamp;         // add timestamp to the reading
+            reading.timestamp = timestamp;          // add timestamp to the reading
 
             // generate JSON and add to data buffer to be send to the database
             reading.toJSON(reading_json);
@@ -211,5 +221,5 @@ void Sensor::loop()
 
             memset(reading_json, 0, 50);
         }
-    }    
+    }
 }

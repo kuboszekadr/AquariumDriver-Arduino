@@ -1,10 +1,34 @@
 #include "Thermometer.h"
 
-Sensor::Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_sensor, Measures *id_measure,
-                         const char *name,
-                         float trigger_value_low, float trigger_value_high,
-                         Events::EventType trigger_low, Events::EventType trigger_high)
-    : Sensor(id_sensor, id_measure, 1, name, trigger_value_low, trigger_value_high, trigger_low, trigger_high)
+Sensor::Thermometer::Thermometer(
+    uint8_t pin,
+    uint8_t *address,
+    uint8_t id_sensor,
+    Measures *id_measure,
+    const char *name,
+
+    uint32_t sampling_interval,
+    uint8_t sampling_amount,
+    float trigger_value_low,
+    float trigger_value_high,
+
+
+    Events::EventType trigger_low,
+    Events::EventType trigger_high)
+    : Sensor(
+          id_sensor,
+          id_measure,
+          1,
+          name,
+
+          sampling_interval,
+          sampling_amount,
+
+          trigger_value_low,
+          trigger_value_high,
+
+          trigger_low,
+          trigger_high)
 {
     _pin = pin;
 
@@ -22,7 +46,7 @@ Sensor::Thermometer::Thermometer(uint8_t pin, uint8_t *address, uint8_t id_senso
 bool Sensor::Thermometer::isReady()
 {
     // check if proper time amount passed since last reading
-    return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL) && _sensor->available();
+    return (millis() - _last_reading >= _sampling_interval) && _sensor->available();
 }
 
 bool Sensor::Thermometer::makeReading()
@@ -33,7 +57,7 @@ bool Sensor::Thermometer::makeReading()
         return false;
     }
 
-    _readings[0] += _sensor->readTemperature(_address);  // insert new reading data
+    _readings[0] += _sensor->readTemperature(_address); // insert new reading data
     _readings_count++;
 
     _sensor->request(_address); // request for new data

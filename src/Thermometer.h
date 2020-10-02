@@ -12,10 +12,21 @@ namespace Sensor
     class Thermometer : public Sensor
     {
     public:
-        Thermometer(uint8_t pin, uint8_t address[], uint8_t id_sensor, Measures *id_measure,
+        Thermometer(uint8_t pin,
+                    uint8_t address[],
+                    uint8_t id_sensor,
+                    Measures *id_measure,
                     const char *name,
-                    float trigger_value_low, float trigger_value_high,
-                    Events::EventType trigger_low, Events::EventType trigger_high);
+
+                    uint32_t sampling_interval,
+                    uint8_t sampling_amount,
+
+                    float trigger_value_low,
+                    float trigger_value_high,
+
+                    Events::EventType trigger_low,
+                    Events::EventType trigger_high);
+
         bool makeReading();
         bool isReady(); // overwrite Sensor method
 

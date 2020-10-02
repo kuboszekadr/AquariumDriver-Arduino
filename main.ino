@@ -52,10 +52,21 @@ uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
 Sensor::Measures t[1] = {Sensor::Measures::TEMP};
 const char thermometer_sensor_name[] PROGMEM = "WaterTemp";
 
-Sensor::Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETER_SENSOR_ID, t,
-                        thermometer_sensor_name,
-                        (float)THERMOMETER_TEMP_LOW, (float)THERMOMETER_TEMP_HIGH,
-                        Events::EventType::TEMP_LOW, Events::EventType::TEMP_HIGH);
+Sensor::Thermometer thermometer(
+    THERMOMETER_PIN,
+    thermometer_address,
+    THERMOMETER_SENSOR_ID,
+    t,
+    thermometer_sensor_name,
+
+    (float)THERMOMETER_TEMP_LOW,
+    (float)THERMOMETER_TEMP_HIGH,
+
+    1000L,
+    30,
+
+    Events::EventType::TEMP_LOW,
+    Events::EventType::TEMP_HIGH);
 
 // WATER LEVEL SENSOR - HC-SR04
 #define WATER_LEVEL_LOW 20.0
@@ -65,10 +76,22 @@ Sensor::Thermometer thermometer(THERMOMETER_PIN, thermometer_address, THERMOMETE
 Sensor::Measures water_level_measure[1] = {Sensor::Measures::WATER_LEVEL};
 const char water_level_sensor_name[] PROGMEM = "WaterLevelSump";
 
-Sensor::WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_SENSOR_TRIG_PIN, WATER_LEVEL_SENSOR_ID, water_level_measure,
-                                      water_level_sensor_name,
-                                      (float)WATER_LEVEL_LOW, (float)WATER_LEVEL_HIGH,
-                                      Events::EventType::WATER_LOW, Events::EventType::WATER_HIGH);
+Sensor::WaterLevel water_level_sensor(
+    WATER_LEVEL_SENSOR_ECHO_PIN,
+    WATER_LEVEL_SENSOR_TRIG_PIN,
+
+    WATER_LEVEL_SENSOR_ID,
+    water_level_measure,
+    water_level_sensor_name,
+
+    (float)WATER_LEVEL_LOW,
+    (float)WATER_LEVEL_HIGH,
+
+    1000L,
+    30,
+
+    Events::EventType::WATER_LOW,
+    Events::EventType::WATER_HIGH);
 
 // Ph sensor
 #define PH_SENSOR_PH_LOW 6.5
@@ -78,10 +101,20 @@ Sensor::WaterLevel water_level_sensor(WATER_LEVEL_SENSOR_ECHO_PIN, WATER_LEVEL_S
 Sensor::Measures ph_measure[1] = {Sensor::Measures::PH};
 const char ph_sensor_name[] PROGMEM = "PhSensor";
 
-Sensor::PhSensor ph_sensor(PH_SENSOR_PIN, PH_SENSOR_SENSOR_ID, ph_measure,
-                           ph_sensor_name,
-                           (float)PH_SENSOR_PH_LOW, (float)PH_SENSOR_PH_HIGH,
-                           Events::EventType::PH_LOW, Events::EventType::PH_HIGH);
+Sensor::PhSensor ph_sensor(
+    PH_SENSOR_PIN,
+    PH_SENSOR_SENSOR_ID,
+    ph_measure,
+    ph_sensor_name,
+
+    (float)PH_SENSOR_PH_LOW,
+    (float)PH_SENSOR_PH_HIGH,
+
+    1000L,
+    60,
+
+    Events::EventType::PH_LOW,
+    Events::EventType::PH_HIGH);
 
 // DHT's
 Sensor::Measures dht_measures[2] = {
@@ -92,20 +125,46 @@ const char dht_cover_left_name[] PROGMEM = "CoverLeft";
 const char dht_cover_center_name[] PROGMEM = "CoverCenter";
 const char dht_cover_right_name[] PROGMEM = "CoverRight";
 
-Sensor::DHT22 dht_cover_left(DHT_COVER_LEFT_PIN, DHT_COVER_LEFT_SENSOR_ID, dht_measures,
-                             dht_cover_left_name,
-                             0.0, 0.0,
-                             Events::EventType::EMPTY, Events::EventType::EMPTY);
+Sensor::DHT22 dht_cover_left(
+    DHT_COVER_LEFT_PIN,
+    DHT_COVER_LEFT_SENSOR_ID,
+    dht_measures,
+    dht_cover_left_name,
 
-Sensor::DHT22 dht_cover_center(DHT_COVER_CENTER_PIN, DHT_COVER_CENTER_SENSOR_ID, dht_measures,
-                               dht_cover_center_name,
-                               0.0, 0.0,
-                               Events::EventType::EMPTY, Events::EventType::EMPTY);
+    0.0,
+    0.0,
 
-Sensor::DHT22 dht_cover_right(DHT_COVER_RIGHT_PIN, DHT_COVER_RIGHT_SENSOR_ID, dht_measures,
-                              dht_cover_right_name,
-                              0.0, 0.0,
-                              Events::EventType::EMPTY, Events::EventType::EMPTY);
+    10000L,
+    30,
+
+    Events::EventType::EMPTY,
+    Events::EventType::EMPTY);
+
+Sensor::DHT22 dht_cover_center(
+    DHT_COVER_CENTER_PIN,
+    DHT_COVER_CENTER_SENSOR_ID,
+    dht_measures,
+    dht_cover_center_name,
+    0.0,
+    0.0,
+
+    10000L,
+    30,
+    Events::EventType::EMPTY,
+    Events::EventType::EMPTY);
+
+Sensor::DHT22 dht_cover_right(
+    DHT_COVER_RIGHT_PIN,
+    DHT_COVER_RIGHT_SENSOR_ID,
+    dht_measures,
+    dht_cover_right_name,
+    0.0, 0.0,
+
+    10000L,
+    30,
+
+    Events::EventType::EMPTY,
+    Events::EventType::EMPTY);
 
 /*---------------------*/
 void changeWater();
@@ -124,7 +183,7 @@ void setup()
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
 
-    // Load configs 
+    // Load configs
     Sensor::loadConfig();
     Lighting::loadConfig();
     TaskScheduler::loadConfig();
@@ -159,7 +218,7 @@ void loop()
             Logger::log(i2c::command_buffer, LogLevel::APPLICATION);
         }
 #ifdef DEBUG
-        else 
+        else
         {
             Serial.println(i2c::data_buffer);
         }
@@ -191,7 +250,6 @@ void loop()
         i2c::transmission_step = i2c::EMPTY;
         i2c::clearBuffers();
     }
-    
 }
 
 // Schedule programs

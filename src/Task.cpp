@@ -109,6 +109,7 @@ void TaskScheduler::Task::_lastRunEEPROMValueRead()
     {
         _last_run.byte_array[i] = EEPROM.read(i);
     }
+    Serial.println(_last_run.value);
 }
 
 void TaskScheduler::loadConfig()

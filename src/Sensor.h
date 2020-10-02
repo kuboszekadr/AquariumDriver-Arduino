@@ -10,12 +10,6 @@
 
 #include <Arduino.h>
 
-// send new data in approx every 30s
-#ifndef SENSOR_SAMPLING_INTERVAL
-#define SENSOR_SAMPLING_INTERVAL 1000L // sample every 1 second
-#endif
-
-#define SENSOR_SAMPLING_AMOUNT 30
 #define SENSOR_AMOUNT 10 // maximum amount of sensors
 #define SENSOR_NAME_LENGHT 20
 
@@ -45,8 +39,15 @@ namespace Sensor
            Measures *id_measure,
            uint8_t measures,
            const char *name,
-           float trigger_value_low, float trigger_value_high,
-           Events::EventType trigger_low, Events::EventType trigger_high);
+
+           uint32_t sampling_interval,
+           uint8_t sampling_amount,
+
+           float trigger_value_low,
+           float trigger_value_high,
+
+           Events::EventType trigger_low,
+           Events::EventType trigger_high);
 
     virtual bool makeReading() = 0;           // to be overwriten by the subclasses
     virtual Events::EventType checkTrigger(); // check if current level of sensor value is between low and high trigger
@@ -58,8 +59,8 @@ namespace Sensor
     void loadConfig();
 
     float getTriggerValue(bool low) { return low ? _trigger_low : _trigger_high; };
-    bool isAvailable() { return _readings_count >= SENSOR_SAMPLING_AMOUNT; };          // check if sensor gathered enough data
-    bool isReady() { return (millis() - _last_reading >= SENSOR_SAMPLING_INTERVAL); }; // check if sensor can gather data
+    bool isAvailable() { return _readings_count >= _sampling_amount; };          // check if sensor gathered enough data
+    bool isReady() { return (millis() - _last_reading >= _sampling_interval); }; // check if sensor can gather data
 
     char *getName();
     float *getReadings() { return _last_readings; };
@@ -70,6 +71,9 @@ namespace Sensor
     float *_last_readings;       // to store
     float *_readings;            // array to hold all readings done before publishing
     uint8_t _readings_count = 0; // amount of readings done in the sesion
+
+    uint32_t _sampling_interval;
+    uint8_t _sampling_amount;
 
     uint8_t *_id_measures;
     uint8_t _measures_amount;
