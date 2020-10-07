@@ -179,8 +179,8 @@ void Sensor::loop()
     RTC::getTimestamp(timestamp);
 
     Events::EventType event;
-    char reading_json[50]; // array to store reading of a sensor
-    char msg[150];         // for logging messages
+    char reading_json[50] = {}; // array to store reading of a sensor
+    char msg[150] = {};         // for logging messages
 
     // loop through sensors
     for (int i = 0; i < Sensor::sensors_amount; i++)
@@ -210,16 +210,18 @@ void Sensor::loop()
             Logger::log(reading_json, LogLevel::DATA);
 
             // check if some event has to be rised
-            event = Events::EventType::EMPTY;
-            sensor->checkTrigger();
+            event = sensor->checkTrigger();
 
+            // notify if needed
             if (event != Events::EventType::EMPTY)
             {
-                sprintf_P(msg, PSTR("%s"), Events::getEventLabel(event));
-                Logger::log(msg, LogLevel::EVENT);
+                char event_name[21] = {};
+                Events::getEventLabel(event, event_name);
+                Logger::log(event_name, LogLevel::EVENT);
             }
 
             memset(reading_json, 0, 50);
+            memset(msg, 0, 150);
         }
     }
 }

@@ -86,7 +86,7 @@ private:
 
 void raise(EventType event);
 void notifySubscribers();
-char *getEventLabel(EventType event);
+void getEventLabel(EventType event, char *buffer);
 
 extern EventType EventsQueue[EVENT_QUEUE_LENGTH];
 extern int queue_length;

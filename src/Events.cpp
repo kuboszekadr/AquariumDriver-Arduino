@@ -72,8 +72,8 @@ void Events::notifySubscribers()
         }
         else
         {
-            char event_name[20];
-            strcpy(event_name, getEventLabel(event_type));
+            char event_name[21] = {};
+            getEventLabel(event_type, event_name);
 
             char msg[50];
             sprintf_P(msg, PSTR("Event %s has no subscribers"), event_name);
@@ -85,11 +85,9 @@ void Events::notifySubscribers()
     queue_length = 0; // restart queue
 }
 
-char *Events::getEventLabel(EventType event)
+void Events::getEventLabel(EventType event, char *buffer)
 {
-    char buffer[21] = {};
     strncpy_P(buffer,
               (char *)pgm_read_word(&(event_type_labels[event])),
               20); // Necessary casts and dereferencing, just copy.
-    return buffer;
 }
