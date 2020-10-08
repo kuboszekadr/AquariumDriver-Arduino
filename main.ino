@@ -45,6 +45,7 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 
 /*------ SENSOR INIT ------------*/
 /*------ (by its' ID) ---------------*/
+
 //DS18B20 - Thermometer
 #define THERMOMETER_TEMP_LOW 24.8
 #define THERMOMETER_TEMP_HIGH 25.2
@@ -99,7 +100,7 @@ Sensor::WaterLevel water_level_sensor(
 
 #define PH_SENSOR_MEASURE_ID 3
 Sensor::Measures ph_measure[1] = {Sensor::Measures::PH};
-const char ph_sensor_name[] PROGMEM = "PhSensor";
+const char ph_sensor_name[] PROGMEM = "WaterPh";
 
 Sensor::PhSensor ph_sensor(
     PH_SENSOR_PIN,
@@ -175,8 +176,8 @@ uint32_t timestamp;
 float i2c_buffer_size;
 
 Lighting::Cover cover_left = Lighting::Cover(0, COVER_LEFT_PIN, 6);
-// Lighting::Cover cover_center = Lighting::Cover(1, COVER_CENTER_PIN, 8);
-// Lighting::Cover cover_right = Lighting::Cover(2, COVER_RIGHT_PIN, 6);
+Lighting::Cover cover_center = Lighting::Cover(1, COVER_CENTER_PIN, 8);
+Lighting::Cover cover_right = Lighting::Cover(2, COVER_RIGHT_PIN, 6);
 
 void setup()
 {
@@ -230,10 +231,10 @@ void loop()
     // do not scan sensors when I2C transmission is in progress
     else if (i2c::transmission_step == i2c::EMPTY)
     {
-        // get data from the sensors
+        // get data from the sensors and check for events
         Sensor::loop();
 
-        // if event was added to the events queue, react
+        // if event has been added to the events queue, react
         Events::notifySubscribers();
 
         scheduler.loop(); // check for scheduled program runs
@@ -241,7 +242,7 @@ void loop()
 
         timestamp = RTC::now();
         i2c_buffer_size = strlen(i2c::data_buffer);
-        display.show();
+        display.show();  // update display
     }
 
     if (i2c::isTimeouted())
@@ -264,7 +265,7 @@ void executeOrder()
     switch (i2c::order)
     {
     case i2c::Order::UPDATE_RTC: // update RTC
-        RTC::setTimestamp(i2c::command_buffer + 2);
+        RTC::setTimestamp(i2c::command_buffer + 2);  // skip order ID = 1 and separator (;)
         break;
     case i2c::Order::WATER_CHANGE:
         changeWater();
