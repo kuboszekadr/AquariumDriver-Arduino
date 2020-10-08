@@ -38,7 +38,7 @@ extern Display display;
 extern Programs::Program heater;
 extern Programs::WaterChange water_change;
 
-//extern Thermometer thermometer;
+extern Sensor::Thermometer thermometer;
 extern Sensor::WaterLevel water_level_sensor;
 extern Sensor::PhSensor ph_sensor;
 

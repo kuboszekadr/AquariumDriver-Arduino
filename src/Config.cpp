@@ -4,19 +4,31 @@
 
 bool Config::loadFile(const char *file_name, JsonDocument &doc)
 {
-    File config_file = SD.open(file_name);
+    if (!SD.exists(file_name))
+    {
+        Serial.println(file_name);
+        Serial.println("does not exist");
+    }
+
+    File config_file = SD.open(file_name, FILE_READ);
     if (!config_file)
     {
-        Serial.println(F("Can not load file from SD"));
+        Serial.print(F("Could not open "));
+        Serial.print(file_name);
         return false;
     }
+
+    Serial.print(file_name);
+    Serial.println(" loaded");
 
     DeserializationError error = deserializeJson(doc, config_file);
     if (error)
     {
-        Serial.println(F("Failed to serialize config file"));
+        Serial.println(F("Failed to serialize JSON inside."));
         return false;
     }
+
+    Serial.println(F("JSON serialized successfully"));
 
     config_file.close();
     return true; 

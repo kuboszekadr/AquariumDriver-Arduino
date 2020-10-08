@@ -62,7 +62,7 @@ namespace Sensor
     bool isAvailable() { return _readings_count >= _sampling_amount; };          // check if sensor gathered enough data
     bool isReady() { return (millis() - _last_reading >= _sampling_interval); }; // check if sensor can gather data
 
-    char *getName();
+    void getName(char *buffer);
     float *getReadings() { return _last_readings; };
 
   protected:

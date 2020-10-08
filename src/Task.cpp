@@ -17,11 +17,9 @@ TaskScheduler::Task::Task(const char *name, void (*fnc)())
     _lastRunEEPROMValueRead();
 }
 
-char *TaskScheduler::Task::getName()
+void TaskScheduler::Task::getName(char *buffer)
 {
-    char name[TASK_NAME_LENGTH + 1] = {};
-    strncpy_P(name, (PGM_P)_name, TASK_NAME_LENGTH);
-    return name;
+    strncpy_P(buffer, (PGM_P)_name, TASK_NAME_LENGTH);
 }
 
 bool TaskScheduler::Task::isExecutable()
@@ -55,8 +53,11 @@ void TaskScheduler::Task::execute()
 
 void TaskScheduler::Task::loadConfig()
 {
+    char task_name[TASK_NAME_LENGTH+1];
+    getName(task_name);
+
     char file_name[12] = {};
-    strncpy(file_name, getName(), 8);
+    strncpy(file_name, task_name, 8);
 
     char file_path[40] = {};
     sprintf_P(file_path, config_path, file_name);
@@ -84,8 +85,11 @@ void TaskScheduler::Task::saveConfig()
         day_doc["h"] = _schedule[i];
     }
 
-    char file_name[12];
-    strncpy(file_name, getName(), 8);
+    char task_name[TASK_NAME_LENGTH+1];
+    getName(task_name);
+
+    char file_name[12] = {};
+    strncpy(file_name, task_name, 8);
 
     char config_file[40];
     sprintf_P(config_file, config_path, file_name);
@@ -109,7 +113,6 @@ void TaskScheduler::Task::_lastRunEEPROMValueRead()
     {
         _last_run.byte_array[i] = EEPROM.read(i);
     }
-    Serial.println(_last_run.value);
 }
 
 void TaskScheduler::loadConfig()

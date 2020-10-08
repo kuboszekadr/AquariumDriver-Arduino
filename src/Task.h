@@ -25,7 +25,7 @@ namespace TaskScheduler
 
         Task(const char *name, void (*fnc)());
 
-        char *getName();
+        void getName(char *buffer);
 
         bool isExecutable(); // check if task can be executed
 

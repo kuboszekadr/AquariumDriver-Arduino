@@ -20,7 +20,7 @@ void TaskScheduler::Scheduler::loop()
         if (task->isExecutable())
         {        
             char task_name[TASK_NAME_LENGTH +1];
-            strcpy(task_name, task->getName());
+            task->getName(task_name);
             
             sprintf_P(msg, PSTR("Task %s is starting"), task_name);
             Logger::log(msg, LogLevel::APPLICATION);

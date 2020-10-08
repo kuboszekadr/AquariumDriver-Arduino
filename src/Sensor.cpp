@@ -90,11 +90,9 @@ void Sensor::Sensor::setTriggers(float trigger_value_low = -1.0, float trigger_v
     }
 }
 
-char *Sensor::Sensor::getName()
+void Sensor::Sensor::getName(char *buffer)
 {
-    char name[SENSOR_NAME_LENGHT + 1] = {};
-    strncpy_P(name, (PGM_P)_name, SENSOR_NAME_LENGHT);
-    return name;
+    strncpy_P(buffer, (PGM_P)_name, SENSOR_NAME_LENGHT);
 }
 
 Events::EventType Sensor::Sensor::checkTrigger()
@@ -125,9 +123,11 @@ void Sensor::Sensor::saveConfig()
     doc["vh"] = _trigger_value_high;
     doc["vl"] = _trigger_value_low;
 
+    char sensor_name[SENSOR_NAME_LENGHT + 1] = {};
+    getName(sensor_name);
+
     char file_name[12] = {};
-    strncpy(file_name, getName(), 8);
-    Serial.println(file_name); //To remove later
+    memcpy(file_name, sensor_name, 8);
 
     char file_path[40];
     sprintf_P(file_path, config_path, file_name);
@@ -138,8 +138,10 @@ void Sensor::Sensor::saveConfig()
 void Sensor::Sensor::loadConfig()
 {
     char file_name[9] = {};
-    strncpy(file_name, getName(), 8);
-    Serial.println(file_name); //To remove later
+    char sensor_name[SENSOR_NAME_LENGHT + 1] = {};
+    
+    getName(sensor_name);
+    memcpy(file_name, sensor_name, 8);
 
     char file_path[40];
     sprintf_P(file_path, config_path, file_name);
@@ -196,7 +198,7 @@ void Sensor::loop()
         if (sensor->isAvailable())
         {
             char sensor_name[SENSOR_NAME_LENGHT + 1];
-            strcpy(sensor_name, sensor->getName());
+            sensor->getName(sensor_name);
 
             sprintf_P(msg, PSTR("Sensor: %s ready"), sensor_name);
             Logger::log(msg, LogLevel::APPLICATION);

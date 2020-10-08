@@ -199,7 +199,6 @@ void Lighting::saveConfig()
 void Lighting::loadConfig()
 {
     char lighting_config_dir[] = "config/lighting";
-    Serial.println(lighting_config_dir);
 
     File dir = SD.open(lighting_config_dir);
     uint8_t i = 0;
