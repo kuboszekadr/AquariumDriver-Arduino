@@ -46,7 +46,7 @@ TaskScheduler::Scheduler &scheduler = TaskScheduler::Scheduler::getInstance();
 /*------ SENSOR INIT ------------*/
 /*------ (by its' ID) ---------------*/
 
-//DS18B20 - Thermometer
+//DS18B20 - ThermometerR
 #define THERMOMETER_TEMP_LOW 24.8
 #define THERMOMETER_TEMP_HIGH 25.2
 uint8_t thermometer_address[8] = {0x28, 0x25, 0x34, 0xE5, 0x8, 0x0, 0x0, 0x35};
@@ -111,8 +111,8 @@ Sensor::PhSensor ph_sensor(
     (float)PH_SENSOR_PH_LOW,
     (float)PH_SENSOR_PH_HIGH,
 
-    1000L,
-    60,
+    5000L,
+    30,
 
     Events::EventType::PH_LOW,
     Events::EventType::PH_HIGH);
@@ -135,7 +135,7 @@ Sensor::DHT22 dht_cover_left(
     0.0,
     0.0,
 
-    10000L,
+    2500L,
     30,
 
     Events::EventType::EMPTY,
@@ -146,11 +146,13 @@ Sensor::DHT22 dht_cover_center(
     DHT_COVER_CENTER_SENSOR_ID,
     dht_measures,
     dht_cover_center_name,
+
     0.0,
     0.0,
 
-    10000L,
+    2500L,
     30,
+
     Events::EventType::EMPTY,
     Events::EventType::EMPTY);
 
@@ -159,9 +161,11 @@ Sensor::DHT22 dht_cover_right(
     DHT_COVER_RIGHT_SENSOR_ID,
     dht_measures,
     dht_cover_right_name,
-    0.0, 0.0,
 
-    10000L,
+    0.0,
+    0.0,
+
+    2500L,
     30,
 
     Events::EventType::EMPTY,
@@ -183,7 +187,7 @@ void setup()
 {
     SD.begin(SD_PIN);
     Logger::log(F("Starting"), LogLevel::VERBOSE);
-
+    
     // Load configs
     Sensor::loadConfig();
     Lighting::loadConfig();
@@ -242,7 +246,7 @@ void loop()
 
         timestamp = RTC::now();
         i2c_buffer_size = strlen(i2c::data_buffer);
-        display.show();  // update display
+        display.show(); // update display
     }
 
     if (i2c::isTimeouted())
@@ -264,8 +268,8 @@ void executeOrder()
 {
     switch (i2c::order)
     {
-    case i2c::Order::UPDATE_RTC: // update RTC
-        RTC::setTimestamp(i2c::command_buffer + 2);  // skip order ID = 1 and separator (;)
+    case i2c::Order::UPDATE_RTC:                    // update RTC
+        RTC::setTimestamp(i2c::command_buffer + 2); // skip order ID = 1 and separator (;)
         break;
     case i2c::Order::WATER_CHANGE:
         changeWater();
