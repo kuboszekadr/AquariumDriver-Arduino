@@ -50,6 +50,15 @@ void RTC::setTimestamp(const char *timestamp)
                  atoi(second) + 2);  // add extra seconds for processing time
 }
 
+void RTC::setTimestamp(uint32_t seconds)
+{
+    RTC &rtc = getInstance();
+
+    rtc._rtc->SetIsWriteProtected(false);
+    rtc._rtc->SetDateTime(seconds);
+    rtc._rtc->SetIsWriteProtected(true);
+}
+
 void RTC::setTimestamp(int year, int month, int day, int hour, int minute, int second)
 {
     RTC &rtc = getInstance();
