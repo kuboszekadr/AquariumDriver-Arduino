@@ -63,7 +63,7 @@ Sensor::Thermometer thermometer(
     (float)THERMOMETER_TEMP_LOW,
     (float)THERMOMETER_TEMP_HIGH,
 
-    1000L,
+    2000L,
     30,
 
     Events::EventType::TEMP_LOW,
@@ -88,7 +88,7 @@ Sensor::WaterLevel water_level_sensor(
     (float)WATER_LEVEL_LOW,
     (float)WATER_LEVEL_HIGH,
 
-    1000L,
+    2000L,
     30,
 
     Events::EventType::WATER_LOW,
