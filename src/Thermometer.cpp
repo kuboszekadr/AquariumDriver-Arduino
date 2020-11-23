@@ -52,7 +52,7 @@ bool Sensor::Thermometer::isReady()
 bool Sensor::Thermometer::makeReading()
 {
     // check if device can be requested
-    if (!isReady() || isAvailable() || !_sensor->available())
+    if (!_sensor->available())
     {
         return false;
     }

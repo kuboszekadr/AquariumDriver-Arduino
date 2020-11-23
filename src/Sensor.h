@@ -60,7 +60,7 @@ namespace Sensor
 
     float getTriggerValue(bool low) { return low ? _trigger_low : _trigger_high; };
     bool isAvailable() { return _readings_count >= _sampling_amount; };          // check if sensor gathered enough data
-    bool isReady() { return (millis() - _last_reading >= _sampling_interval); }; // check if sensor can gather data
+    bool isReady() { return (millis() - _last_reading) >= _sampling_interval; }; // check if sensor can gather data
 
     void getName(char *buffer);
     float *getReadings() { return _last_readings; };

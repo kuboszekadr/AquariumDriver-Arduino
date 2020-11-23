@@ -39,12 +39,6 @@ Sensor::WaterLevel::WaterLevel(
 
 bool Sensor::WaterLevel::makeReading()
 {
-	//  check if sensor is ready or if data array is full
-	if (!isReady() || isAvailable())
-	{
-		return false;
-	}
-
 	digitalWrite(_trig, LOW);
 	delayMicroseconds(2);
 

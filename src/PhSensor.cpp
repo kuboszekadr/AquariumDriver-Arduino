@@ -34,10 +34,6 @@ Sensor::PhSensor::PhSensor(
 
 bool Sensor::PhSensor::makeReading()
 {
-	//  check if sensor is ready or if data is full
-	if (!isReady() || isAvailable())
-		return false;
-
 	float voltage = analogRead(_pin) * 5.0 / 1024; // read voltage from the analog pin
 	float ph = 3.5 * voltage;
 

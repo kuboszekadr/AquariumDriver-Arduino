@@ -139,7 +139,7 @@ void Sensor::Sensor::loadConfig()
 {
     char file_name[9] = {};
     char sensor_name[SENSOR_NAME_LENGHT + 1] = {};
-    
+
     getName(sensor_name);
     memcpy(file_name, sensor_name, 8);
 
@@ -188,18 +188,28 @@ void Sensor::loop()
     for (int i = 0; i < Sensor::sensors_amount; i++)
     {
         Sensor *sensor = Sensor::sensors[i]; // take sensor
+        char sensor_name[SENSOR_NAME_LENGHT + 1] = {};
+        sensor->getName(sensor_name);
+
         // check if sensor is reading for data collection
         if (sensor->isReady())
         {
-            sensor->makeReading();
+            if (sensor->makeReading())
+            {
+                sprintf_P(msg, PSTR("Sensor: %s reading successful"), sensor_name);
+                Logger::log(msg, LogLevel::VERBOSE);
+            }
+            else
+            {
+                sprintf_P(msg, PSTR("Sensor: %s reading failed"), sensor_name);
+                Logger::log(msg, LogLevel::WARNING);
+            }
+            memset(msg, 0, 150);
         }
 
         // check if sensor has collected enough data to share
         if (sensor->isAvailable())
         {
-            char sensor_name[SENSOR_NAME_LENGHT + 1];
-            sensor->getName(sensor_name);
-
             sprintf_P(msg, PSTR("Sensor: %s ready"), sensor_name);
             Logger::log(msg, LogLevel::APPLICATION);
 

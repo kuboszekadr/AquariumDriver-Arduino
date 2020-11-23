@@ -40,7 +40,7 @@ void Timestamp::format(DateFormat format, char *target, uint32_t seconds)
 
 uint32_t Timestamp::extract(DatePart part)
 {
-    uint32_t result = 0;
+    uint32_t result = 0L;
     switch (part)
     {
     case YYYYMMDD:

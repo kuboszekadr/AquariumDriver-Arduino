@@ -36,10 +36,6 @@ Sensor::DHT22::DHT22(
 
 bool Sensor::DHT22::makeReading()
 {
-	//  check if sensor is ready or if data is full
-	if (!isReady() || isAvailable())
-		return false;
-
 	float humid = readHumidity();
 	float temp = readTemperature();
 
