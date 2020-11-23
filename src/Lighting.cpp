@@ -8,7 +8,6 @@ void Lighting::loop()
 {
     uint32_t now = RTC::now(); // get current timestamp
     uint8_t pixels = 0;
-
     // loop through all covers with pixels
     for (uint8_t i = 0; i < LIGHTING_COVERS_AMOUNT; i++)
     {
@@ -34,7 +33,7 @@ Lighting::Program *Lighting::Cover::getPixelProgram(uint32_t now, uint8_t pixel)
     Timestamp ts_now = Timestamp(now);
     now = ts_now.extract(DatePart::HHMMSS);
 
-    Program *program; // program to be applied to the pixel
+    Program *program = nullptr; // program to be applied to the pixel
 
     for (uint8_t i = 0; i < programs_amount; i++)
     {
@@ -65,12 +64,13 @@ Lighting::Cover::Cover(uint8_t order, uint16_t pin, uint16_t pixels_amount) : Ad
 void Lighting::Cover::setPixelProgram(uint32_t now, uint16_t pixel_cover, uint16_t pixel_number)
 {
     Program *program = getPixelProgram(now, pixel_number);
-    uint32_t pixel_color = 0;
+    uint32_t pixel_color = 0L;
 
     if (program) // no program to run
     {
         pixel_color = program->getPixelColor(now, pixel_number);
     }
+
     setPixelColor(pixel_cover, pixel_color);
 }
 
@@ -97,7 +97,7 @@ void Lighting::Program::setup(uint32_t start, uint32_t end, uint8_t *pixel_start
     // translate timestamp into HHMM
     _start = start * 100L; // to be able to add seconds later on
     _end = end * 100L;
-
+ 
     memcpy(_pixel_start_cond, pixel_start_cond, 3);
     memcpy(_pixel_end_cond, pixel_end_cond, 3);
 
@@ -115,14 +115,8 @@ uint32_t Lighting::Program::getPixelColor(uint32_t timestamp, uint8_t pixel_numb
     uint32_t b = (uint8_t)(_pixel_start_cond[1] + _pixel_diff[1] * progress);
     uint32_t w = (uint8_t)(_pixel_start_cond[2] + _pixel_diff[2] * progress);
 
-    // Serial.print("r:\t");
-    // Serial.print(r);
-    // Serial.print("b:\t");
-    // Serial.print(b);
-    // Serial.print("w:\t");
-    // Serial.println(w);
-
     uint32_t color = (b << 16) | (r << 8) | w;
+    
     return color;
 }
 
